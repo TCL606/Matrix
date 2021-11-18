@@ -6,7 +6,8 @@
 #include<iomanip>
 #include<vector>
 #pragma warning(disable:4996)
-#define PRECISION 1e-5
+#define PRECISION_OF_DIFFERENCE 1e-3
+#define PRECISION_WHEN_CALCULATING 1e-5
 
 class Matrix
 {
@@ -93,13 +94,13 @@ public:
         {
             int nonZero = row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < row; j++) // 找到非0元素
-                if (abs(matrix[j][i]) > PRECISION)
+                if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(matrix[nonZero][i]) > PRECISION)
+            if (abs(matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -112,7 +113,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(matrix[i - zeroRow][i] - 1.0) > PRECISION)  //归一化
+                if (abs(matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = matrix[i - zeroRow][i];
                     for (int k = i; k < col; k++)
@@ -123,7 +124,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < row; j++) //把下面部分消为0
                 {
-                    if (abs(matrix[j][i]) > PRECISION) //如果matrix[j][i]不是0
+                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = matrix[j][i];
                         for (int k = i; k < col; k++)
@@ -135,7 +136,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(matrix[j][i]) > PRECISION)
+                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = matrix[j][i];
                         for (int k = i; k < col; k++)
@@ -156,7 +157,7 @@ public:
         if (col > row && rank < row) //若此时不满秩，且col>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = row;
-            while (abs(matrix[row - 1][k]) < PRECISION && k < col)
+            while (abs(matrix[row - 1][k]) < PRECISION_OF_DIFFERENCE && k < col)
             {
                 k++;
             }
@@ -170,7 +171,7 @@ public:
                 rank++; //加上最后一行的秩
                 for (int j = row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(matrix[j][k]) > PRECISION)
+                    if (abs(matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = matrix[j][k];
                         for (int t = k; t < col; t++)
@@ -196,13 +197,13 @@ public:
         {
             int nonZero = original.row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < original.row; j++) // 找到非0元素
-                if (abs(original.matrix[j][i]) > PRECISION)
+                if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(original.matrix[nonZero][i]) > PRECISION)
+            if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -215,7 +216,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION)  //归一化
+                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -226,7 +227,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < original.row; j++) //把下面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION) //如果matrix[j][i]不是0
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -238,7 +239,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION)
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -259,7 +260,7 @@ public:
         if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = original.row;
-            while (abs(original.matrix[original.row - 1][k]) < PRECISION && k < original.col - 1)
+            while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
             {
                 k++;
             }
@@ -273,7 +274,7 @@ public:
                 original.rank++; //加上最后一行的秩
                 for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][k]) > PRECISION)
+                    if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][k];
                         for (int t = k; t < original.col; t++)
@@ -288,7 +289,7 @@ public:
         //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
-            if (abs(original.matrix[i][original.col - 1]) > PRECISION)
+            if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
             {
                 return false;
             }
@@ -300,7 +301,7 @@ public:
         int temp;  //记录列
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //主列位置对应分量为目标向量的对应分量，自由列对应分量直接取0
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION)
+            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
                 solution.matrix[temp][0] = original.matrix[temp - numOfFreeColumn][original.col - 1];
             }
@@ -332,13 +333,13 @@ public:
         {
             int nonZero = original.row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < original.row; j++) // 找到非0元素
-                if (abs(original.matrix[j][i]) > PRECISION)
+                if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(original.matrix[nonZero][i]) > PRECISION)
+            if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -351,7 +352,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION)  //归一化
+                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -362,7 +363,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < original.row; j++) //把下面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION) //如果matrix[j][i]不是0
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -374,7 +375,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION)
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -395,7 +396,7 @@ public:
         if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = original.row;
-            while (abs(original.matrix[original.row - 1][k]) < PRECISION && k < original.col - 1)
+            while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
             {
                 k++;
             }
@@ -409,7 +410,7 @@ public:
                 original.rank++; //加上最后一行的秩
                 for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][k]) > PRECISION)
+                    if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][k];
                         for (int t = k; t < original.col; t++)
@@ -423,7 +424,7 @@ public:
         //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
-            if (abs(original.matrix[i][original.col - 1]) > PRECISION)
+            if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
             {
                 return false;
             }
@@ -434,7 +435,7 @@ public:
         int temp = 0;
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++) //先找零空间的基
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION)
+            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
                 continue;
             else
             {
@@ -461,7 +462,7 @@ public:
         //找特解
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //主列位置对应分量为目标向量的对应分量，自由列对应分量直接取0
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION)
+            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
                 solution.matrix[temp][original.col - original.rank - 1] = original.matrix[temp - numOfFreeColumn][original.col - 1];
             }
@@ -543,13 +544,13 @@ public:
         {
             int nonZero = row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < row; j++) // 找到非0元素
-                if (abs(mtemp[j][i]) > PRECISION)
+                if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(mtemp[nonZero][i]) > PRECISION)
+            if (abs(mtemp[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -565,7 +566,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < row; j++) //把下面部分消为0
                 {
-                    if (abs(mtemp[j][i]) > PRECISION) //如果mtemp[j][i]不是0
+                    if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE) //如果mtemp[j][i]不是0
                     {
                         double temp = mtemp[j][i] / mtemp[i - zeroRow][i];
                         for (int k = i; k < col; k++)
@@ -577,7 +578,7 @@ public:
             }
         }
         double ret = 1;
-        if (abs(mtemp[row - 1][col - 1]) < PRECISION)
+        if (abs(mtemp[row - 1][col - 1]) < PRECISION_OF_DIFFERENCE)
             ret = 0;
         else
         {
@@ -617,7 +618,7 @@ public:
                 caculateInverse.matrix[i][j + row] = i == j ? 1 : 0;
             }
         caculateInverse.Gauss_Jordan_Elimination();
-        if (abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION) //高斯消元后，右下角为0，则不可逆；否则可逆。
+        if (abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION_OF_DIFFERENCE) //高斯消元后，右下角为0，则不可逆；否则可逆。
             return false;
         for (int i = 0; i < row; i++)
         {
@@ -632,49 +633,19 @@ public:
     /// <summary>
     /// 矩阵转置
     /// </summary>
-    /// <param name="A">参数用于接收返回值</param>
-    void Transpose(Matrix& A)
+    /// <param name="A"></param>
+    /// <returns>返回转置后的矩阵</returns>
+    friend Matrix Transpose(const Matrix& A)
     {
-        if (A.row != col || A.col != row)
-        {
-            double** tranm = new double* [col];
-            for (int i = 0; i < col; i++)
-            {
-                tranm[i] = new double[row];
-            }
-
-            for (int i = 0; i < row; i++)
-            {
-                for (int j = 0; j < col; j++)
-                {
-                    tranm[j][i] = matrix[i][j];
-                }
-            }
-
-            for (int i = 0; i < A.row; i++)
-                delete[] A.matrix[i];
-            delete[] A.matrix;
-
-            A.matrix = tranm;
-            A.col = row;
-            A.row = col;
-        }
-        else
-        {
-            for (int i = 0; i < A.row; i++)
-            {
-                for (int j = 0; j < A.col; j++)
-                {
-                    A.matrix[i][j] = matrix[j][i];
-                }
-            }
-        }
+        Matrix temp = A;
+        temp.TransposeDirectly();
+        return temp;
     }
 
     /// <summary>
-    /// 矩阵转置
+    /// 直接将对象矩阵转置
     /// </summary>
-    void Transpose()
+    void TransposeDirectly()
     {
         if (row != col)
         {
@@ -736,8 +707,27 @@ public:
             {
                 for (int k = 0; k < A.col; k++)
                 {
-                    ret.matrix[i][j] += A.matrix[i][k] * B.matrix[k][j];
+                    ret.matrix[i][j] += (A.matrix[i][k] * B.matrix[k][j]);
                 }
+            }
+        }
+        return ret;
+    }
+
+    /// <summary>
+    /// 矩阵数乘
+    /// </summary>
+    /// <param name="k"></param>
+    /// <param name="A"></param>
+    /// <returns></returns>
+    friend Matrix operator*(double k, const Matrix& A)
+    {
+        Matrix ret(A.row, A.col);
+        for (int i = 0; i < ret.row; i++)
+        {
+            for (int j = 0; j < ret.col; j++)
+            {
+                ret.matrix[i][j] = k * A.matrix[i][j];
             }
         }
         return ret;
@@ -781,7 +771,7 @@ public:
             std::cout << "The dimension does not match! Matrix subtraction failed. Return the first matrix." << std::endl;
             return A;
         }
-        Matrix ret(A.row, B.row);
+        Matrix ret(A.row, A.col);
         for (int i = 0; i < ret.row; i++)
         {
             for (int j = 0; j < ret.col; j++)
@@ -790,6 +780,29 @@ public:
             }
         }
         return ret;
+    }
+
+    /// <summary>
+    /// 矩阵相等判断
+    /// </summary>
+    /// <param name="A"></param>
+    /// <param name="B"></param>
+    /// <returns></returns>
+    friend bool operator ==(const Matrix& A, const Matrix& B)
+    {
+        if (A.row != B.row)
+            return false;
+        if (A.col != B.col)
+            return false;
+        for (int i = 0; i < A.row; i++)
+        {
+            for (int j = 0; j < A.col; j++)
+            {
+                if (abs(A.matrix[i][j] - B.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
+                    return false;
+            }
+        }
+        return true;
     }
 
     Matrix operator =(const Matrix& A)
@@ -879,10 +892,9 @@ public:
     /// </summary>
     /// <param name="precision">迭代精度</param>
     /// <returns></returns>
-    double GetLargestSingularValue(double precision = PRECISION)
+    double GetLargestSingularValue(double precision = PRECISION_WHEN_CALCULATING)
     {
-        Matrix T;
-        this->Transpose(T);
+        Matrix T = Transpose(*this);
         int len;
         if (row < col)
         {
@@ -929,6 +941,138 @@ public:
     }
 
     /// <summary>
+    /// 计算对称非不定矩阵的所有特征值
+    /// </summary>
+    /// <param name="v">用于接收特征值。若矩阵对称非不定，则算法保证计算出所有特征值，但在接受向量中的顺序不定；若矩阵不对称或不为方阵，则如果进行判断，v中会添加一个DBL_MAX元素；若矩阵对称但不定，其结果正确性不作保证</param>
+    /// <param name="precision">迭代精度</param>
+    /// <param name="minIteration">最小迭代次数</param>
+    /// <param name="judgeSymmetry">是否对矩阵对称性或是否为方阵进行判断</param>
+    void GetEigenValueOfDefiniteMatrix(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50, bool judgeSymmetry = true)
+    {
+        if (judgeSymmetry)
+        {
+            if (row != col)
+            {
+                std::cout << "The matrix is not a square!" << std::endl;
+                v.push_back(DBL_MAX);
+                return;
+            }
+            for (int i = 0; i < row; i++)
+            {
+                for (int j = i + 1; j < col; j++)
+                {
+                    if (matrix[i][j] != matrix[j][i])
+                    {
+                        std::cout << "The matrix is not symmetric!" << std::endl;
+                        v.push_back(DBL_MAX);
+                        return;
+                    }
+                }
+            }
+        }
+        std::vector<Matrix> eigenVector;
+        Matrix A(row, col);
+        double now, last;
+        int iteration;
+        int multipleRootNum = 0;
+        if (!InverseMatrix(A))
+            v.push_back(0);
+        A = *this;
+        //用幂法求矩阵绝对值最大特征值，并不断迭代
+        {
+            do
+            {
+                Matrix vector(row, 1);
+                for (int i = 0; i < row; i++)
+                {
+                    vector.matrix[i][0] = 1;
+                }
+                Matrix zero(row, 1);
+                int p = 0;
+                while ((zero == A * vector) && p < row)
+                {
+                    vector.matrix[p++][0] = 0;  //防止A*vector得到零向量
+                }
+                if (p >= row)
+                    return;
+                vector = A * vector;
+                int maxpos = 0; //最大位置
+                for (int i = 0; i < row; i++)
+                {
+                    if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
+                        maxpos = i;
+                }
+                last = vector.matrix[maxpos][0];
+                now = last;
+                iteration = 0; //归0迭代次数
+                do
+                {
+                    last = now;
+                    for (int i = 0; i < row; i++)
+                    {
+                        vector.matrix[i][0] /= last;
+                    }
+                    vector = A * vector;
+                    for (int i = 0; i < row; i++)
+                    {
+                        if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
+                            maxpos = i;
+                    }
+                    now = vector.matrix[maxpos][0];
+                    iteration++;
+                } while (iteration < minIteration || abs(now - last) > precision);
+
+                bool isExist = false; //特征值是否已经计算出来
+                for (auto& i : v)
+                {
+                    if (abs(now - i) < PRECISION_OF_DIFFERENCE)
+                    {
+                        isExist = true;
+                        multipleRootNum++;
+                        break;
+                    }
+                }
+                if (!isExist)
+                {
+                    v.push_back(now);
+                }
+                for (const auto& eigen : eigenVector)
+                {
+                    vector = vector - (Transpose(vector) * eigen).matrix[0][0] * eigen; //正交化
+                }
+                double mod = 0;
+                for (int i = 0; i < row; i++)
+                {
+                    mod += (vector.matrix[i][0] * vector.matrix[i][0]);
+                }
+                mod = sqrt(mod);
+                if (vector.matrix[maxpos][0] > 0)
+                    vector = (1 / mod) * vector; //归一化
+                else
+                    vector = (-1 / mod) * vector;
+                A = A - now * (vector * Transpose(vector));
+                //防止出现零矩阵
+                bool isZero = true;
+                for (int i = 0; i < A.row && isZero; i++)
+                {
+                    for (int j = 0; j < A.col; j++)
+                    {
+                        if (abs(A.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
+                        {
+                            isZero = false;
+                            break;
+                        }
+
+                    }
+                }
+                if (isZero)
+                    break;
+                eigenVector.push_back(vector);
+            } while (v.size() < row - multipleRootNum);
+        }
+    }
+
+    /// <summary>
     /// 产生一个单位矩阵
     /// </summary>
     /// <param name="n">矩阵维度</param>
@@ -948,7 +1092,7 @@ public:
     /// </summary>
     /// <param name="width">指定输出宽度，默认为3</param>
     /// <param name="precision">指定输出精度，默认为3</param>
-    void Display(int width = 3, int precision = 3)
+    void Display(int width = 3, int precision = 3) const
     {
         for (int i = 0; i < row; i++)
             for (int j = 0; j < col; j++)
