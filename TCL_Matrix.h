@@ -888,11 +888,12 @@ public:
     }
 
     /// <summary>
-    /// 求矩阵的最大奇异值
+    /// 获得矩阵的所有奇异值
     /// </summary>
+    /// <param name="v">用于接收奇异值</param>
     /// <param name="precision">迭代精度</param>
-    /// <returns></returns>
-    double GetLargestSingularValue(double precision = PRECISION_WHEN_CALCULATING)
+    /// <param name="minIteration">最小迭代次数</param>
+    void GetAllSingularValues(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
     {
         Matrix T = Transpose(*this);
         int len;
@@ -906,38 +907,16 @@ public:
             len = col;
             T = T * (*this);
         }
-        double now, last;
-        //幂法求矩阵最大特征值
-        Matrix vector(len, 1);
-        for (int i = 0; i < len; i++)
+        T.GetEigenValuesOfDefiniteMatrix(v, precision, minIteration, false);
+        for (auto& i : v)
         {
-            vector.matrix[i][0] = 1;
-        }
-        vector = T * vector;
-        int maxpos = 0; //最大位置
-        for (int i = 0; i < len; i++)
-        {
-            if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
-                maxpos = i;
-        }
-        last = vector.matrix[maxpos][0];
-        now = last;
-        do
-        {
-            last = now;
-            for (int i = 0; i < len; i++)
+            if (i >= 0)
+                i = sqrt(i);
+            else
             {
-                vector.matrix[i][0] /= last;
+                std::cout << "Something went wrong that the singular value is negative!" << std::endl;
             }
-            vector = T * vector;
-            for (int i = 0; i < len; i++)
-            {
-                if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
-                    maxpos = i;
-            }
-            now = vector.matrix[maxpos][0];
-        } while (abs(now - last) > precision);
-        return sqrt(now);
+        }
     }
 
     /// <summary>
@@ -947,7 +926,7 @@ public:
     /// <param name="precision">迭代精度</param>
     /// <param name="minIteration">最小迭代次数</param>
     /// <param name="judgeSymmetry">是否对矩阵对称性或是否为方阵进行判断</param>
-    void GetEigenValueOfDefiniteMatrix(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50, bool judgeSymmetry = true)
+    void GetEigenValuesOfDefiniteMatrix(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50, bool judgeSymmetry = true)
     {
         if (judgeSymmetry)
         {
@@ -970,6 +949,7 @@ public:
                 }
             }
         }
+        v.clear();
         std::vector<Matrix> eigenVector;
         Matrix A(row, col);
         double now, last;
