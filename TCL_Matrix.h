@@ -961,7 +961,7 @@ public:
             {
                 for (int j = i + 1; j < col; j++)
                 {
-                    if (matrix[i][j] != matrix[j][i])
+                    if (abs(matrix[i][j] - matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         std::cout << "The matrix is not symmetric!" << std::endl;
                         v.push_back(DBL_MAX);
@@ -1077,7 +1077,7 @@ public:
     /// </summary>
     /// <param name="n">æÿ’ÛŒ¨∂»</param>
     /// <returns></returns>
-    Matrix IdentityMatrix(int n)
+    static Matrix IdentityMatrix(int n)
     {
         Matrix I(n, n);
         for (int i = 0; i < n; i++)
@@ -1101,6 +1101,7 @@ public:
                 if (j == col - 1)
                     std::cout << std::endl;
             }
+        std::cout << std::endl;
     }
 };
 #endif
