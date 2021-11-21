@@ -32,4 +32,7 @@
 *.app
 
 # VS2019
-.vs/
+Debug/
+*.vcxproj
+*.filters
+*.user
