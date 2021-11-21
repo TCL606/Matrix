@@ -5,6 +5,11 @@
 #include<cmath>
 #include<iomanip>
 #include<vector>
+#include<cassert>
+#include<cfloat>
+#include<complex>
+#include<cstring>
+#include<algorithm>
 #pragma warning(disable:4996)
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
@@ -13,19 +18,85 @@ class Matrix
 {
 private:
     int rank;
+
+    ///<summary>è·å–ä¸€ä¸ªçŸ©é˜µçš„LUçŸ©é˜µã€‚ä¸èƒ½è·å–åªèƒ½é€šè¿‡PLUåˆ†è§£å¾—åˆ°çš„çŸ©é˜µ</summary>
+    void GetLU()
+    {
+        if (row != col)
+        {
+            std::cout << "warning: can not get LU! the LU_Matrix will be nullptr." << std::endl;
+            return;
+        }
+        L_matrix = new double *[row];
+        for (int i = 0; i < row; i++)
+        {
+            L_matrix[i] = new double[col];
+            memset(L_matrix[i], 0, col * sizeof(double));
+        }
+        U_matrix = new double *[row];
+        for (int i = 0; i < row; i++)
+        {
+            U_matrix[i] = new double[col];
+            memset(U_matrix[i], 0, col * sizeof(double));
+        }  
+        
+
+        for (int i = 0; i < col; i++)
+        {
+            for (int k = i; k < col; k++)
+            {
+                double sum = 0;
+                for (int j = 0; j < i; j++)
+                {
+                    sum += (L_matrix[i][j] * U_matrix[j][k]);
+                }
+                U_matrix[i][k] = matrix[i][k] - sum;
+            }
+
+            for (int k = i; k < col; k++)
+            {
+                if (i == k)
+                {
+                    L_matrix[i][i] = 1;
+                }
+                else
+                {
+                    double sum = 0;
+                    for (int j = 0; j < i; j++)
+                    {
+                        sum += (L_matrix[k][j] * U_matrix[j][i]);
+                    }
+                    L_matrix[k][i] = (matrix[k][i] - sum) / U_matrix[i][i];
+                }
+            }
+        }
+    }
+
+    void swap(double &a, double &b)
+    {
+        double temp = a;
+        a = b;
+        b = temp;
+    }
+
 public:
     int row;
     int col;
     double** matrix;
+    double** L_matrix;
+    double** U_matrix;
 
     /// <summary>
-    /// ½«ÒÑÓĞ¾ØÕóÉî¸´ÖÆµ½¶ÔÏó¾ØÕóÖĞ£¬³õÊ¼Ê±²»ÖªµÀÖÈ£¬ÁîÖÈÎª-1¡£
+    /// å°†å·²æœ‰çŸ©é˜µæ·±å¤åˆ¶åˆ°å¯¹è±¡çŸ©é˜µä¸­ï¼Œåˆå§‹æ—¶ä¸çŸ¥é“ç§©ï¼Œä»¤ç§©ä¸º-1ã€‚
     /// </summary>
-    /// <param name="matrix">Ê¹ÓÃÊ±£¬¿ÉÒÔ½«double**ÀàĞÍÇ¿×ªÎªdouble*ÀàĞÍÊäÈë</param>
+    /// <param name="matrix">ä½¿ç”¨æ—¶ï¼Œå¯ä»¥å°†double**ç±»å‹å¼ºè½¬ä¸ºdouble*ç±»å‹è¾“å…¥</param>
     /// <param name="row"></param>
     /// <param name="col"></param>
-    Matrix(double* newMatrix, int row, int col) :row(row), col(col), rank(-1)
+    /// <param name="detailed_info">è‹¥ä¸ºtrueï¼Œåˆ™è®¡ç®—çŸ©é˜µçš„LUåˆ†è§£ï¼Œå¯¹äºä¹‹åçš„æ±‚è§£éƒ½æœ‰ç”¨</param>
+    Matrix(double* newMatrix, int row, int col, bool detailed_info = false) :row(row), col(col), rank(-1),L_matrix(nullptr),U_matrix(nullptr)
     {
+        assert(row>=1);
+        assert(col>=1);
         matrix = new double* [row];
         for (int i = 0; i < row; i++)
             matrix[i] = new double[col];
@@ -34,19 +105,22 @@ public:
             {
                 matrix[i][j] = newMatrix[col * i + j];
             }
+        
+        if(detailed_info)
+        {
+            GetLU();
+        }
     }
 
     /// <summary>
-    /// ´´½¨ĞÂ¾ØÕó²¢³õÊ¼»¯Îª0
+    /// åˆ›å»ºæ–°çŸ©é˜µå¹¶åˆå§‹åŒ–ä¸º0
     /// </summary>
     /// <param name="row"></param>
     /// <param name="col"></param>
-    Matrix(int row = 1, int col = 1) :row(row), col(col), rank(-1)
+    Matrix(int row = 1, int col = 1) :row(row), col(col), rank(-1),L_matrix(nullptr),U_matrix(nullptr)
     {
-        if (row < 1)
-            row = 1;
-        if (col < 1)
-            col = 1;
+        assert(row>=1);
+        assert(col>=1);
         matrix = new double* [row];
         for (int i = 0; i < row; i++)
             matrix[i] = new double[col];
@@ -60,10 +134,10 @@ public:
     }
 
     /// <summary>
-    /// ¸´ÖÆ¹¹Ôìº¯Êı£¬Éî¸´ÖÆ
+    /// å¤åˆ¶æ„é€ å‡½æ•°ï¼Œæ·±å¤åˆ¶
     /// </summary>
     /// <param name="A"></param>
-    Matrix(const Matrix& A) : row(A.row), col(A.col), rank(A.rank)
+    Matrix(const Matrix& A) : row(A.row), col(A.col), rank(A.rank),L_matrix(nullptr),U_matrix(nullptr)
     {
         matrix = new double* [row];
         for (int i = 0; i < row; i++)
@@ -82,18 +156,30 @@ public:
         for (int i = 0; i < row; i++)
             delete[] matrix[i];
         delete[] matrix;
+        if (L_matrix)
+        {
+            for (int i = 0; i < row; i++)
+                delete[] L_matrix[i];
+            delete[] L_matrix;
+        }
+        if (U_matrix)
+        {
+            for (int i = 0; i < row; i++)
+                delete[] U_matrix[i];
+            delete[] U_matrix;
+        }
     }
 
     /// <summary>
-    /// ¸ßË¹ÏûÔª£¬»¯ÎªĞĞ¼ò»¯½×ÌİĞÍ
+    /// é«˜æ–¯æ¶ˆå…ƒï¼ŒåŒ–ä¸ºè¡Œç®€åŒ–é˜¶æ¢¯å‹
     /// </summary>
     void Gauss_Jordan_Elimination()
     {
         int zeroRow = 0;
-        for (int i = 0; i < col && i < row; i++)  //i¿´³ÉÁĞ
+        for (int i = 0; i < col && i < row; i++)  //içœ‹æˆåˆ—
         {
-            int nonZero = row - 1;  //ÏÈÉè·ÇÁãĞĞÎª×îºóÒ»ĞĞ
-            for (int j = i - zeroRow; j < row; j++) // ÕÒµ½·Ç0ÔªËØ
+            int nonZero = row - 1;  //å…ˆè®¾éé›¶è¡Œä¸ºæœ€åä¸€è¡Œ
+            for (int j = i - zeroRow; j < row; j++) // æ‰¾åˆ°é0å…ƒç´ 
                 if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
@@ -102,9 +188,9 @@ public:
 
             if (abs(matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
-                if (nonZero != i - zeroRow) //Èç¹û·Ç0ÔªËØ²»ÊÇµÚi-zeroRowĞĞ
+                if (nonZero != i - zeroRow) //å¦‚æœé0å…ƒç´ ä¸æ˜¯ç¬¬i-zeroRowè¡Œ
                 {
-                    for (int k = i; k < col; k++) // °Ñ·Ç0ÔªËØËùÔÚĞĞ½»»»µ½µ±Ç°ĞĞ
+                    for (int k = i; k < col; k++) // æŠŠé0å…ƒç´ æ‰€åœ¨è¡Œäº¤æ¢åˆ°å½“å‰è¡Œ
                     {
                         double t = matrix[i - zeroRow][k];
                         matrix[i - zeroRow][k] = matrix[nonZero][k];
@@ -113,7 +199,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //¹éÒ»»¯
+                if (abs(matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //å½’ä¸€åŒ–
                 {
                     double temp = matrix[i - zeroRow][i];
                     for (int k = i; k < col; k++)
@@ -122,9 +208,9 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow + 1; j < row; j++) //°ÑÏÂÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow + 1; j < row; j++) //æŠŠä¸‹é¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
-                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE) //Èç¹ûmatrix[j][i]²»ÊÇ0
+                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE) //å¦‚æœmatrix[j][i]ä¸æ˜¯0
                     {
                         double temp = matrix[j][i];
                         for (int k = i; k < col; k++)
@@ -134,7 +220,7 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow - 1; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow - 1; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -154,7 +240,7 @@ public:
         if (col > row)
             rank = row - zeroRow;
         else rank = col - zeroRow;
-        if (col > row && rank < row) //Èô´ËÊ±²»ÂúÖÈ£¬ÇÒcol>row£¬Ôò×îºóÒ»ĞĞ¿ÉÄÜ²»»á±»¹éÒ»»¯£¬ÇÒ×îºóÒ»ĞĞµÄÖÈ²»»á±»¼ÆËã£¬Òªµ¥¶À´¦Àí
+        if (col > row && rank < row) //è‹¥æ­¤æ—¶ä¸æ»¡ç§©ï¼Œä¸”col>rowï¼Œåˆ™æœ€åä¸€è¡Œå¯èƒ½ä¸ä¼šè¢«å½’ä¸€åŒ–ï¼Œä¸”æœ€åä¸€è¡Œçš„ç§©ä¸ä¼šè¢«è®¡ç®—ï¼Œè¦å•ç‹¬å¤„ç†
         {
             int k = row;
             while (abs(matrix[row - 1][k]) < PRECISION_OF_DIFFERENCE && k < col)
@@ -168,8 +254,8 @@ public:
                 {
                     matrix[row - 1][i] /= temp;
                 }
-                rank++; //¼ÓÉÏ×îºóÒ»ĞĞµÄÖÈ
-                for (int j = row - 2; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                rank++; //åŠ ä¸Šæœ€åä¸€è¡Œçš„ç§©
+                for (int j = row - 2; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -185,18 +271,18 @@ public:
     }
 
     /// <summary>
-    /// Èô¶ÔÏóÎªÔö¹ã¾ØÕó£¬¿ÉÓÃ´Ëº¯ÊıÇó½â
+    /// è‹¥å¯¹è±¡ä¸ºå¢å¹¿çŸ©é˜µï¼Œå¯ç”¨æ­¤å‡½æ•°æ±‚è§£
     /// </summary>
-    /// <param name="solution">ÓÃÓÚ½ÓÊÕÒ»¸ö½âÏòÁ¿</param>
-    /// <returns>Èô·µ»ØÖµÎªfalse£¬Ôò·½³ÌÎŞ½â£¬Î´¶Ô·µ»Ø²ÎÊı²Ù×÷</returns>
+    /// <param name="solution">ç”¨äºæ¥æ”¶ä¸€ä¸ªè§£å‘é‡</param>
+    /// <returns>è‹¥è¿”å›å€¼ä¸ºfalseï¼Œåˆ™æ–¹ç¨‹æ— è§£ï¼Œæœªå¯¹è¿”å›å‚æ•°æ“ä½œ</returns>
     bool GetAnswerForAugmentedMatrix(Matrix& ret)
     {
         Matrix original(*this);
         int zeroRow = 0;
-        for (int i = 0; i < original.col - 1 && i < original.row; i++)  //i¿´³ÉÁĞ£¬´ËÊ±ÊÇÔö¹ã¾ØÕó£¬i×î¶àµ½col - 1
+        for (int i = 0; i < original.col - 1 && i < original.row; i++)  //içœ‹æˆåˆ—ï¼Œæ­¤æ—¶æ˜¯å¢å¹¿çŸ©é˜µï¼Œiæœ€å¤šåˆ°col - 1
         {
-            int nonZero = original.row - 1;  //ÏÈÉè·ÇÁãĞĞÎª×îºóÒ»ĞĞ
-            for (int j = i - zeroRow; j < original.row; j++) // ÕÒµ½·Ç0ÔªËØ
+            int nonZero = original.row - 1;  //å…ˆè®¾éé›¶è¡Œä¸ºæœ€åä¸€è¡Œ
+            for (int j = i - zeroRow; j < original.row; j++) // æ‰¾åˆ°é0å…ƒç´ 
                 if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
@@ -205,18 +291,16 @@ public:
 
             if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
-                if (nonZero != i - zeroRow) //Èç¹û·Ç0ÔªËØ²»ÊÇµÚi-zeroRowĞĞ
+                if (nonZero != i - zeroRow) //å¦‚æœé0å…ƒç´ ä¸æ˜¯ç¬¬i-zeroRowè¡Œ
                 {
-                    for (int k = i; k < original.col; k++) // °Ñ·Ç0ÔªËØËùÔÚĞĞ½»»»µ½µ±Ç°ĞĞ
+                    for (int k = i; k < original.col; k++) // æŠŠé0å…ƒç´ æ‰€åœ¨è¡Œäº¤æ¢åˆ°å½“å‰è¡Œ
                     {
-                        double t = original.matrix[i - zeroRow][k];
-                        original.matrix[i - zeroRow][k] = original.matrix[nonZero][k];
-                        original.matrix[nonZero][k] = t;
+                        swap(original.matrix[i - zeroRow][k],original.matrix[nonZero][k]);
                     }
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //¹éÒ»»¯
+                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //å½’ä¸€åŒ–
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -225,9 +309,9 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow + 1; j < original.row; j++) //°ÑÏÂÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow + 1; j < original.row; j++) //æŠŠä¸‹é¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //Èç¹ûmatrix[j][i]²»ÊÇ0
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //å¦‚æœmatrix[j][i]ä¸æ˜¯0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -237,7 +321,7 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow - 1; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow - 1; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -257,7 +341,7 @@ public:
         if (original.col - 1 > original.row)
             original.rank = original.row - zeroRow;
         else original.rank = original.col - 1 - zeroRow;
-        if (original.col - 1 > original.row && original.rank < original.row) //Èô´ËÊ±Ô­¾ØÕó²»ÂúÖÈ£¬ÇÒcol - 1>row£¬Ôò×îºóÒ»ĞĞ¿ÉÄÜ²»»á±»¹éÒ»»¯£¬ÇÒ×îºóÒ»ĞĞµÄÖÈ²»»á±»¼ÆËã£¬Òªµ¥¶À´¦Àí
+        if (original.col - 1 > original.row && original.rank < original.row) //è‹¥æ­¤æ—¶åŸçŸ©é˜µä¸æ»¡ç§©ï¼Œä¸”col - 1>rowï¼Œåˆ™æœ€åä¸€è¡Œå¯èƒ½ä¸ä¼šè¢«å½’ä¸€åŒ–ï¼Œä¸”æœ€åä¸€è¡Œçš„ç§©ä¸ä¼šè¢«è®¡ç®—ï¼Œè¦å•ç‹¬å¤„ç†
         {
             int k = original.row;
             while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
@@ -271,8 +355,8 @@ public:
                 {
                     original.matrix[original.row - 1][i] /= temp;
                 }
-                original.rank++; //¼ÓÉÏ×îºóÒ»ĞĞµÄÖÈ
-                for (int j = original.row - 2; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                original.rank++; //åŠ ä¸Šæœ€åä¸€è¡Œçš„ç§©
+                for (int j = original.row - 2; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -286,7 +370,7 @@ public:
             }
         }
 
-        //ÏÈ¿´ÓĞÃ»ÓĞ½â£¬¼´¿´ĞĞ¼ò»¯½×ÌİĞÍµÄÈ«ÁãĞĞ¶ÔÓ¦Ôö¹ã¾ØÕó×îÓÒĞĞµÄÔªËØÊÇ·ñÎª0
+        //å…ˆçœ‹æœ‰æ²¡æœ‰è§£ï¼Œå³çœ‹è¡Œç®€åŒ–é˜¶æ¢¯å‹çš„å…¨é›¶è¡Œå¯¹åº”å¢å¹¿çŸ©é˜µæœ€å³è¡Œçš„å…ƒç´ æ˜¯å¦ä¸º0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
             if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
@@ -298,8 +382,8 @@ public:
         Matrix solution(col - 1, 1);
         int numOfFreeColumn = 0;
 
-        int temp;  //¼ÇÂ¼ÁĞ
-        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //Ö÷ÁĞÎ»ÖÃ¶ÔÓ¦·ÖÁ¿ÎªÄ¿±êÏòÁ¿µÄ¶ÔÓ¦·ÖÁ¿£¬×ÔÓÉÁĞ¶ÔÓ¦·ÖÁ¿Ö±½ÓÈ¡0
+        int temp;  //è®°å½•åˆ—
+        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //ä¸»åˆ—ä½ç½®å¯¹åº”åˆ†é‡ä¸ºç›®æ ‡å‘é‡çš„å¯¹åº”åˆ†é‡ï¼Œè‡ªç”±åˆ—å¯¹åº”åˆ†é‡ç›´æ¥å–0
         {
             if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
@@ -308,7 +392,7 @@ public:
             else
             {
                 numOfFreeColumn++;
-                solution.matrix[temp][0] = 0;//×ÔÓÉÁĞÎ»ÖÃ´¦È¡0¿Ï¶¨Âú×ã·½³Ì
+                solution.matrix[temp][0] = 0;//è‡ªç”±åˆ—ä½ç½®å¤„å–0è‚¯å®šæ»¡è¶³æ–¹ç¨‹
             }
         }
 
@@ -321,18 +405,18 @@ public:
     }
 
     /// <summary>
-    /// Èô¶ÔÏóÎªÔö¹ã¾ØÕó£¬¿ÉÓÃ´Ëº¯ÊıÕÒµ½ÏßĞÔ·½³Ì×éµÄËùÓĞ½â
+    /// è‹¥å¯¹è±¡ä¸ºå¢å¹¿çŸ©é˜µï¼Œå¯ç”¨æ­¤å‡½æ•°æ‰¾åˆ°çº¿æ€§æ–¹ç¨‹ç»„çš„æ‰€æœ‰è§£
     /// </summary>
-    /// <param name="ret">Ç°col-1ÁĞÊÇÁã¿Õ¼äµÄÒ»×é»ù£¬×îºó1ÁĞÊÇÒ»¸öÌØ½â</param>
-    /// <returns>Èô·µ»ØÖµÎªfalse£¬Ôò·½³ÌÎŞ½â£¬Î´¶Ô·µ»Ø²ÎÊı²Ù×÷</returns>
+    /// <param name="ret">å‰col-1åˆ—æ˜¯é›¶ç©ºé—´çš„ä¸€ç»„åŸºï¼Œæœ€å1åˆ—æ˜¯ä¸€ä¸ªç‰¹è§£</param>
+    /// <returns>è‹¥è¿”å›å€¼ä¸ºfalseï¼Œåˆ™æ–¹ç¨‹æ— è§£ï¼Œæœªå¯¹è¿”å›å‚æ•°æ“ä½œ</returns>
     bool GetAllSolutionsForAugmentedMatrix(Matrix& ret)
     {
         Matrix original(*this);
         int zeroRow = 0;
-        for (int i = 0; i < original.col - 1 && i < original.row; i++)  //i¿´³ÉÁĞ£¬´ËÊ±ÊÇÔö¹ã¾ØÕó£¬i×î¶àµ½col - 1
+        for (int i = 0; i < original.col - 1 && i < original.row; i++)  //içœ‹æˆåˆ—ï¼Œæ­¤æ—¶æ˜¯å¢å¹¿çŸ©é˜µï¼Œiæœ€å¤šåˆ°col - 1
         {
-            int nonZero = original.row - 1;  //ÏÈÉè·ÇÁãĞĞÎª×îºóÒ»ĞĞ
-            for (int j = i - zeroRow; j < original.row; j++) // ÕÒµ½·Ç0ÔªËØ
+            int nonZero = original.row - 1;  //å…ˆè®¾éé›¶è¡Œä¸ºæœ€åä¸€è¡Œ
+            for (int j = i - zeroRow; j < original.row; j++) // æ‰¾åˆ°é0å…ƒç´ 
                 if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
@@ -341,9 +425,9 @@ public:
 
             if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
-                if (nonZero != i - zeroRow) //Èç¹û·Ç0ÔªËØ²»ÊÇµÚi-zeroRowĞĞ
+                if (nonZero != i - zeroRow) //å¦‚æœé0å…ƒç´ ä¸æ˜¯ç¬¬i-zeroRowè¡Œ
                 {
-                    for (int k = i; k < original.col; k++) // °Ñ·Ç0ÔªËØËùÔÚĞĞ½»»»µ½µ±Ç°ĞĞ
+                    for (int k = i; k < original.col; k++) // æŠŠé0å…ƒç´ æ‰€åœ¨è¡Œäº¤æ¢åˆ°å½“å‰è¡Œ
                     {
                         double t = original.matrix[i - zeroRow][k];
                         original.matrix[i - zeroRow][k] = original.matrix[nonZero][k];
@@ -352,7 +436,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //¹éÒ»»¯
+                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //å½’ä¸€åŒ–
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -361,9 +445,9 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow + 1; j < original.row; j++) //°ÑÏÂÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow + 1; j < original.row; j++) //æŠŠä¸‹é¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //Èç¹ûmatrix[j][i]²»ÊÇ0
+                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //å¦‚æœmatrix[j][i]ä¸æ˜¯0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -373,7 +457,7 @@ public:
                     }
                 }
 
-                for (int j = i - zeroRow - 1; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow - 1; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -391,9 +475,9 @@ public:
             }
         }
         if (original.col - 1 > original.row)
-            original.rank = original.row - zeroRow;  //ÕâÀïÊÇÖ¸Ô­¾ØÕóµÄÖÈ£¬²»ÊÇÔö¹ã¾ØÕóµÄÖÈ¡£
+            original.rank = original.row - zeroRow;  //è¿™é‡Œæ˜¯æŒ‡åŸçŸ©é˜µçš„ç§©ï¼Œä¸æ˜¯å¢å¹¿çŸ©é˜µçš„ç§©ã€‚
         else original.rank = original.col - 1 - zeroRow;
-        if (original.col - 1 > original.row && original.rank < original.row) //Èô´ËÊ±Ô­¾ØÕó²»ÂúÖÈ£¬ÇÒcol - 1>row£¬Ôò×îºóÒ»ĞĞ¿ÉÄÜ²»»á±»¹éÒ»»¯£¬ÇÒ×îºóÒ»ĞĞµÄÖÈ²»»á±»¼ÆËã£¬Òªµ¥¶À´¦Àí
+        if (original.col - 1 > original.row && original.rank < original.row) //è‹¥æ­¤æ—¶åŸçŸ©é˜µä¸æ»¡ç§©ï¼Œä¸”col - 1>rowï¼Œåˆ™æœ€åä¸€è¡Œå¯èƒ½ä¸ä¼šè¢«å½’ä¸€åŒ–ï¼Œä¸”æœ€åä¸€è¡Œçš„ç§©ä¸ä¼šè¢«è®¡ç®—ï¼Œè¦å•ç‹¬å¤„ç†
         {
             int k = original.row;
             while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
@@ -407,8 +491,8 @@ public:
                 {
                     original.matrix[original.row - 1][i] /= temp;
                 }
-                original.rank++; //¼ÓÉÏ×îºóÒ»ĞĞµÄÖÈ
-                for (int j = original.row - 2; j >= 0; j--) //°ÑÉÏÃæ²¿·ÖÏûÎª0
+                original.rank++; //åŠ ä¸Šæœ€åä¸€è¡Œçš„ç§©
+                for (int j = original.row - 2; j >= 0; j--) //æŠŠä¸Šé¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
                     if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
@@ -421,7 +505,7 @@ public:
                 }
             }
         }
-        //ÏÈ¿´ÓĞÃ»ÓĞ½â£¬¼´¿´ĞĞ¼ò»¯½×ÌİĞÍµÄÈ«ÁãĞĞ¶ÔÓ¦Ôö¹ã¾ØÕó×îÓÒĞĞµÄÔªËØÊÇ·ñÎª0
+        //å…ˆçœ‹æœ‰æ²¡æœ‰è§£ï¼Œå³çœ‹è¡Œç®€åŒ–é˜¶æ¢¯å‹çš„å…¨é›¶è¡Œå¯¹åº”å¢å¹¿çŸ©é˜µæœ€å³è¡Œçš„å…ƒç´ æ˜¯å¦ä¸º0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
             if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
@@ -433,7 +517,7 @@ public:
         Matrix solution(original.col - 1, original.col - original.rank);
         int numOfFreeColumn = 0;
         int temp = 0;
-        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++) //ÏÈÕÒÁã¿Õ¼äµÄ»ù
+        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++) //å…ˆæ‰¾é›¶ç©ºé—´çš„åŸº
         {
             if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
                 continue;
@@ -459,8 +543,8 @@ public:
         }
 
         numOfFreeColumn = 0;
-        //ÕÒÌØ½â
-        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //Ö÷ÁĞÎ»ÖÃ¶ÔÓ¦·ÖÁ¿ÎªÄ¿±êÏòÁ¿µÄ¶ÔÓ¦·ÖÁ¿£¬×ÔÓÉÁĞ¶ÔÓ¦·ÖÁ¿Ö±½ÓÈ¡0
+        //æ‰¾ç‰¹è§£
+        for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //ä¸»åˆ—ä½ç½®å¯¹åº”åˆ†é‡ä¸ºç›®æ ‡å‘é‡çš„å¯¹åº”åˆ†é‡ï¼Œè‡ªç”±åˆ—å¯¹åº”åˆ†é‡ç›´æ¥å–0
         {
             if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
@@ -481,11 +565,45 @@ public:
     }
 
     /// <summary>
-    /// ÕÒµ½Áã¿Õ¼äµÄÒ»×é»ù
+    /// é€šè¿‡LUçŸ©é˜µè·å–è§£ï¼Œæ‡’å¾—å†™ç‰¹æ®Šæƒ…å†µäº†
     /// </summary>
-    /// <param name="bases">ÓÃÓÚ·µ»Ø»ù</param>
-    /// <returns>Èô¾ØÕó¿ÉÄæ£¬Ôò·µ»Øfalse£»·ñÔò£¬·µ»ØÒ»×é»ù¡£×¢£ºÎŞÂÛ¾ØÕóÊÇ·ñ¿ÉÄæ£¬ÀíÂÛÉÏ×÷Îª·µ»ØÖµµÄ²ÎÊıbases¶¼»á·¢Éú±ä»¯¡£</returns>
-    bool GetBasesOfNullSpace(Matrix& bases)
+    bool GetSolutionFromLU(double* vector)
+    {
+        if (L_matrix)
+        {
+            // å‰ä»£æ³•
+            for (int i = 0; i < col; i++)
+            {
+                for (int j = 0; j < i; j++)
+                {
+                    vector[i] -= L_matrix[i][j] * vector[j];
+                }
+            }
+
+            // å›ä»£æ³•
+            for (int i = col - 1; i >= 0; i--)
+            {
+                for (int j = col - 1; j > i; j--)
+                {
+                    vector[i] -= U_matrix[i][j] * vector[j];
+                }
+                vector[i] = vector[i] / U_matrix[i][i];
+            }
+            return true;
+        }
+        else
+        {
+            std::cout << "warning: get LU Matrix first!" << std::endl;
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// æ‰¾åˆ°é›¶ç©ºé—´çš„ä¸€ç»„åŸº
+    /// </summary>
+    /// <param name="bases">ç”¨äºè¿”å›åŸº</param>
+    /// <returns>è‹¥çŸ©é˜µå¯é€†ï¼Œåˆ™è¿”å›falseï¼›å¦åˆ™ï¼Œè¿”å›ä¸€ç»„åŸºã€‚æ³¨ï¼šæ— è®ºçŸ©é˜µæ˜¯å¦å¯é€†ï¼Œç†è®ºä¸Šä½œä¸ºè¿”å›å€¼çš„å‚æ•°baseséƒ½ä¼šå‘ç”Ÿå˜åŒ–ã€‚</returns>
+    bool GetBasesOfNullSpace(Matrix &bases)
     {
         Matrix ret(row, col + 1);
         for (int i = 0; i < row; i++)
@@ -524,13 +642,13 @@ public:
     }
 
     /// <summary>
-    /// ĞĞÁĞÊ½£¬²»Îª·½ÕóÊ±·µ»Ø0
+    /// è¡Œåˆ—å¼ï¼Œä¸ä¸ºæ–¹é˜µæ—¶è¿”å›0
     /// </summary>
     double Determinant() const
     {
         if (row != col)
             return 0;
-        int swapTimes = 0; //ĞĞ½»»»´ÎÊı
+        int swapTimes = 0; //è¡Œäº¤æ¢æ¬¡æ•°
         double** mtemp = new double* [row];
         for (int i = 0; i < row; i++)
             mtemp[i] = new double[col];
@@ -540,10 +658,10 @@ public:
                 mtemp[i][j] = matrix[i][j];
             }
         int zeroRow = 0;
-        for (int i = 0; i < col && i < row; i++)  //i¿´³ÉÁĞ
+        for (int i = 0; i < col && i < row; i++)  //içœ‹æˆåˆ—
         {
-            int nonZero = row - 1;  //ÏÈÉè·ÇÁãĞĞÎª×îºóÒ»ĞĞ
-            for (int j = i - zeroRow; j < row; j++) // ÕÒµ½·Ç0ÔªËØ
+            int nonZero = row - 1;  //å…ˆè®¾éé›¶è¡Œä¸ºæœ€åä¸€è¡Œ
+            for (int j = i - zeroRow; j < row; j++) // æ‰¾åˆ°é0å…ƒç´ 
                 if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
@@ -552,9 +670,9 @@ public:
 
             if (abs(mtemp[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
-                if (nonZero != i - zeroRow) //Èç¹û·Ç0ÔªËØ²»ÊÇµÚi-zeroRowĞĞ
+                if (nonZero != i - zeroRow) //å¦‚æœé0å…ƒç´ ä¸æ˜¯ç¬¬i-zeroRowè¡Œ
                 {
-                    for (int k = i; k < col; k++) // °Ñ·Ç0ÔªËØËùÔÚĞĞ½»»»µ½µ±Ç°ĞĞ
+                    for (int k = i; k < col; k++) // æŠŠé0å…ƒç´ æ‰€åœ¨è¡Œäº¤æ¢åˆ°å½“å‰è¡Œ
                     {
                         double t = mtemp[i - zeroRow][k];
                         mtemp[i - zeroRow][k] = mtemp[nonZero][k];
@@ -564,9 +682,9 @@ public:
                     swapTimes++;
                 }
 
-                for (int j = i - zeroRow + 1; j < row; j++) //°ÑÏÂÃæ²¿·ÖÏûÎª0
+                for (int j = i - zeroRow + 1; j < row; j++) //æŠŠä¸‹é¢éƒ¨åˆ†æ¶ˆä¸º0
                 {
-                    if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE) //Èç¹ûmtemp[j][i]²»ÊÇ0
+                    if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE) //å¦‚æœmtemp[j][i]ä¸æ˜¯0
                     {
                         double temp = mtemp[j][i] / mtemp[i - zeroRow][i];
                         for (int k = i; k < col; k++)
@@ -597,10 +715,10 @@ public:
     }
 
     /// <summary>
-    /// Çó¾ØÕóµÄÄæ¾ØÕó
+    /// æ±‚çŸ©é˜µçš„é€†çŸ©é˜µ
     /// </summary>
-    /// <param name="inverse">inverseÓ¦Îªrow*rowµÄ¾ØÕó¶ÔÏó£¬ÓÃÓÚ½ÓÊÕ·µ»ØÖµ¡£Èô¾ØÕó¿ÉÄæ£¬ÔòÄæ¾ØÕóÍ¨¹ı¸Ã²ÎÊı·µ»Ø£»Èô¾ØÕó²»¿ÉÄæ£¬Ôòinverse²»»á½øĞĞÈÎºÎ²Ù×÷</param>
-    /// <returns>·µ»Ø¾ØÕóÊÇ·ñ¿ÉÄæ</returns>
+    /// <param name="inverse">inverseåº”ä¸ºrow*rowçš„çŸ©é˜µå¯¹è±¡ï¼Œç”¨äºæ¥æ”¶è¿”å›å€¼ã€‚è‹¥çŸ©é˜µå¯é€†ï¼Œåˆ™é€†çŸ©é˜µé€šè¿‡è¯¥å‚æ•°è¿”å›ï¼›è‹¥çŸ©é˜µä¸å¯é€†ï¼Œåˆ™inverseä¸ä¼šè¿›è¡Œä»»ä½•æ“ä½œ</param>
+    /// <returns>è¿”å›çŸ©é˜µæ˜¯å¦å¯é€†</returns>
     bool InverseMatrix(Matrix& inverse)
     {
         if (row != col)
@@ -618,7 +736,7 @@ public:
                 caculateInverse.matrix[i][j + row] = i == j ? 1 : 0;
             }
         caculateInverse.Gauss_Jordan_Elimination();
-        if (abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION_OF_DIFFERENCE) //¸ßË¹ÏûÔªºó£¬ÓÒÏÂ½ÇÎª0£¬Ôò²»¿ÉÄæ£»·ñÔò¿ÉÄæ¡£
+        if (abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION_OF_DIFFERENCE) //é«˜æ–¯æ¶ˆå…ƒåï¼Œå³ä¸‹è§’ä¸º0ï¼Œåˆ™ä¸å¯é€†ï¼›å¦åˆ™å¯é€†ã€‚
             return false;
         for (int i = 0; i < row; i++)
         {
@@ -631,10 +749,10 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕó×ªÖÃ
+    /// çŸ©é˜µè½¬ç½®
     /// </summary>
     /// <param name="A"></param>
-    /// <returns>·µ»Ø×ªÖÃºóµÄ¾ØÕó</returns>
+    /// <returns>è¿”å›è½¬ç½®åçš„çŸ©é˜µ</returns>
     friend Matrix Transpose(const Matrix& A)
     {
         Matrix temp = A;
@@ -643,7 +761,7 @@ public:
     }
 
     /// <summary>
-    /// Ö±½Ó½«¶ÔÏó¾ØÕó×ªÖÃ
+    /// ç›´æ¥å°†å¯¹è±¡çŸ©é˜µè½¬ç½®
     /// </summary>
     void TransposeDirectly()
     {
@@ -688,11 +806,11 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕó³Ë·¨
+    /// çŸ©é˜µä¹˜æ³•
     /// </summary>
     /// <param name="A"></param>
     /// <param name="B"></param>
-    /// <returns>ÈôÎ¬¶ÈÊ§Åä£¬Ôò·µ»ØµÚÒ»¸ö²Ù×÷Êı</returns>
+    /// <returns>è‹¥ç»´åº¦å¤±é…ï¼Œåˆ™è¿”å›ç¬¬ä¸€ä¸ªæ“ä½œæ•°</returns>
     friend Matrix operator *(const Matrix& A, const Matrix& B)
     {
         if (A.col != B.row)
@@ -715,7 +833,7 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕóÊı³Ë
+    /// çŸ©é˜µæ•°ä¹˜
     /// </summary>
     /// <param name="k"></param>
     /// <param name="A"></param>
@@ -734,11 +852,11 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕó¼Ó·¨
+    /// çŸ©é˜µåŠ æ³•
     /// </summary>
     /// <param name="A"></param>
     /// <param name="B"></param>
-    /// <returns>ÈôÎ¬¶ÈÊ§Åä£¬Ôò·µ»ØµÚÒ»¸ö²Ù×÷Êı</returns>
+    /// <returns>è‹¥ç»´åº¦å¤±é…ï¼Œåˆ™è¿”å›ç¬¬ä¸€ä¸ªæ“ä½œæ•°</returns>
     friend Matrix operator +(const Matrix& A, const Matrix& B)
     {
         if (A.col != B.col || A.row != B.row)
@@ -759,11 +877,11 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕó¼õ·¨
+    /// çŸ©é˜µå‡æ³•
     /// </summary>
     /// <param name="A"></param>
     /// <param name="B"></param>
-    /// <returns>ÈôÎ¬¶ÈÊ§Åä£¬Ôò·µ»ØµÚÒ»¸ö²Ù×÷Êı</returns>
+    /// <returns>è‹¥ç»´åº¦å¤±é…ï¼Œåˆ™è¿”å›ç¬¬ä¸€ä¸ªæ“ä½œæ•°</returns>
     friend Matrix operator -(const Matrix& A, const Matrix& B)
     {
         if (A.col != B.col || A.row != B.row)
@@ -783,7 +901,7 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕóÏàµÈÅĞ¶Ï
+    /// çŸ©é˜µç›¸ç­‰åˆ¤æ–­
     /// </summary>
     /// <param name="A"></param>
     /// <param name="B"></param>
@@ -830,10 +948,10 @@ public:
     }
 
     /// <summary>
-    /// ¾ØÕóµÄÃİ£¬¾ØÕó±ØĞëÎª·½Õó
+    /// çŸ©é˜µçš„å¹‚ï¼ŒçŸ©é˜µå¿…é¡»ä¸ºæ–¹é˜µ
     /// </summary>
-    /// <param name="n">±ØĞëÊÇ×ÔÈ»Êı</param>
-    /// <returns>Èô¾ØÕó²»Îª·½Õó»ò²ÎÊıĞ¡ÓÚ0£¬Ôò·µ»ØÔ­¾ØÕó</returns>
+    /// <param name="n">å¿…é¡»æ˜¯è‡ªç„¶æ•°</param>
+    /// <returns>è‹¥çŸ©é˜µä¸ä¸ºæ–¹é˜µæˆ–å‚æ•°å°äº0ï¼Œåˆ™è¿”å›åŸçŸ©é˜µ</returns>
     Matrix Power(int n)
     {
         if (row != col)
@@ -871,7 +989,7 @@ public:
     }
 
     /// <summary>
-    /// ¼ÆËã¾ØÕóµÄÖÈ
+    /// è®¡ç®—çŸ©é˜µçš„ç§©
     /// </summary>
     /// <returns></returns>
     int GetRank()
@@ -888,11 +1006,11 @@ public:
     }
 
     /// <summary>
-    /// »ñµÃ¾ØÕóµÄËùÓĞÆæÒìÖµ
+    /// è·å¾—çŸ©é˜µçš„æ‰€æœ‰å¥‡å¼‚å€¼
     /// </summary>
-    /// <param name="v">ÓÃÓÚ½ÓÊÕÆæÒìÖµ</param>
-    /// <param name="precision">µü´ú¾«¶È</param>
-    /// <param name="minIteration">×îĞ¡µü´ú´ÎÊı</param>
+    /// <param name="v">ç”¨äºæ¥æ”¶å¥‡å¼‚å€¼</param>
+    /// <param name="precision">è¿­ä»£ç²¾åº¦</param>
+    /// <param name="minIteration">æœ€å°è¿­ä»£æ¬¡æ•°</param>
     void GetAllSingularValues(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
     {
         Matrix T = Transpose(*this);
@@ -920,12 +1038,12 @@ public:
     }
 
     /// <summary>
-    /// ¼ÆËã¶Ô³Æ·Ç²»¶¨¾ØÕóµÄËùÓĞÌØÕ÷Öµ
+    /// è®¡ç®—å¯¹ç§°éä¸å®šçŸ©é˜µçš„æ‰€æœ‰ç‰¹å¾å€¼
     /// </summary>
-    /// <param name="v">ÓÃÓÚ½ÓÊÕÌØÕ÷Öµ¡£Èô¾ØÕó¶Ô³Æ·Ç²»¶¨£¬ÔòËã·¨±£Ö¤¼ÆËã³öËùÓĞÌØÕ÷Öµ£¬µ«ÔÚ½ÓÊÜÏòÁ¿ÖĞµÄË³Ğò²»¶¨£»Èô¾ØÕó²»¶Ô³Æ»ò²»Îª·½Õó£¬ÔòÈç¹û½øĞĞÅĞ¶Ï£¬vÖĞ»áÌí¼ÓÒ»¸öDBL_MAXÔªËØ£»Èô¾ØÕó¶Ô³Æµ«²»¶¨£¬Æä½á¹ûÕıÈ·ĞÔ²»×÷±£Ö¤</param>
-    /// <param name="precision">µü´ú¾«¶È</param>
-    /// <param name="minIteration">×îĞ¡µü´ú´ÎÊı</param>
-    /// <param name="judgeSymmetry">ÊÇ·ñ¶Ô¾ØÕó¶Ô³ÆĞÔ»òÊÇ·ñÎª·½Õó½øĞĞÅĞ¶Ï</param>
+    /// <param name="v">ç”¨äºæ¥æ”¶ç‰¹å¾å€¼ã€‚è‹¥çŸ©é˜µå¯¹ç§°éä¸å®šï¼Œåˆ™ç®—æ³•ä¿è¯è®¡ç®—å‡ºæ‰€æœ‰ç‰¹å¾å€¼ï¼Œä½†åœ¨æ¥å—å‘é‡ä¸­çš„é¡ºåºä¸å®šï¼›è‹¥çŸ©é˜µä¸å¯¹ç§°æˆ–ä¸ä¸ºæ–¹é˜µï¼Œåˆ™å¦‚æœè¿›è¡Œåˆ¤æ–­ï¼Œvä¸­ä¼šæ·»åŠ ä¸€ä¸ªDBL_MAXå…ƒç´ ï¼›è‹¥çŸ©é˜µå¯¹ç§°ä½†ä¸å®šï¼Œå…¶ç»“æœæ­£ç¡®æ€§ä¸ä½œä¿è¯</param>
+    /// <param name="precision">è¿­ä»£ç²¾åº¦</param>
+    /// <param name="minIteration">æœ€å°è¿­ä»£æ¬¡æ•°</param>
+    /// <param name="judgeSymmetry">æ˜¯å¦å¯¹çŸ©é˜µå¯¹ç§°æ€§æˆ–æ˜¯å¦ä¸ºæ–¹é˜µè¿›è¡Œåˆ¤æ–­</param>
     void GetEigenValuesOfDefiniteMatrix(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50, bool judgeSymmetry = true)
     {
         if (judgeSymmetry)
@@ -958,7 +1076,7 @@ public:
         if (!InverseMatrix(A))
             v.push_back(0);
         A = *this;
-        //ÓÃÃİ·¨Çó¾ØÕó¾ø¶ÔÖµ×î´óÌØÕ÷Öµ£¬²¢²»¶Ïµü´ú
+        //ç”¨å¹‚æ³•æ±‚çŸ©é˜µç»å¯¹å€¼æœ€å¤§ç‰¹å¾å€¼ï¼Œå¹¶ä¸æ–­è¿­ä»£
         {
             do
             {
@@ -971,12 +1089,12 @@ public:
                 int p = 0;
                 while ((zero == A * vector) && p < row)
                 {
-                    vector.matrix[p++][0] = 0;  //·ÀÖ¹A*vectorµÃµ½ÁãÏòÁ¿
+                    vector.matrix[p++][0] = 0;  //é˜²æ­¢A*vectorå¾—åˆ°é›¶å‘é‡
                 }
                 if (p >= row)
                     return;
                 vector = A * vector;
-                int maxpos = 0; //×î´óÎ»ÖÃ
+                int maxpos = 0; //æœ€å¤§ä½ç½®
                 for (int i = 0; i < row; i++)
                 {
                     if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
@@ -984,7 +1102,7 @@ public:
                 }
                 last = vector.matrix[maxpos][0];
                 now = last;
-                iteration = 0; //¹é0µü´ú´ÎÊı
+                iteration = 0; //å½’0è¿­ä»£æ¬¡æ•°
                 do
                 {
                     last = now;
@@ -1002,7 +1120,7 @@ public:
                     iteration++;
                 } while (iteration < minIteration || abs(now - last) > precision);
 
-                bool isExist = false; //ÌØÕ÷ÖµÊÇ·ñÒÑ¾­¼ÆËã³öÀ´
+                bool isExist = false; //ç‰¹å¾å€¼æ˜¯å¦å·²ç»è®¡ç®—å‡ºæ¥
                 for (auto& i : v)
                 {
                     if (abs(now - i) < PRECISION_OF_DIFFERENCE)
@@ -1018,7 +1136,7 @@ public:
                 }
                 for (const auto& eigen : eigenVector)
                 {
-                    vector = vector - (Transpose(vector) * eigen).matrix[0][0] * eigen; //Õı½»»¯
+                    vector = vector - (Transpose(vector) * eigen).matrix[0][0] * eigen; //æ­£äº¤åŒ–
                 }
                 double mod = 0;
                 for (int i = 0; i < row; i++)
@@ -1027,11 +1145,11 @@ public:
                 }
                 mod = sqrt(mod);
                 if (vector.matrix[maxpos][0] > 0)
-                    vector = (1 / mod) * vector; //¹éÒ»»¯
+                    vector = (1 / mod) * vector; //å½’ä¸€åŒ–
                 else
                     vector = (-1 / mod) * vector;
                 A = A - now * (vector * Transpose(vector));
-                //·ÀÖ¹³öÏÖÁã¾ØÕó
+                //é˜²æ­¢å‡ºç°é›¶çŸ©é˜µ
                 bool isZero = true;
                 for (int i = 0; i < A.row && isZero; i++)
                 {
@@ -1053,9 +1171,9 @@ public:
     }
 
     /// <summary>
-    /// ²úÉúÒ»¸öµ¥Î»¾ØÕó
+    /// äº§ç”Ÿä¸€ä¸ªå•ä½çŸ©é˜µ
     /// </summary>
-    /// <param name="n">¾ØÕóÎ¬¶È</param>
+    /// <param name="n">çŸ©é˜µç»´åº¦</param>
     /// <returns></returns>
     static Matrix IdentityMatrix(int n)
     {
@@ -1064,14 +1182,14 @@ public:
         {
             I.matrix[i][i] = 1;
         }
-        return I; //»áµ÷ÓÃ¸´ÖÆ¹¹Ôìº¯Êı£¬Òò´ËĞ§ÂÊ±ÈÖ±½Ó¹¹ÔìÒªµÍ£»´Ëº¯ÊıÖ»ÊÇÎªÁË·½±ã
+        return I; //ä¼šè°ƒç”¨å¤åˆ¶æ„é€ å‡½æ•°ï¼Œå› æ­¤æ•ˆç‡æ¯”ç›´æ¥æ„é€ è¦ä½ï¼›æ­¤å‡½æ•°åªæ˜¯ä¸ºäº†æ–¹ä¾¿
     }
 
     /// <summary>
-    /// ´òÓ¡¾ØÕó
+    /// æ‰“å°çŸ©é˜µ
     /// </summary>
-    /// <param name="width">Ö¸¶¨Êä³ö¿í¶È£¬Ä¬ÈÏÎª3</param>
-    /// <param name="precision">Ö¸¶¨Êä³ö¾«¶È£¬Ä¬ÈÏÎª3</param>
+    /// <param name="width">æŒ‡å®šè¾“å‡ºå®½åº¦ï¼Œé»˜è®¤ä¸º3</param>
+    /// <param name="precision">æŒ‡å®šè¾“å‡ºç²¾åº¦ï¼Œé»˜è®¤ä¸º3</param>
     void Display(int width = 3, int precision = 3) const
     {
         for (int i = 0; i < row; i++)
@@ -1083,5 +1201,37 @@ public:
             }
         std::cout << std::endl;
     }
+
+    void Display_LU(int width = 3, int precision = 3) const
+    {
+        if(!L_matrix)
+        {
+            std::cout << "NaN" <<std::endl;
+            return;
+        }
+
+        std::cout << "L Matrix" << std::endl;
+        for (int i = 0; i < row; i++)
+            for (int j = 0; j < row; j++)
+            {
+                std::cout << std::setprecision(precision) << std::setw(width) << L_matrix[i][j] << " ";
+                 if (j == col - 1)
+                    std::cout << std::endl;
+            }
+        std::cout << std::endl;
+
+        std::cout << "U Matrix" << std::endl;
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 0; j < col; j++)
+            {
+                std::cout << std::setprecision(precision) << std::setw(width) << U_matrix[i][j] << " ";
+                if (j == col - 1)
+                    std::cout << std::endl;
+            }
+        }
+        std::cout << std::endl;
+    }
 };
+
 #endif
