@@ -38,7 +38,7 @@ int main()
     Matrix C((double*)c, 8, 8); //对角矩阵
     Matrix D = A * C * A1; //D正交相似于C，特征值为C的对角元素
     std::vector<double> v; //创建一个vector，用于接收特征值
-    D.GetEigenValuesOfDefiniteMatrix(v);  //调用函数，获得矩阵的所有特征值
+    D.GetEigenValuesOfDefiniteMatrix(v,1e-5,50);  //调用函数，获得矩阵的所有特征值
     for (auto& t : v) //记t为特征值，则D-tI行列式应为0
     {                 //下面打印计算出的特征值和D-tI的行列式进行比较，验证结果的正确性
         std::cout << "eigen value: " << t << std::endl;  
@@ -98,5 +98,23 @@ int main()
     {
         std::cout << "The function has no solutions!" << std::endl;
     }
+    std::cout << "=========================================================================================" << std::endl;
+
+    //样例8：求矩阵的奇异值分解
+    double aUsedForSvd[3][2] = { {3,0},{4,5},{0,0} };
+    Matrix AUsedForSVD((double*)aUsedForSvd, 3, 2);
+    Matrix U, Sigma, VT;
+    if (AUsedForSVD.SVD(U, Sigma, VT))
+    {
+        U.Display(5);
+        Sigma.Display();
+        VT.Display();
+    }
+    else
+    {
+        std::cout << "No SVD！Wrong！" << std::endl;
+    }
+    std::cout << "=========================================================================================" << std::endl;
+
     return 0;
 }

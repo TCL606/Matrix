@@ -5,6 +5,8 @@
 #include<cmath>
 #include<iomanip>
 #include<vector>
+#include<algorithm>
+#include<utility>
 #pragma warning(disable:4996)
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
@@ -94,13 +96,13 @@ public:
         {
             int nonZero = row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < row; j++) // 找到非0元素
-                if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                if (std::abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -113,7 +115,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
+                if (std::abs(matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = matrix[i - zeroRow][i];
                     for (int k = i; k < col; k++)
@@ -124,7 +126,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < row; j++) //把下面部分消为0
                 {
-                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
+                    if (std::abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = matrix[j][i];
                         for (int k = i; k < col; k++)
@@ -136,7 +138,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = matrix[j][i];
                         for (int k = i; k < col; k++)
@@ -157,7 +159,7 @@ public:
         if (col > row && rank < row) //若此时不满秩，且col>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = row;
-            while (abs(matrix[row - 1][k]) < PRECISION_OF_DIFFERENCE && k < col)
+            while (std::abs(matrix[row - 1][k]) < PRECISION_OF_DIFFERENCE && k < col)
             {
                 k++;
             }
@@ -171,7 +173,7 @@ public:
                 rank++; //加上最后一行的秩
                 for (int j = row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(matrix[j][k]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = matrix[j][k];
                         for (int t = k; t < col; t++)
@@ -197,13 +199,13 @@ public:
         {
             int nonZero = original.row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < original.row; j++) // 找到非0元素
-                if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -216,7 +218,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
+                if (std::abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -227,7 +229,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < original.row; j++) //把下面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
+                    if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -239,7 +241,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -260,7 +262,7 @@ public:
         if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = original.row;
-            while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
+            while (std::abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
             {
                 k++;
             }
@@ -274,7 +276,7 @@ public:
                 original.rank++; //加上最后一行的秩
                 for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][k];
                         for (int t = k; t < original.col; t++)
@@ -289,7 +291,7 @@ public:
         //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
-            if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
             {
                 return false;
             }
@@ -301,7 +303,7 @@ public:
         int temp;  //记录列
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //主列位置对应分量为目标向量的对应分量，自由列对应分量直接取0
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
                 solution.matrix[temp][0] = original.matrix[temp - numOfFreeColumn][original.col - 1];
             }
@@ -333,13 +335,13 @@ public:
         {
             int nonZero = original.row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < original.row; j++) // 找到非0元素
-                if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -352,7 +354,7 @@ public:
                     nonZero = i - zeroRow;
                 }
 
-                if (abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
+                if (std::abs(original.matrix[i - zeroRow][i] - 1.0) > PRECISION_OF_DIFFERENCE)  //归一化
                 {
                     double temp = original.matrix[i - zeroRow][i];
                     for (int k = i; k < original.col; k++)
@@ -363,7 +365,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < original.row; j++) //把下面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
+                    if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果matrix[j][i]不是0
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -375,7 +377,7 @@ public:
 
                 for (int j = i - zeroRow - 1; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(original.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][i];
                         for (int k = i; k < original.col; k++)
@@ -396,7 +398,7 @@ public:
         if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
         {
             int k = original.row;
-            while (abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
+            while (std::abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
             {
                 k++;
             }
@@ -410,7 +412,7 @@ public:
                 original.rank++; //加上最后一行的秩
                 for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                 {
-                    if (abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
                     {
                         double temp = original.matrix[j][k];
                         for (int t = k; t < original.col; t++)
@@ -424,7 +426,7 @@ public:
         //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
         for (int i = original.row - 1; i >= original.rank; i--)
         {
-            if (abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
             {
                 return false;
             }
@@ -435,7 +437,7 @@ public:
         int temp = 0;
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++) //先找零空间的基
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
                 continue;
             else
             {
@@ -462,7 +464,7 @@ public:
         //找特解
         for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++)  //主列位置对应分量为目标向量的对应分量，自由列对应分量直接取0
         {
-            if (abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
             {
                 solution.matrix[temp][original.col - original.rank - 1] = original.matrix[temp - numOfFreeColumn][original.col - 1];
             }
@@ -544,13 +546,13 @@ public:
         {
             int nonZero = row - 1;  //先设非零行为最后一行
             for (int j = i - zeroRow; j < row; j++) // 找到非0元素
-                if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE)
+                if (std::abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE)
                 {
                     nonZero = j;
                     break;
                 }
 
-            if (abs(mtemp[nonZero][i]) > PRECISION_OF_DIFFERENCE)
+            if (std::abs(mtemp[nonZero][i]) > PRECISION_OF_DIFFERENCE)
             {
                 if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
                 {
@@ -566,7 +568,7 @@ public:
 
                 for (int j = i - zeroRow + 1; j < row; j++) //把下面部分消为0
                 {
-                    if (abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE) //如果mtemp[j][i]不是0
+                    if (std::abs(mtemp[j][i]) > PRECISION_OF_DIFFERENCE) //如果mtemp[j][i]不是0
                     {
                         double temp = mtemp[j][i] / mtemp[i - zeroRow][i];
                         for (int k = i; k < col; k++)
@@ -578,7 +580,7 @@ public:
             }
         }
         double ret = 1;
-        if (abs(mtemp[row - 1][col - 1]) < PRECISION_OF_DIFFERENCE)
+        if (std::abs(mtemp[row - 1][col - 1]) < PRECISION_OF_DIFFERENCE)
             ret = 0;
         else
         {
@@ -618,7 +620,7 @@ public:
                 caculateInverse.matrix[i][j + row] = i == j ? 1 : 0;
             }
         caculateInverse.Gauss_Jordan_Elimination();
-        if (abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION_OF_DIFFERENCE) //高斯消元后，右下角为0，则不可逆；否则可逆。
+        if (std::abs(caculateInverse.matrix[row - 1][row - 1]) < PRECISION_OF_DIFFERENCE) //高斯消元后，右下角为0，则不可逆；否则可逆。
             return false;
         for (int i = 0; i < row; i++)
         {
@@ -640,7 +642,7 @@ public:
         Matrix temp = A;
         temp.TransposeDirectly();
         return temp;
-    }
+    } const
 
     /// <summary>
     /// 直接将对象矩阵转置
@@ -685,6 +687,500 @@ public:
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 奇异值分解
+    /// </summary>
+    /// <param name="U">正交矩阵U</param>
+    /// <param name="Sigma">奇异值矩阵Sigma</param>
+    /// <param name="VT">正交矩阵V的转置</param>
+    /// <param name="precision">计算精度</param>
+    /// <param name="minIteration">幂法最小迭代次数</param>
+    /// <returns>返回为false时，奇异值分解失败（可能是由于计算过程中的精度损失造成的），此时U、Sigma、V未定义</returns>
+    bool SVD(Matrix& U, Matrix& Sigma, Matrix& VT, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50) const
+    {
+        Matrix A(*this);
+        A.TransposeDirectly();
+        std::vector<double> values;
+        Sigma = Matrix(this->row, this->col);
+        Matrix V(this->col, this->col);
+        U = Matrix(this->row, this->row);
+
+        if (this->col < this->row)
+        {
+            Matrix ATA = A * (*this);
+            ATA.GetEigenValuesOfDefiniteMatrix(values, precision, minIteration, false);
+            std::sort(values.begin(), values.end(), std::greater<double>());
+            std::vector<int> multiplicity;
+            Matrix eigenSubSpace;
+            int nowDim = 0;
+            int ATADim = 0;
+            double mod = 0;
+
+            for (const auto& val : values)
+            {
+                if ((ATA - val * IdentityMatrix(ATA.row)).GetBasesOfNullSpace(eigenSubSpace))
+                {
+                    for (int i = 0; i < eigenSubSpace.row; i++)
+                    {
+                        for (int j = 0; j < eigenSubSpace.col; j++)
+                        {
+                            V.matrix[i][j + nowDim] = eigenSubSpace.matrix[i][j];
+                        }
+                    }
+                    multiplicity.push_back(eigenSubSpace.col);
+                    nowDim += eigenSubSpace.col;
+                    if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                        ATADim += eigenSubSpace.col;
+                }
+                else
+                {
+                    std::cout << "The eigen value " << val << " is not correct! Maybe the precision or the minIteration is too small." << std::endl;
+                    return false;
+                }
+            }
+            Matrix V1(V.row, ATADim);
+            for (int i = 0; i < V1.row; i++)
+            {
+                for (int j = 0; j < V1.col; j++)
+                {
+                    V1.matrix[i][j] = V.matrix[i][j];
+                }
+            }
+            //V1作正交化
+            int nowCol = 0;
+            for (int j = 0; j < V1.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < V1.row; i++)
+                {
+                    mod += V1.matrix[i][j] * V1.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < V1.row; i++)
+                {
+                    V1.matrix[i][j] /= mod; //归一化
+                }
+                mod = 0;
+                for (int k = 0; k < nowCol; k++)
+                {
+                    double innerProduct = 0;
+                    for (int p = 0; p < V1.row; p++)
+                    {
+                        innerProduct += V1.matrix[p][k] * V1.matrix[p][nowCol];
+                    }
+                    for (int p = 0; p < V1.row; p++)
+                    {
+                        V1.matrix[p][nowCol] -= innerProduct * V1.matrix[p][k];
+                        mod += V1.matrix[p][nowCol] * V1.matrix[p][nowCol];
+                    }
+                    mod = sqrt(mod);
+                    for (int p = 0; p < V1.row; p++)
+                    {
+                        V1.matrix[p][nowCol] /= mod; //归一化
+                    }
+                    nowCol++;
+                }
+            }
+
+            int now = 0;
+            int len = this->col < this->row ? this->col : this->row;
+            Matrix Sigmar(len, len);  //作一个Sigmar矩阵
+            for (int i = 0; i < values.size(); i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigmar.matrix[now][now] = 1 / sqrt(values[i]); //Sigmar的逆矩阵
+                        now++;
+                    }
+                }
+            }
+
+            now = 0;
+            for (int i = 0; i < values.size(); i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigma.matrix[now][now] = sqrt(values[i]); //Sigma矩阵赋值
+                        now++;
+                    }
+                }
+            }
+
+            Matrix U1((*this) * V1 * Sigmar);
+            for (int j = 0; j < U1.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < U1.row; i++)
+                {
+                    mod += U1.matrix[i][j] * U1.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < U1.row; i++)
+                {
+                    U1.matrix[i][j] /= mod;
+                }
+            }
+
+            //还要生成V的正交基
+            if (V1.col < V.col)
+            {
+                Matrix I(IdentityMatrix(V.row));
+                Matrix zero(V.row, 1);
+                Matrix V2(V.row, V.col - V1.col);
+                Matrix V1T(Transpose(V1));
+                int p = 0;
+                int nowExpandDim = 0;
+                int iterateTimes = 0;
+                double mod;
+                while (iterateTimes < V.col - V1.col)
+                {
+                    for (int i = 0; i < V.row; i++)
+                    {
+                        mod = 0;
+                        Matrix vector(V.row, 1);
+                        vector.matrix[i][0] = 1;
+                        vector = (I - V1 * V1T) * vector;
+                        for (int j = 0; j < nowExpandDim; j++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < V2.row; p++)
+                            {
+                                innerProduct += V2.matrix[p][j] * vector.matrix[p][0];
+                            }
+                            for (int p = 0; p < V1.row; p++)
+                            {
+                                vector.matrix[p][0] -= innerProduct * V2.matrix[p][j];
+                            }
+                        }
+
+                        if (vector != zero)
+                        {
+                            for (int p = 0; p < vector.row; p++)
+                            {
+                                mod += vector.matrix[p][0] * vector.matrix[p][0];
+                            }
+                            mod = sqrt(mod);
+                            for (int p = 0; p < V2.row; p++)
+                            {
+                                V2.matrix[p][nowExpandDim] = vector.matrix[p][0] / mod;
+                            }
+                            nowExpandDim++;
+                            break;
+                        }
+                    }
+                    iterateTimes++;
+                }
+                if (nowExpandDim != V.col - V1.col)
+                {
+                    std::cout << "Something went wrong that the program can't find all V's orthogonal bases!" << std::endl;
+                    return false;
+                }
+                V = V1 & V2;
+            }
+            else V = V1;
+
+            //生成U的正交基
+            if (U1.col < U.col)  //当原矩阵不是方阵时，这里的U1还不是U，要补充正交向量
+            {
+                Matrix I(IdentityMatrix(U.row));
+                Matrix zero(U.row, 1);
+                Matrix U2(U.row, U.col - U1.col);
+                Matrix U1T(Transpose(U1));
+                int p = 0;
+                int nowExpandDim = 0;
+                int iterateTimes = 0;
+                double mod;
+                while (iterateTimes < U.col - U1.col)
+                {
+                    for (int i = 0; i < U.row; i++)
+                    {
+                        mod = 0;
+                        Matrix vector(U.row, 1);
+                        vector.matrix[i][0] = 1;
+                        vector = (I - U1 * U1T) * vector;
+                        for (int j = 0; j < nowExpandDim; j++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < U2.row; p++)
+                            {
+                                innerProduct += U2.matrix[p][j] * vector.matrix[p][0];
+                            }
+                            for (int p = 0; p < U1.row; p++)
+                            {
+                                vector.matrix[p][0] -= innerProduct * U2.matrix[p][j];
+                            }
+                        }
+
+                        if (vector != zero)
+                        {
+                            for (int p = 0; p < vector.row; p++)
+                            {
+                                mod += vector.matrix[p][0] * vector.matrix[p][0];
+                            }
+                            mod = sqrt(mod);
+                            for (int p = 0; p < U2.row; p++)
+                            {
+                                U2.matrix[p][nowExpandDim] = vector.matrix[p][0] / mod;
+                            }
+                            nowExpandDim++;
+                            break;
+                        }
+                    }
+                    iterateTimes++;
+                }
+                if (nowExpandDim != U.col - U1.col)
+                {
+                    std::cout << "Something went wrong that the program can't find all U's orthogonal bases!" << std::endl;
+                    return false;
+                }
+                U = U1 & U2;
+            }
+            else U = U1;
+        }
+        else
+        {
+            Matrix AAT = (*this) * A;
+            AAT.GetEigenValuesOfDefiniteMatrix(values, precision, minIteration, false);
+            std::sort(values.begin(), values.end(), std::greater<double>());
+            std::vector<int> multiplicity;
+            Matrix eigenSubSpace;
+            int nowDim = 0;
+            int AATDim = 0;
+            double mod = 0;
+
+            for (const auto& val : values)
+            {
+                if ((AAT - val * IdentityMatrix(AAT.row)).GetBasesOfNullSpace(eigenSubSpace))
+                {
+                    for (int i = 0; i < eigenSubSpace.row; i++)
+                    {
+                        for (int j = 0; j < eigenSubSpace.col; j++)
+                        {
+                            U.matrix[i][j + nowDim] = eigenSubSpace.matrix[i][j];
+                        }
+                    }
+                    multiplicity.push_back(eigenSubSpace.col);
+                    nowDim += eigenSubSpace.col;
+                    if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                        AATDim += eigenSubSpace.col;
+                }
+                else
+                {
+                    std::cout << "The eigen value " << val << " is not correct! Maybe the precision or the minIteration is too small." << std::endl;
+                    return false;
+                }
+            }
+            Matrix U1(U.row, AATDim);
+            for (int i = 0; i < U1.row; i++)
+            {
+                for (int j = 0; j < U1.col; j++)
+                {
+                    U1.matrix[i][j] = U.matrix[i][j];
+                }
+            }
+            //U1作正交化
+            int nowCol = 0;
+            for (int j = 0; j < U1.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < U1.row; i++)
+                {
+                    mod += U1.matrix[i][j] * U1.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < U1.row; i++)
+                {
+                    U1.matrix[i][j] /= mod; //归一化
+                }
+                mod = 0;
+                for (int k = 0; k < nowCol; k++)
+                {
+                    double innerProduct = 0;
+                    for (int p = 0; p < U1.row; p++)
+                    {
+                        innerProduct += U1.matrix[p][k] * U1.matrix[p][nowCol];
+                    }
+                    for (int p = 0; p < U1.row; p++)
+                    {
+                        U1.matrix[p][nowCol] -= innerProduct * U1.matrix[p][k];
+                        mod += U1.matrix[p][nowCol] * U1.matrix[p][nowCol];
+                    }
+                    mod = sqrt(mod);
+                    for (int p = 0; p < U1.row; p++)
+                    {
+                        U1.matrix[p][nowCol] /= mod; //归一化
+                    }
+                    nowCol++;
+                }
+            }
+
+            int now = 0;
+            int len = this->col < this->row ? this->col : this->row;
+            Matrix Sigmar(len, len);  //作一个Sigmar矩阵
+            for (int i = 0; i < values.size(); i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigmar.matrix[now][now] = 1 / sqrt(values[i]); //Sigmar的逆矩阵
+                        now++;
+                    }
+                }
+            }
+
+            now = 0;
+            for (int i = 0; i < values.size(); i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigma.matrix[now][now] = sqrt(values[i]); //Sigma矩阵赋值
+                        now++;
+                    }
+                }
+            }
+
+            Matrix V1(A * U1 * Sigmar);
+            for (int j = 0; j < V1.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < V1.row; i++)
+                {
+                    mod += V1.matrix[i][j] * V1.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < V1.row; i++)
+                {
+                    V1.matrix[i][j] /= mod;
+                }
+            }
+
+            //还要生成U的正交基
+            if (U1.col < U.col)
+            {
+                Matrix I(IdentityMatrix(U.row));
+                Matrix zero(U.row, 1);
+                Matrix U2(U.row, U.col - U1.col);
+                Matrix U1T(Transpose(U1));
+                int p = 0;
+                int nowExpandDim = 0;
+                int iterateTimes = 0;
+                double mod;
+                while (iterateTimes < U.col - U1.col)
+                {
+                    for (int i = 0; i < U.row; i++)
+                    {
+                        mod = 0;
+                        Matrix vector(U.row, 1);
+                        vector.matrix[i][0] = 1;
+                        vector = (I - U1 * U1T) * vector;
+                        for (int j = 0; j < nowExpandDim; j++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < U2.row; p++)
+                            {
+                                innerProduct += U2.matrix[p][j] * vector.matrix[p][0];
+                            }
+                            for (int p = 0; p < U1.row; p++)
+                            {
+                                vector.matrix[p][0] -= innerProduct * U2.matrix[p][j];
+                            }
+                        }
+
+                        if (vector != zero)
+                        {
+                            for (int p = 0; p < vector.row; p++)
+                            {
+                                mod += vector.matrix[p][0] * vector.matrix[p][0];
+                            }
+                            mod = sqrt(mod);
+                            for (int p = 0; p < U2.row; p++)
+                            {
+                                U2.matrix[p][nowExpandDim] = vector.matrix[p][0] / mod;
+                            }
+                            nowExpandDim++;
+                            break;
+                        }
+                    }
+                    iterateTimes++;
+                }
+                if (nowExpandDim != U.col - U1.col)
+                {
+                    std::cout << "Something went wrong that the program can't find all U's orthogonal bases!" << std::endl;
+                    return false;
+                }
+                U = U1 & U2;
+            }
+            else U = U1;
+
+            //生成V的正交基
+            if (V1.col < V.col)  //当原矩阵不是方阵时，这里的V1还不是V，要补充正交向量
+            {
+                Matrix I(IdentityMatrix(V.row));
+                Matrix zero(V.row, 1);
+                Matrix V2(V.row, V.col - V1.col);
+                Matrix V1T(Transpose(V1));
+                int p = 0;
+                int nowExpandDim = 0;
+                int iterateTimes = 0;
+                double mod;
+                while (iterateTimes < V.col - V1.col)
+                {
+                    for (int i = 0; i < V.row; i++)
+                    {
+                        mod = 0;
+                        Matrix vector(V.row, 1);
+                        vector.matrix[i][0] = 1;
+                        vector = (I - V1 * V1T) * vector;
+                        for (int j = 0; j < nowExpandDim; j++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < V2.row; p++)
+                            {
+                                innerProduct += V2.matrix[p][j] * vector.matrix[p][0];
+                            }
+                            for (int p = 0; p < V1.row; p++)
+                            {
+                                vector.matrix[p][0] -= innerProduct * V2.matrix[p][j];
+                            }
+                        }
+
+                        if (vector != zero)
+                        {
+                            for (int p = 0; p < vector.row; p++)
+                            {
+                                mod += vector.matrix[p][0] * vector.matrix[p][0];
+                            }
+                            mod = sqrt(mod);
+                            for (int p = 0; p < V2.row; p++)
+                            {
+                                V2.matrix[p][nowExpandDim] = vector.matrix[p][0] / mod;
+                            }
+                            nowExpandDim++;
+                            break;
+                        }
+                    }
+                    iterateTimes++;
+                }
+                if (nowExpandDim != V.col - V1.col)
+                {
+                    std::cout << "Something went wrong that the program can't find all V's orthogonal bases!" << std::endl;
+                    return false;
+                }
+                V = V1 & V2;
+            }
+            else V = V1;
+        }
+        VT = Transpose(V);
+        return true;
     }
 
     /// <summary>
@@ -798,13 +1294,63 @@ public:
         {
             for (int j = 0; j < A.col; j++)
             {
-                if (abs(A.matrix[i][j] - B.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
+                if (std::abs(A.matrix[i][j] - B.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
                     return false;
             }
         }
         return true;
     }
 
+    /// <summary>
+    /// 矩阵不等判断
+    /// </summary>
+    /// <param name="A"></param>
+    /// <param name="B"></param>
+    /// <returns></returns>
+    friend bool operator !=(const Matrix& A, const Matrix& B)
+    {
+        return !(A == B);
+    }
+
+    /// <summary>
+    /// 矩阵横向合并
+    /// </summary>
+    /// <param name="A"></param>
+    /// <param name="B"></param>
+    /// <returns></returns>
+    friend Matrix operator &(const Matrix& A, const Matrix& B)
+    {
+        if (A.row != B.row)
+        {
+            std::cout << "A and B don't have the same rows! Return the first matrix." << std::endl;
+            return A;
+        }
+        else
+        {
+            Matrix ret(A.row, A.col + B.col);
+            for (int i = 0; i < A.row; i++)
+            {
+                for (int j = 0; j < A.col; j++)
+                {
+                    ret.matrix[i][j] = A.matrix[i][j];
+                }
+            }
+            for (int i = 0; i < B.row; i++)
+            {
+                for (int j = 0; j < B.col; j++)
+                {
+                    ret.matrix[i][j + A.col] = B.matrix[i][j];
+                }
+            }
+            return ret;
+        }
+    }
+
+    /// <summary>
+    /// 矩阵赋值
+    /// </summary>
+    /// <param name="A"></param>
+    /// <returns></returns>
     Matrix operator =(const Matrix& A)
     {
         rank = A.rank;
@@ -827,6 +1373,29 @@ public:
             }
         }
         return *this;
+    }
+
+    /// <summary>
+    /// 获得列向量
+    /// </summary>
+    /// <param name="column"></param>
+    /// <returns></returns>
+    Matrix operator [](int column)
+    {
+        if (column >= col || column < 0)
+        {
+            std::cout << "Index out of range! Return NULL." << std::endl;
+            return NULL;
+        }
+        else
+        {
+            Matrix ret(row, 1);
+            for (int i = 0; i < row; i++)
+            {
+                ret.matrix[i][column] = matrix[i][column];
+            }
+            return ret;
+        }
     }
 
     /// <summary>
@@ -928,6 +1497,7 @@ public:
     /// <param name="judgeSymmetry">是否对矩阵对称性或是否为方阵进行判断</param>
     void GetEigenValuesOfDefiniteMatrix(std::vector<double>& v, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50, bool judgeSymmetry = true)
     {
+        v.clear();
         if (judgeSymmetry)
         {
             if (row != col)
@@ -940,7 +1510,7 @@ public:
             {
                 for (int j = i + 1; j < col; j++)
                 {
-                    if (abs(matrix[i][j] - matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                    if (std::abs(matrix[i][j] - matrix[j][i]) > PRECISION_OF_DIFFERENCE)
                     {
                         std::cout << "The matrix is not symmetric!" << std::endl;
                         v.push_back(DBL_MAX);
@@ -949,7 +1519,6 @@ public:
                 }
             }
         }
-        v.clear();
         std::vector<Matrix> eigenVector;
         Matrix A(row, col);
         double now, last;
@@ -979,7 +1548,7 @@ public:
                 int maxpos = 0; //最大位置
                 for (int i = 0; i < row; i++)
                 {
-                    if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
+                    if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
                         maxpos = i;
                 }
                 last = vector.matrix[maxpos][0];
@@ -995,17 +1564,17 @@ public:
                     vector = A * vector;
                     for (int i = 0; i < row; i++)
                     {
-                        if (abs(vector.matrix[i][0]) > abs(vector.matrix[maxpos][0]))
+                        if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
                             maxpos = i;
                     }
                     now = vector.matrix[maxpos][0];
                     iteration++;
-                } while (iteration < minIteration || abs(now - last) > precision);
+                } while (iteration < minIteration || std::abs(now - last) > precision);
 
                 bool isExist = false; //特征值是否已经计算出来
                 for (auto& i : v)
                 {
-                    if (abs(now - i) < PRECISION_OF_DIFFERENCE)
+                    if (std::abs(now - i) < PRECISION_OF_DIFFERENCE)
                     {
                         isExist = true;
                         multipleRootNum++;
@@ -1037,7 +1606,7 @@ public:
                 {
                     for (int j = 0; j < A.col; j++)
                     {
-                        if (abs(A.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
+                        if (std::abs(A.matrix[i][j]) > PRECISION_OF_DIFFERENCE)
                         {
                             isZero = false;
                             break;
