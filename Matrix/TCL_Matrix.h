@@ -717,7 +717,7 @@ public:
             int nowDim = 0;
             int ATADim = 0;
             double mod = 0;
-            int len = 0;  //非0奇异值
+            int len = 0;  //非0奇异值个数
 
             for (const auto& val : values)
             {
@@ -789,8 +789,8 @@ public:
             }
 
             int now = 0;
-            Matrix Sigmar(len, len);  //作一个Sigmar矩阵
-            for (int i = 0; i < values.size(); i++)
+            Matrix Sigmar(ATADim, ATADim);  //作一个Sigmar矩阵
+            for (int i = 0; i < len; i++)
             {
                 for (int j = 0; j < multiplicity[i]; j++)
                 {
@@ -816,19 +816,6 @@ public:
             }
 
             Matrix U1((*this) * V1 * Sigmar);
-            for (int j = 0; j < U1.col; j++)
-            {
-                mod = 0;
-                for (int i = 0; i < U1.row; i++)
-                {
-                    mod += U1.matrix[i][j] * U1.matrix[i][j];
-                }
-                mod = sqrt(mod);
-                for (int i = 0; i < U1.row; i++)
-                {
-                    U1.matrix[i][j] /= mod;
-                }
-            }
 
             //还要生成V的正交基
             if (V1.col < V.col)
@@ -1028,8 +1015,8 @@ public:
             }
 
             int now = 0;
-            Matrix Sigmar(len, len);  //作一个Sigmar矩阵
-            for (int i = 0; i < values.size(); i++)
+            Matrix Sigmar(AATDim, AATDim);  //作一个Sigmar矩阵
+            for (int i = 0; i < len; i++)
             {
                 for (int j = 0; j < multiplicity[i]; j++)
                 {
@@ -1055,19 +1042,6 @@ public:
             }
 
             Matrix V1(A * U1 * Sigmar);
-            for (int j = 0; j < V1.col; j++)
-            {
-                mod = 0;
-                for (int i = 0; i < V1.row; i++)
-                {
-                    mod += V1.matrix[i][j] * V1.matrix[i][j];
-                }
-                mod = sqrt(mod);
-                for (int i = 0; i < V1.row; i++)
-                {
-                    V1.matrix[i][j] /= mod;
-                }
-            }
 
             //还要生成U的正交基
             if (U1.col < U.col)
@@ -1189,6 +1163,232 @@ public:
         return true;
     }
 
+    bool SimplifiedSVD(Matrix& Ur, Matrix& Sigmar, Matrix& VrT, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
+    {
+        Matrix A(*this);
+        A.TransposeDirectly(); //A是原矩阵的转置
+        std::vector<double> values;
+        Matrix Temp;
+        if (this->col < this->row)
+        {
+            Temp = A * (*this);
+            Temp.GetEigenValuesOfDefiniteMatrix(values, precision, minIteration, false);
+        }
+        else
+        {
+            Temp = (*this) * A;
+            Temp.GetEigenValuesOfDefiniteMatrix(values, precision, minIteration, false);
+        }
+
+        int len = 0;
+        if (this->col < this->row)
+        {
+            Matrix VrTemp(this->col, this->col);
+            std::sort(values.begin(), values.end(), std::greater<double>());
+            std::vector<int> multiplicity;
+            Matrix eigenSubSpace;
+            int nowDim = 0;
+            int ATADim = 0;
+            double mod = 0;
+
+            for (const auto& val : values)
+            {
+                if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                {
+                    if ((Temp - val * IdentityMatrix(Temp.row)).GetBasesOfNullSpace(eigenSubSpace))
+                    {
+                        for (int i = 0; i < eigenSubSpace.row; i++)
+                        {
+                            for (int j = 0; j < eigenSubSpace.col; j++)
+                            {
+                                VrTemp.matrix[i][j + nowDim] = eigenSubSpace.matrix[i][j];
+                            }
+                        }
+
+                        multiplicity.push_back(eigenSubSpace.col);
+                        nowDim += eigenSubSpace.col;
+                        ATADim += eigenSubSpace.col;
+                        len++;
+                    }
+                    else
+                    {
+                        std::cout << "The eigen value " << val << " is not correct! Maybe the precision or the minIteration is too small." << std::endl;
+                        return false;
+                    }
+                }
+            }
+            Sigmar = Matrix(ATADim, ATADim);
+            Matrix Vr(this->col, ATADim);
+            for (int i = 0; i < Vr.row; i++)
+            {
+                for (int j = 0; j < Vr.col; j++)
+                {
+                    Vr.matrix[i][j] = VrTemp.matrix[i][j];
+                }
+            }
+            //Vr作正交化
+            int nowCol = 0;
+            for (int j = 0; j < Vr.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < Vr.row; i++)
+                {
+                    mod += Vr.matrix[i][j] * Vr.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < Vr.row; i++)
+                {
+                    Vr.matrix[i][j] /= mod; //归一化
+                }
+                mod = 0;
+                for (int k = 0; k < nowCol; k++)
+                {
+                    double innerProduct = 0;
+                    for (int p = 0; p < Vr.row; p++)
+                    {
+                        innerProduct += Vr.matrix[p][k] * Vr.matrix[p][nowCol];
+                    }
+                    for (int p = 0; p < Vr.row; p++)
+                    {
+                        Vr.matrix[p][nowCol] -= innerProduct * Vr.matrix[p][k];
+                        mod += Vr.matrix[p][nowCol] * Vr.matrix[p][nowCol];
+                    }
+                    mod = sqrt(mod);
+                    for (int p = 0; p < Vr.row; p++)
+                    {
+                        Vr.matrix[p][nowCol] /= mod; //归一化
+                    }
+                    nowCol++;
+                }
+            }
+
+            int now = 0;
+            for (int i = 0; i < len; i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigmar.matrix[now][now] = 1 / sqrt(values[i]); //Sigmar的逆矩阵
+                        now++;
+                    }
+                }
+            }
+
+            Ur = (*this) * Vr * Sigmar;
+
+            now = 0;
+            for (int i = 0; i < Sigmar.row; i++)
+            {
+                Sigmar.matrix[i][i] = 1.0 / Sigmar.matrix[i][i];  //Sigmar还原
+            }
+            VrT = Transpose(Vr);
+        }
+        else
+        {
+            Matrix UrTemp(this->row, this->row);
+            std::sort(values.begin(), values.end(), std::greater<double>());
+            std::vector<int> multiplicity;
+            Matrix eigenSubSpace;
+            int nowDim = 0;
+            int AATDim = 0;
+            double mod = 0;
+
+            for (const auto& val : values)
+            {
+                if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                {
+                    if ((Temp - val * IdentityMatrix(Temp.row)).GetBasesOfNullSpace(eigenSubSpace))
+                    {
+                        for (int i = 0; i < eigenSubSpace.row; i++)
+                        {
+                            for (int j = 0; j < eigenSubSpace.col; j++)
+                            {
+                                UrTemp.matrix[i][j + nowDim] = eigenSubSpace.matrix[i][j];
+                            }
+                        }
+
+                        multiplicity.push_back(eigenSubSpace.col);
+                        nowDim += eigenSubSpace.col;
+                        AATDim += eigenSubSpace.col;
+                        len++;
+                    }
+                    else
+                    {
+                        std::cout << "The eigen value " << val << " is not correct! Maybe the precision or the minIteration is too small." << std::endl;
+                        return false;
+                    }
+                }
+            }
+            Sigmar = Matrix(AATDim, AATDim);
+            Ur = Matrix(this->row, AATDim);
+            for (int i = 0; i < Ur.row; i++)
+            {
+                for (int j = 0; j < Ur.col; j++)
+                {
+                    Ur.matrix[i][j] = UrTemp.matrix[i][j];
+                }
+            }
+            //Ur作正交化
+            int nowCol = 0;
+            for (int j = 0; j < Ur.col; j++)
+            {
+                mod = 0;
+                for (int i = 0; i < Ur.row; i++)
+                {
+                    mod += Ur.matrix[i][j] * Ur.matrix[i][j];
+                }
+                mod = sqrt(mod);
+                for (int i = 0; i < Ur.row; i++)
+                {
+                    Ur.matrix[i][j] /= mod; //归一化
+                }
+                mod = 0;
+                for (int k = 0; k < nowCol; k++)
+                {
+                    double innerProduct = 0;
+                    for (int p = 0; p < Ur.row; p++)
+                    {
+                        innerProduct += Ur.matrix[p][k] * Ur.matrix[p][nowCol];
+                    }
+                    for (int p = 0; p < Ur.row; p++)
+                    {
+                        Ur.matrix[p][nowCol] -= innerProduct * Ur.matrix[p][k];
+                        mod += Ur.matrix[p][nowCol] * Ur.matrix[p][nowCol];
+                    }
+                    mod = sqrt(mod);
+                    for (int p = 0; p < Ur.row; p++)
+                    {
+                        Ur.matrix[p][nowCol] /= mod; //归一化
+                    }
+                    nowCol++;
+                }
+            }
+
+            int now = 0;
+            for (int i = 0; i < len; i++)
+            {
+                for (int j = 0; j < multiplicity[i]; j++)
+                {
+                    if (std::abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        Sigmar.matrix[now][now] = 1 / sqrt(values[i]); //Sigmar的逆矩阵
+                        now++;
+                    }
+                }
+            }
+
+            VrT = Transpose(A * Ur * Sigmar);
+
+            now = 0;
+            for (int i = 0; i < Sigmar.row; i++)
+            {
+                Sigmar.matrix[i][i] = 1.0 / Sigmar.matrix[i][i];  //Sigmar还原
+            }
+        }
+        return true;
+    }
+    
     /// <summary>
     /// 矩阵乘法
     /// </summary>

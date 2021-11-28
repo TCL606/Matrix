@@ -6,7 +6,7 @@
 /// <returns></returns>
 int main()
 {
- /*   //样例1：创建矩阵
+    //样例1：创建矩阵
     double a[8][8] =   //注：这是一个正交矩阵，下面会用这个正交矩阵生成一个矩阵来求特征值
     {
         {0.33333333,-0.66666667,0,0.666666667,0,0,0,0},
@@ -98,10 +98,10 @@ int main()
     {
         std::cout << "The function has no solutions!" << std::endl;
     }
-    std::cout << "=========================================================================================" << std::endl;*/
+    std::cout << "=========================================================================================" << std::endl;
 
-    //样例8：求矩阵的奇异值分解
-    double aUsedForSvd[25][15] = 
+    //样例8：求矩阵的奇异值分解、简化奇异值分解
+    double aUsedForSvd[25][15]// = { {3,0},{4,5},{0,0} };
     { 
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
         {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -131,17 +131,28 @@ int main()
     };
     Matrix AUsedForSVD((double*)aUsedForSvd, 25, 15);
     AUsedForSVD.Display();
-    Matrix U, Sigma, VT;
+    Matrix U, Sigma, VT, Ur, Sigmar, VrT;
     if (AUsedForSVD.SVD(U, Sigma, VT))
     {
+        std::cout << "SVD:" << std::endl << std::endl;
         U.Display(5);
         Sigma.Display();
         VT.Display();
-        (U * Sigma * VT).Display();
     }
     else
     {
         std::cout << "No SVD！Wrong！" << std::endl;
+    }
+    if (AUsedForSVD.SimplifiedSVD(Ur, Sigmar, VrT))
+    {
+        std::cout << "Simplified SVD:" << std::endl << std::endl;
+        Ur.Display(5);
+        Sigmar.Display();
+        VrT.Display();
+    }
+    else
+    {
+        std::cout << "No Simplified SVD！Wrong！" << std::endl;
     }
     std::cout << "=========================================================================================" << std::endl;
 
