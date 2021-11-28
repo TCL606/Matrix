@@ -717,6 +717,7 @@ public:
             int nowDim = 0;
             int ATADim = 0;
             double mod = 0;
+            int len = 0;  //非0奇异值
 
             for (const auto& val : values)
             {
@@ -732,7 +733,10 @@ public:
                     multiplicity.push_back(eigenSubSpace.col);
                     nowDim += eigenSubSpace.col;
                     if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                    {
                         ATADim += eigenSubSpace.col;
+                        len++;
+                    }
                 }
                 else
                 {
@@ -785,7 +789,6 @@ public:
             }
 
             int now = 0;
-            int len = this->col < this->row ? this->col : this->row;
             Matrix Sigmar(len, len);  //作一个Sigmar矩阵
             for (int i = 0; i < values.size(); i++)
             {
@@ -953,6 +956,7 @@ public:
             int nowDim = 0;
             int AATDim = 0;
             double mod = 0;
+            int len = 0;
 
             for (const auto& val : values)
             {
@@ -968,7 +972,10 @@ public:
                     multiplicity.push_back(eigenSubSpace.col);
                     nowDim += eigenSubSpace.col;
                     if (std::abs(val) > PRECISION_OF_DIFFERENCE)
+                    {
                         AATDim += eigenSubSpace.col;
+                        len++;
+                    }
                 }
                 else
                 {
@@ -1021,7 +1028,6 @@ public:
             }
 
             int now = 0;
-            int len = this->col < this->row ? this->col : this->row;
             Matrix Sigmar(len, len);  //作一个Sigmar矩阵
             for (int i = 0; i < values.size(); i++)
             {
