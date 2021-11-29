@@ -6,6 +6,7 @@
 #include<iomanip>
 #include<vector>
 #include<algorithm>
+#include<cfloat>
 #include<utility>
 #pragma warning(disable:4996)
 #define PRECISION_OF_DIFFERENCE 1e-3
@@ -1416,6 +1417,28 @@ public:
         return ret;
     }
 
+    void operator *=(const Matrix& B)
+    {
+        if (col != B.row)
+        {
+            std::cout << "The dimension does not match! Matrix multiplication and equality failed. Nothing done." << std::endl;
+            return;
+        }
+
+        Matrix ret(row, B.col);
+        for (int i = 0; i < ret.row; i++)
+        {
+            for (int j = 0; j < ret.col; j++)
+            {
+                for (int k = 0; k < col; k++)
+                {
+                    ret.matrix[i][j] += (matrix[i][k] * B.matrix[k][j]);
+                }
+            }
+        }
+        (*this) = ret;
+    }
+
     /// <summary>
     /// ¾ØÕóÊý³Ë
     /// </summary>
@@ -1447,7 +1470,6 @@ public:
         {
             std::cout << "The dimension does not match! Matrix addtion failed. Return the first matrix." << std::endl;
             return A;
-
         }
         Matrix ret(A.row, B.row);
         for (int i = 0; i < ret.row; i++)
@@ -1458,6 +1480,22 @@ public:
             }
         }
         return ret;
+    }
+
+    void operator +=(const Matrix& B)
+    {
+        if (col != B.col || row != B.row)
+        {
+            std::cout << "The dimension does not match! Matrix addtion and equality failed. Nothing done." << std::endl;
+            return;
+        }
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 0; j < col; j++)
+            {
+                matrix[i][j] += B.matrix[i][j];
+            }
+        }
     }
 
     /// <summary>
@@ -1482,6 +1520,22 @@ public:
             }
         }
         return ret;
+    }
+
+    void operator -=(const Matrix& B)
+    {
+        if (col != B.col || row != B.row)
+        {
+            std::cout << "The dimension does not match! Matrix subtraction and equality failed. Nothing done." << std::endl;
+            return;
+        }
+        for (int i = 0; i < row; i++)
+        {
+            for (int j = 0; j < col; j++)
+            {
+                matrix[i][j] -= B.matrix[i][j];
+            }
+        }
     }
 
     /// <summary>
@@ -1630,14 +1684,14 @@ public:
             {
                 if (n % 2)
                 {
-                    ret = ret * ori;
+                    ret *= ori;
                     n -= 1;
-                    ori = ori * ori;
+                    ori *= ori;
                     n /= 2;
                 }
                 else
                 {
-                    ori = ori * ori;
+                    ori *= ori;
                     n /= 2;
                 }
             }
@@ -1680,7 +1734,7 @@ public:
         else
         {
             len = col;
-            T = T * (*this);
+            T *= (*this);
         }
         T.GetEigenValuesOfDefiniteMatrix(v, precision, minIteration, false);
         for (auto& i : v)
