@@ -1164,6 +1164,15 @@ public:
         return true;
     }
 
+    /// <summary>
+    /// 简化SVD
+    /// </summary>
+    /// <param name="Ur"></param>
+    /// <param name="Sigmar"></param>
+    /// <param name="VrT"></param>
+    /// <param name="precision"></param>
+    /// <param name="minIteration"></param>
+    /// <returns></returns>
     bool SimplifiedSVD(Matrix& Ur, Matrix& Sigmar, Matrix& VrT, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
     {
         Matrix A(*this);
@@ -1390,6 +1399,29 @@ public:
         return true;
     }
     
+    /// <summary>
+    /// 求矩阵的Moore-Penrose广义逆
+    /// </summary>
+    /// <param name="precision"></param>
+    /// <param name="minIteration"></param>
+    /// <returns>若计算过程中无错误，则返回广义逆；否则返回NULL</returns>
+    Matrix MoorePenrosGeneralizedInverse(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
+    {
+        Matrix UrT, Vr, SigmarInverse, AT(Transpose((*this)));
+        if (AT.SimplifiedSVD(Vr, SigmarInverse, UrT))
+        {
+            for (int i = 0; i < SigmarInverse.row; i++)
+            {
+                SigmarInverse.matrix[i][i] = 1 / SigmarInverse.matrix[i][i];
+            }
+            return Vr * SigmarInverse * UrT;
+        }
+        else
+        {
+            return NULL;
+        }
+    }
+
     /// <summary>
     /// 矩阵乘法
     /// </summary>
