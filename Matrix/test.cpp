@@ -163,10 +163,17 @@ int main()
     double aMM[4][3] = { {1,0,0},{1,1,1},{1,3,9},{1,4,16} };
     Matrix MP((double*)aMM, 4, 3);
     MP.Display();
-    MP = MP.MoorePenrosGeneralizedInverse();
-    MP.Display();
-    double yvec[4] = { 0,8,8,20 };
-    (MP * (Matrix(yvec, 4, 1))).Display();
+    MP = MP.MPGeneralizedInverseForFullRankMatrix();
+    if (MP != NULL)
+    {
+        MP.Display();
+        double yvec[4] = { 0,8,8,20 };
+        (MP * (Matrix(yvec, 4, 1))).Display();
+    }
+    else
+    {
+        std::cout << "Error!" << std::endl;
+    }
     std::cout << "=========================================================================================" << std::endl;
     return 0;
 }

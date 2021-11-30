@@ -1400,7 +1400,7 @@ public:
     }
     
     /// <summary>
-    /// 求矩阵的Moore-Penrose广义逆
+    /// 求任意矩阵的Moore-Penrose广义逆
     /// </summary>
     /// <param name="precision"></param>
     /// <param name="minIteration"></param>
@@ -1422,6 +1422,53 @@ public:
         }
     }
 
+    /// <summary>
+    /// 求行/列满秩矩阵的Moore-Penrose广义逆
+    /// </summary>
+    /// <param name="judgeRank">是否判断矩阵行满秩或列满秩</param>
+    /// <returns>若计算过程中无错误，则返回广义逆；否则返回NULL</returns>
+    Matrix MPGeneralizedInverseForFullRankMatrix(bool judgeRank = true)
+    {
+        int theoreticRank = row < col ? row : col;
+        if (judgeRank)
+        {
+            int r = GetRank();
+            this->rank = r;
+            if (r != theoreticRank)
+            {
+                std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
+                return NULL;
+            }
+        }
+        if (col < row)
+        {
+            Matrix AT(Transpose(*this));
+            Matrix inv(AT * (*this));
+            if (inv.InverseMatrix(inv))
+            {
+                return inv * AT;
+            }
+            else
+            {
+                std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
+                return NULL;
+            }
+        }
+        else
+        {
+            Matrix AT(Transpose(*this));
+            Matrix inv((*this) * AT);
+            if (inv.InverseMatrix(inv))
+            {
+                return AT * inv;
+            }
+            else
+            {
+                std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
+                return NULL;
+            }
+        }
+    }
     /// <summary>
     /// 矩阵乘法
     /// </summary>
