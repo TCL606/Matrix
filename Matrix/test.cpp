@@ -160,7 +160,7 @@ int main()
 
     //样例9：广义逆与最小二乘法
     //y=ax2+bx+c，现有四个点(0,0),(1,8),(3,8),(4,20)，用广义逆进行最小二乘拟合
-    double aMM[4][3] = { {1,0,0},{1,1,1},{1,3,9},{1,4,16} };
+    /*double aMM[4][3] = { {1,0,0},{1,1,1},{1,3,9},{1,4,16} };
     Matrix MP((double*)aMM, 4, 3);
     MP.Display();
     MP = MP.MPGeneralizedInverseForFullRankMatrix();
@@ -174,6 +174,12 @@ int main()
     {
         std::cout << "Error!" << std::endl;
     }
-    std::cout << "=========================================================================================" << std::endl;
+    std::cout << "=========================================================================================" << std::endl;*/
+
+    //样例10：计算矩阵谱范数
+    double test[] = { 1,2,3,4,5,6 };
+    Matrix Test(test, 3, 2);
+    Test.Display();
+    std::cout << Test.SpectralNorm() << std::endl;
     return 0;
 }

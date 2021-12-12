@@ -1976,6 +1976,61 @@ public:
     }
 
     /// <summary>
+    /// 矩阵谱范数
+    /// </summary>
+    /// <param name="precision"></param>
+    /// <param name="minIteration"></param>
+    /// <returns></returns>
+    double SpectralNorm(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 10) const
+    {
+        Matrix T = Transpose(*this);
+        int len;
+        if (row < col)
+        {
+            len = row;
+            T = *this * T;
+        }
+        else
+        {
+            len = col;
+            T *= (*this);
+        }
+        Matrix vector(T.col, 1);
+        for (int i = 0; i < T.col; i++)
+        {
+            vector.matrix[i][0] = 1;
+        }
+
+        vector = T * vector;
+        int maxpos = 0; //最大位置
+        for (int i = 0; i < T.col; i++)
+        {
+            if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
+                maxpos = i;
+        }
+        double last = vector.matrix[maxpos][0];
+        double now = last;
+        int iteration = 0; //归0迭代次数
+        do
+        {
+            last = now;
+            for (int i = 0; i < T.col; i++)
+            {
+                vector.matrix[i][0] /= last;
+            }
+            vector = T * vector;
+            for (int i = 0; i < T.col; i++)
+            {
+                if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
+                    maxpos = i;
+            }
+            now = vector.matrix[maxpos][0];
+            iteration++;
+        } while (iteration < minIteration || std::abs(now - last) > precision);
+        return sqrt(now);
+    }
+
+    /// <summary>
     /// 打印矩阵
     /// </summary>
     /// <param name="width">指定输出宽度，默认为3</param>
