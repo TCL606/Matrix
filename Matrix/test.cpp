@@ -1,5 +1,6 @@
 #include"TCL_Matrix.h"
-
+#pragma warning(disable:4996)
+using namespace TCL_Matrix;
 /// <summary>
 /// TCL_Matrix.h สนำรั๙ภý
 /// </summary>

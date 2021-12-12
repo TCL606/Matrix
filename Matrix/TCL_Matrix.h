@@ -8,17 +8,19 @@
 #include<algorithm>
 #include<cfloat>
 #include<utility>
-#pragma warning(disable:4996)
+#include<fstream>
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
 
+namespace TCL_Matrix
+{ 
 class Matrix
 {
 private:
     int rank;
-public:
     int row;
     int col;
+public:
     double** matrix;
 
     /// <summary>
@@ -1795,6 +1797,16 @@ public:
         }
     }
 
+    int GetRow() const
+    {
+        return row;
+    }
+
+    int GetCol() const
+    {
+        return col;
+    }
+
     /// <summary>
     /// 获得矩阵的所有奇异值
     /// </summary>
@@ -1961,6 +1973,47 @@ public:
     }
 
     /// <summary>
+    /// 获得方阵特征多项式的系数，返回vector的第i个位置，代表x的i次方的系数
+    /// </summary>
+    /// <param name="v">若矩阵不为方阵，返回false，vector未进行任何操作</param>
+    bool GetCoefficientsOfCharacteristicPolynomial(std::vector<double>& v)
+    {
+        if (col != row)
+        {
+            std::cout << "The matrix is not a square so its characteristic polynomial is not defined." << std::endl;
+            return false;
+        }
+        v.clear();
+        double* tr = new double[col + 1];
+        double* co = new double[col + 1];
+        Matrix A(*this);
+        for (int i = 1; i <= col; i++)
+        {
+            tr[i] = A.Trace();
+            if (i != col)
+                A *= (*this);
+        }
+        co[col] = 1;
+        for (int i = col - 1; i >= 0; i--)
+        {
+            co[i] = 0;
+            for (int j = col - i; j >= 1; j--)
+            {
+                co[i] += (co[i + j] * tr[j]);
+            }
+            co[i] /= (i - col);
+        }
+        for (int i = 0; i < col; i++)
+        {
+            v.push_back(co[i]);
+        }
+        v.push_back(co[col]);
+        delete[]co;
+        delete[]tr;
+        return true;
+    }
+
+    /// <summary>
     /// 产生一个单位矩阵
     /// </summary>
     /// <param name="n">矩阵维度</param>
@@ -2031,6 +2084,25 @@ public:
     }
 
     /// <summary>
+    /// 计算方阵的迹
+    /// </summary>
+    /// <returns>若矩阵不是方阵，则返回DBL_MAX</returns>
+    
+    double Trace() const
+    {
+        if (row != col)
+        {
+            std::cout << "The matrix is not a square so trace is not defined." << std::endl;
+            return DBL_MAX;
+        }
+        double tr = 0;
+        for (int i = 0; i < row; i++)
+        {
+            tr += matrix[i][i];
+        }
+        return tr;
+    }
+    /// <summary>
     /// 打印矩阵
     /// </summary>
     /// <param name="width">指定输出宽度，默认为3</param>
@@ -2046,5 +2118,25 @@ public:
             }
         std::cout << std::endl;
     }
+
+    /// <summary>
+    /// 从文件中读取矩阵。文件格式要求：首先是row、col两个数，指定行、列，然后是row*col个数，指定矩阵各元素
+    /// </summary>
+    /// <param name="path">文件路径</param>
+    /// <returns></returns>
+    friend Matrix InputMatrix(const char* path)
+    {
+        std::ifstream in;
+        std::ofstream out;
+        in.open(path, std::ios_base::in);
+        int row, col;
+        in >> row >> col;
+        double* a = new double[row * col];
+        for (int i = 0; i < row * col; i++)
+            in >> a[i];
+        in.close();
+        return Matrix(a, row, col);
+    }
 };
+}
 #endif
