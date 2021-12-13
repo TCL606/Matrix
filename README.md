@@ -26,7 +26,8 @@
   - 常用数值计算
     - 求矩阵范数
     - 求对称非不定矩阵的所有特征值（幂法）
-    - 求矩阵所有奇异值（幂法）
+    - 求任意矩阵的所有奇异值（幂法）
+    - 求任意矩阵的（复）特征值（Aberth+Newton Iteration）
   - 矩阵高级操作
     - 获得方阵特征多项式的系数（Faddeev–LeVerrier 算法）
     - 求任意矩阵的SVD分解或简化SVD分解
@@ -46,3 +47,6 @@
 
 - 《线性代数入门》 梁鑫，田垠，杨一龙 编著。（清华大学内部讲义 2020年秋）
 - [Faddeev–LeVerrier algorithm - Wikipedia](https://en.wikipedia.org/wiki/Faddeev–LeVerrier_algorithm)
+- [Power iteration - Wikipedia](https://en.wikipedia.org/wiki/Power_iteration)
+- [Aberth method - Wikipedia](https://en.wikipedia.org/wiki/Aberth_method)
+
