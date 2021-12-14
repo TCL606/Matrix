@@ -1848,7 +1848,7 @@ namespace TCL_Matrix
         }
 
         /// <summary>
-        /// 获得矩阵的所有奇异值
+        /// 获得矩阵的所有奇异值，不含重根
         /// </summary>
         /// <param name="v">用于接收奇异值</param>
         /// <param name="precision">迭代精度</param>
@@ -1880,7 +1880,7 @@ namespace TCL_Matrix
         }
 
         /// <summary>
-        /// 计算对称非不定矩阵的所有特征值
+        /// 计算对称非不定矩阵的所有特征值，不含重根
         /// </summary>
         /// <param name="v">用于接收特征值。若矩阵对称非不定，则算法保证计算出所有特征值，但在接受向量中的顺序不定；若矩阵不对称或不为方阵，则如果进行判断，v中会添加一个DBL_MAX元素；若矩阵对称但不定，其结果正确性不作保证</param>
         /// <param name="precision">迭代精度</param>
@@ -2054,14 +2054,14 @@ namespace TCL_Matrix
         }
 
         /// <summary>
-        /// 计算矩阵的所有（复）特征值
+        /// 计算矩阵的所有（复）特征值，含重根
         /// </summary>
         /// <param name="v">接收解的vector</param>
         /// <param name="aberthIteration">Aberth迭代次数</param>
         /// <param name="newtonIteration">牛顿迭代次数</param>
         /// <param name="possibleMaxMod">特征值可能的最大模长</param>
         /// <param name="possibleMaxMultiplicity">特征值可能的最大重数</param>
-        void GetEigenValues(std::vector<std::complex<double>>& v, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150, int possibleMaxMultiplicity = 4) const
+        void GetAllEigenValues(std::vector<std::complex<double>>& v, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150, int possibleMaxMultiplicity = 4) const
         {
             if (col != row)
             {
