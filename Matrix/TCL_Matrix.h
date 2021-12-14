@@ -2053,6 +2053,14 @@ namespace TCL_Matrix
             return true;
         }
 
+        /// <summary>
+        /// 计算矩阵的所有（复）特征值
+        /// </summary>
+        /// <param name="v">接收解的vector</param>
+        /// <param name="aberthIteration">Aberth迭代次数</param>
+        /// <param name="newtonIteration">牛顿迭代次数</param>
+        /// <param name="possibleMaxMod">特征值可能的最大模长</param>
+        /// <param name="possibleMaxMultiplicity">特征值可能的最大重数</param>
         void GetEigenValues(std::vector<std::complex<double>>& v, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150, int possibleMaxMultiplicity = 4) const
         {
             if (col != row)
@@ -2066,7 +2074,7 @@ namespace TCL_Matrix
                 return;
             }
             double** poly = new double* [possibleMaxMultiplicity + 1];
-            for (int i = 0; i < coeff.size(); i++)
+            for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
             {
                 poly[i] = new double[col + 1];
             }
@@ -2145,9 +2153,9 @@ namespace TCL_Matrix
                 int x = -1;
                 for (int j = 0; j < multirootnum; ++j)
                 {
-                    if (abs(multiroots[j] - roots[j]) < PRECISION_OF_DIFFERENCE * 20) //这里的精度不能太大
+                    if (std::abs(multiroots[j] - roots[i]) < PRECISION_OF_DIFFERENCE * 20) //这里的精度不能太大
                     {
-                        x = i;
+                        x = j;
                         break;
                     }
                 }
@@ -2212,10 +2220,10 @@ namespace TCL_Matrix
                 }
             }
 
-            delete[]multiplicity;
             delete[]multiroots;
+            delete[]multiplicity;
             delete[]roots;
-            for (int i = 0; i < coeff.size(); i++)
+            for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
             {
                 delete[]poly[i];
             }
