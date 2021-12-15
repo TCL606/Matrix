@@ -747,7 +747,7 @@ namespace TCL_Matrix
             }
             L = IdentityMatrix(col);
             U = *this;
-            for (int i = 0; i < col - 1; i++)
+            for (int i = 0; i < col; i++)
             {
                 if (std::abs(U.matrix[i][i]) > PRECISION_OF_DIFFERENCE)
                 {
@@ -762,8 +762,20 @@ namespace TCL_Matrix
                 }
                 else
                 {
-                    std::cout << "The matrix can't be LU decomposed." << std::endl;
-                    return false;
+                    bool flag = false;
+                    for (int k = i + 1; k < row; k++)
+                    {
+                        if (std::abs(U.matrix[k][i]) > PRECISION_OF_DIFFERENCE)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag)
+                    {
+                        std::cout << "The matrix can't be LU decomposed." << std::endl;
+                        return false;
+                    }
                 }
             }
             return true;
@@ -2357,6 +2369,7 @@ namespace TCL_Matrix
             }
             return tr;
         }
+
         /// <summary>
         /// ¥Ú”°æÿ’Û
         /// </summary>
