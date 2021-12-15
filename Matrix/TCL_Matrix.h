@@ -687,10 +687,10 @@ namespace TCL_Matrix
             return temp;
         } const
 
-            /// <summary>
-            /// 直接将对象矩阵转置
-            /// </summary>
-            void TransposeDirectly()
+        /// <summary>
+                /// 直接将对象矩阵转置
+                /// </summary>
+        void TransposeDirectly()
         {
             if (row != col)
             {
@@ -730,6 +730,43 @@ namespace TCL_Matrix
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// LU分解
+        /// </summary>
+        /// <param name="L"></param>
+        /// <param name="U"></param>
+        /// <returns>返回true时，该矩阵可以LU分解，分解出的L和U通过参数返回</returns>
+        bool LU(Matrix& L, Matrix& U) const
+        {
+            if (col != row)
+            {
+                std::cout << "The matrix is not a square.LU decomposition failed." << std::endl;
+                return false;
+            }
+            L = IdentityMatrix(col);
+            U = *this;
+            for (int i = 0; i < col - 1; i++)
+            {
+                if (std::abs(U.matrix[i][i]) > PRECISION_OF_DIFFERENCE)
+                {
+                    for (int j = i + 1; j < row; j++)
+                    {
+                        L.matrix[j][i] = U.matrix[j][i] / U.matrix[i][i];
+                        for (int k = i; k < col; k++)
+                        {
+                            U.matrix[j][k] -= L.matrix[j][i] * U.matrix[i][k];
+                        }
+                    }
+                }
+                else
+                {
+                    std::cout << "The matrix can't be LU decomposed." << std::endl;
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>
@@ -2056,13 +2093,14 @@ namespace TCL_Matrix
         /// <summary>
         /// 计算矩阵的所有（复）特征值，含重根
         /// </summary>
+        /// <param name="possibleMaxMultiplicity">特征值可能的最大重数，该参数非常影响结果的准确性</param>
         /// <param name="v">接收解的vector</param>
         /// <param name="aberthIteration">Aberth迭代次数</param>
         /// <param name="newtonIteration">牛顿迭代次数</param>
         /// <param name="possibleMaxMod">特征值可能的最大模长</param>
-        /// <param name="possibleMaxMultiplicity">特征值可能的最大重数</param>
-        void GetAllEigenValues(std::vector<std::complex<double>>& v, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150, int possibleMaxMultiplicity = 4) const
+        void GetAllEigenValues(std::vector<std::complex<double>>& v, int possibleMaxMultiplicity = 5, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150) const
         {
+            v.clear();
             if (col != row)
             {
                 std::cout << "The matrix is not a square so it doesn't have eigenvalues." << std::endl;
@@ -2213,7 +2251,7 @@ namespace TCL_Matrix
                 {
                     v.push_back(roots[i]);
                 }
-                else if (roots[i].imag() >= 0.1 * PRECISION_OF_DIFFERENCE)
+                else if (roots[i].imag() >= 0)
                 {
                     v.push_back(std::complex<double>{ roots[i].real(), std::abs(roots[i].imag())});
                     v.push_back(std::complex<double>{ roots[i].real(), -std::abs(roots[i].imag())});
