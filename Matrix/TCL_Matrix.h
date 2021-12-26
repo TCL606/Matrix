@@ -9,6 +9,8 @@
 #include<cfloat>
 #include<utility>
 #include<complex>
+#include<string>
+#include<fstream>
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
 
@@ -55,6 +57,7 @@ namespace TCL_Matrix
                 return true;
             else return false;
         }
+    
     protected:
         int rank;
         int row;
@@ -1560,6 +1563,7 @@ namespace TCL_Matrix
                 }
             }
         }
+       
         /// <summary>
         /// 矩阵乘法
         /// </summary>
@@ -2351,10 +2355,58 @@ namespace TCL_Matrix
         }
 
         /// <summary>
+        /// 求方阵谱半径
+        /// </summary>
+        /// <param name="precision"></param>
+        /// <param name="minIteration"></param>
+        /// <returns></returns>
+        double SpectralRadius(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 10)const
+        {
+            if (row != col)
+            {
+                std::cout << "The matrix is not a square so its spectral radius is not defined! Return DBL_MAX." << std::endl;
+                return DBL_MAX;
+            }
+            Matrix T(*this);
+            Matrix vector(T.col, 1);
+            for (int i = 0; i < T.col; i++)
+            {
+                vector.matrix[i][0] = 1;
+            }
+
+            vector = T * vector;
+            int maxpos = 0; //最大位置
+            for (int i = 0; i < T.col; i++)
+            {
+                if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
+                    maxpos = i;
+            }
+            double last = vector.matrix[maxpos][0];
+            double now = last;
+            int iteration = 0; //归0迭代次数
+            do
+            {
+                last = now;
+                for (int i = 0; i < T.col; i++)
+                {
+                    vector.matrix[i][0] /= last;
+                }
+                vector = T * vector;
+                for (int i = 0; i < T.col; i++)
+                {
+                    if (std::abs(vector.matrix[i][0]) > std::abs(vector.matrix[maxpos][0]))
+                        maxpos = i;
+                }
+                now = vector.matrix[maxpos][0];
+                iteration++;
+            } while (iteration < minIteration || std::abs(now - last) > precision);
+            return now;
+        }
+
+        /// <summary>
         /// 计算方阵的迹
         /// </summary>
         /// <returns>若矩阵不是方阵，则返回DBL_MAX</returns>
-
         double Trace() const
         {
             if (row != col)
@@ -2385,6 +2437,71 @@ namespace TCL_Matrix
                         std::cout << std::endl;
                 }
             std::cout << std::endl;
+        }
+
+        /// <summary>
+        /// 从文件中读取矩阵
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="ret"></param>
+        /// <returns></returns>
+        friend bool ReadFromFile(const char* str, Matrix& ret)
+        {
+            std::ifstream in;
+            in.open(str, std::ios_base::in);
+            if (in.is_open())
+            {
+                int col, row;
+                in >> row >> col;
+                ret = Matrix(row, col);
+                for (int i = 0; i < row; i++)
+                {
+                    for (int j = 0; j < col; j++)
+                    {
+                        in >> ret.matrix[i][j];
+                    }
+                }
+                in.close();
+                return true;
+            }
+            else return false;
+        }
+
+        /// <summary>
+        /// 向文件中保存矩阵
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="ret"></param>
+        /// <param name="width"></param>
+        friend void WriteToFile(const char* str, const Matrix& ret, int width = 3)
+        {
+            std::ofstream of;
+            of.open(str, std::ios_base::out);
+            of << ret.row << std::setw(width) << ret.col << std::endl << std::setw(width);
+            for (int i = 0; i < ret.row; i++)
+            {
+                for (int j = 0; j < ret.col; j++)
+                {
+                    of << ret.matrix[i][j] << std::setw(3);
+                }
+                of << std::endl;
+            }
+            of.close();
+        }
+    };
+
+    /// <summary>
+    /// 异常类，暂时可能用不到
+    /// </summary>
+    class Exception
+    {
+    protected:
+        std::string str;
+    public:
+        Exception(const std::string& str) :str(str) {}
+        void Show()
+        {
+            std::cout << str << std::endl;
         }
     };
 }

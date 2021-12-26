@@ -178,9 +178,25 @@ int main()
     std::cout << "=========================================================================================" << std::endl;*/
 
     //ÑùÀı10£º¼ÆËã¾ØÕóÆ×·¶Êı
-    double test[] = { 1,2,3,4,5,6 };
-    Matrix Test(test, 3, 2);
-    Test.Display();
-    std::cout << Test.SpectralNorm() << std::endl;
+    //double test[] = { 1,2,3,4,5,6 };
+    //Matrix Test(test, 3, 2);
+    //Test.Display();
+    //std::cout << Test.SpectralNorm() << std::endl;
+    //std::cout << "=========================================================================================" << std::endl; */
+
+
+    //ÑùÀı11£ºÇó¾ØÕóÆ×°ë¾¶
+    //double radius[16] = {1,1,1,1,1,2,3,4,1,3,6,10,1,4,10,20 };
+    //Matrix Radius(radius, 4, 4);
+    //Radius.Display();
+    //std::cout << Radius.SpectralRadius() << std::endl;
+    //std::cout << "=========================================================================================" << std::endl; */
+
+    Matrix file;
+    if (ReadFromFile("C:\\Users\\admin\\Desktop\\t.txt", file))
+    {
+        file.Display();
+        WriteToFile("C:\\Users\\admin\\Desktop\\ttt.txt", file);
+    }
     return 0;
 }
