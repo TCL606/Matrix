@@ -84,7 +84,7 @@ namespace TCL_Matrix
         {
             if (row <= 0 || col <= 0)
             {
-                row = col = 0;
+                this->row = this->col = 0;
                 matrix = nullptr;
                 return;
             }
@@ -107,12 +107,12 @@ namespace TCL_Matrix
         explicit Matrix(int row = 1, int col = 1) :row(row), col(col)
         {
             if (row < 0)
-                row = 0;
+                this->row = row = 0;
             if (col < 0)
-                col = 0;
+                this->col = col = 0;
             if (row == 0 || col == 0)
             {
-                row = col = 0;
+                this->row = this->col = 0;
                 matrix = nullptr;
                 return;
             }
