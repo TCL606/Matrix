@@ -1,18 +1,27 @@
+#pragma once
+
 #ifndef TCL_MATRIX_H
 #define TCL_MATRIX_H
-#pragma once
-#include<iostream>
-#include<cmath>
-#include<iomanip>
-#include<vector>
-#include<algorithm>
-#include<cfloat>
-#include<utility>
-#include<complex>
-#include<string>
-#include<fstream>
+
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <cfloat>
+#include <utility>
+#include <complex>
+#include <string>
+#include <fstream>
+#include <cstddef>
+#include <initializer_list>
+
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
+
+#ifndef TCL_MATRIX_UNUSED_PARAMETER
+#   define TCL_MATRIX_UNUSED_PARAMETER(x) ((void)(x))
+#endif
 
 namespace TCL_Matrix
 {
@@ -26,7 +35,7 @@ namespace TCL_Matrix
         /// <param name="degree">多项式次数</param>
         /// <param name="z">自变量</param>
         /// <returns></returns>
-        std::complex<double> PolynomialFunc(const double* coeff, int degree, const std::complex<double>& z) const
+        static std::complex<double> PolynomialFunc(const double* coeff, int degree, const std::complex<double>& z)
         {
             std::complex<double> ret = { 0,0 };
             for (int i = 0; i < degree + 1; i++)
@@ -43,7 +52,7 @@ namespace TCL_Matrix
         /// <param name="z2"></param>
         /// <param name="precision"></param>
         /// <returns></returns>
-        bool Greater(const std::complex<double>& z1, const std::complex<double>& z2, double precision = 0.1 * PRECISION_OF_DIFFERENCE) const
+        static bool Greater(const std::complex<double>& z1, const std::complex<double>& z2, double precision = 0.1 * PRECISION_OF_DIFFERENCE)
         {
             if (z1.real() > precision + z2.real())
                 return true;
@@ -59,9 +68,9 @@ namespace TCL_Matrix
         }
     
     protected:
-        int rank;
         int row;
         int col;
+        int rank;
 
     public:
         double** matrix;
@@ -74,6 +83,13 @@ namespace TCL_Matrix
         /// <param name="col"></param>
         Matrix(double* newMatrix, int row, int col) :row(row), col(col), rank(-1)
         {
+            if (row <= 0 || col <= 0)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return;
+            }
+
             matrix = new double* [row];
             for (int i = 0; i < row; i++)
                 matrix[i] = new double[col];
@@ -89,12 +105,19 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        Matrix(int row = 1, int col = 1) :row(row), col(col), rank(-1)
+        explicit Matrix(int row = 1, int col = 1) :row(row), col(col), rank(-1)
         {
-            if (row < 1)
-                row = 1;
-            if (col < 1)
-                col = 1;
+            if (row < 0)
+                row = 0;
+            if (col < 0)
+                col = 0;
+            if (row == 0 || col == 0)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return;
+            }
+
             matrix = new double* [row];
             for (int i = 0; i < row; i++)
                 matrix[i] = new double[col];
@@ -107,12 +130,54 @@ namespace TCL_Matrix
             }
         }
 
+        Matrix(std::nullptr_t) : row(0), col(0), rank(-1), matrix(nullptr)
+        {
+            
+        }
+
+        Matrix(std::initializer_list<std::initializer_list<double>> init)
+        {
+            row = init.size();
+            if (row == 0)
+            {
+                col = 0;
+                matrix = nullptr;
+                return;
+            }
+            col = init.begin()->size();
+            if (col == 0)
+            {
+                matrix = nullptr;
+                return;
+            }
+
+            matrix = new double* [row];
+            for (int i = 0; i < row; i++)
+                matrix[i] = new double[col];
+
+            auto p = init.begin();
+            for (int i = 0; i < row; ++i, ++p)
+            {
+                auto q = p->begin();
+                for (int j = 0; j < col; j++, ++q)
+                {
+                    matrix[i][j] = *q;
+                }
+            }
+        }
+
         /// <summary>
         /// 复制构造函数，深复制
         /// </summary>
         /// <param name="A"></param>
         Matrix(const Matrix& A) : row(A.row), col(A.col), rank(A.rank)
         {
+            if (A == nullptr)
+            {
+                matrix = nullptr;
+                return;
+            }
+
             matrix = new double* [row];
             for (int i = 0; i < row; i++)
                 matrix[i] = new double[col];
@@ -127,6 +192,7 @@ namespace TCL_Matrix
 
         ~Matrix()
         {
+            if (row == 0) return;
             for (int i = 0; i < row; i++)
                 delete[] matrix[i];
             delete[] matrix;
@@ -239,6 +305,8 @@ namespace TCL_Matrix
         /// <returns>若返回值为false，则方程无解，未对返回参数操作</returns>
         bool GetAnswerForAugmentedMatrix(Matrix& ret)
         {
+            if (*this == nullptr) return false;
+
             Matrix original(*this);
             int zeroRow = 0;
             for (int i = 0; i < original.col - 1 && i < original.row; i++)  //i看成列，此时是增广矩阵，i最多到col - 1
@@ -375,6 +443,8 @@ namespace TCL_Matrix
         /// <returns>若返回值为false，则方程无解，未对返回参数操作</returns>
         bool GetAllSolutionsForAugmentedMatrix(Matrix& ret)
         {
+            if (*this == nullptr) return false;
+
             Matrix original(*this);
             int zeroRow = 0;
             for (int i = 0; i < original.col - 1 && i < original.row; i++)  //i看成列，此时是增广矩阵，i最多到col - 1
@@ -535,6 +605,8 @@ namespace TCL_Matrix
         /// <returns>若矩阵可逆，则返回false；否则，返回一组基。注：无论矩阵是否可逆，理论上作为返回值的参数bases都会发生变化。</returns>
         bool GetBasesOfNullSpace(Matrix& bases)
         {
+            if (*this == nullptr) return false;
+
             Matrix ret(row, col + 1);
             for (int i = 0; i < row; i++)
             {
@@ -576,6 +648,7 @@ namespace TCL_Matrix
         /// </summary>
         double Determinant() const
         {
+            if (*this == nullptr) return 0.0;
             if (row != col)
                 return 0;
             int swapTimes = 0; //行交换次数
@@ -651,6 +724,7 @@ namespace TCL_Matrix
         /// <returns>返回矩阵是否可逆</returns>
         bool InverseMatrix(Matrix& inverse)
         {
+            if (*this == nullptr) return false;
             if (row != col)
                 return false;
             if (inverse.row != inverse.col || inverse.row != row)
@@ -688,7 +762,7 @@ namespace TCL_Matrix
             Matrix temp = A;
             temp.TransposeDirectly();
             return temp;
-        } const
+        }
 
         /// <summary>
                 /// 直接将对象矩阵转置
@@ -743,6 +817,7 @@ namespace TCL_Matrix
         /// <returns>返回true时，该矩阵可以LU分解，分解出的L和U通过参数返回</returns>
         bool LU(Matrix& L, Matrix& U) const
         {
+            if (*this == nullptr) return false;
             if (col != row)
             {
                 std::cout << "The matrix is not a square.LU decomposition failed." << std::endl;
@@ -795,6 +870,7 @@ namespace TCL_Matrix
         /// <returns>返回为false时，奇异值分解失败（可能是由于计算过程中的精度损失造成的），此时U、Sigma、V未定义</returns>
         bool SVD(Matrix& U, Matrix& Sigma, Matrix& VT, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50) const
         {
+            if (*this == nullptr) return false;
             Matrix A(*this);
             A.TransposeDirectly();
             std::vector<double> values;
@@ -898,7 +974,7 @@ namespace TCL_Matrix
                 }
 
                 now = 0;
-                for (int i = 0; i < values.size(); i++)
+                for (std::size_t i = 0; i < values.size(); i++)
                 {
                     for (int j = 0; j < multiplicity[i]; j++)
                     {
@@ -919,7 +995,7 @@ namespace TCL_Matrix
                     Matrix zero(V.row, 1);
                     Matrix V2(V.row, V.col - V1.col);
                     Matrix V1T(Transpose(V1));
-                    int p = 0;
+
                     int nowExpandDim = 0;
                     int iterateTimes = 0;
                     double mod;
@@ -977,7 +1053,7 @@ namespace TCL_Matrix
                     Matrix zero(U.row, 1);
                     Matrix U2(U.row, U.col - U1.col);
                     Matrix U1T(Transpose(U1));
-                    int p = 0;
+
                     int nowExpandDim = 0;
                     int iterateTimes = 0;
                     double mod;
@@ -1124,7 +1200,7 @@ namespace TCL_Matrix
                 }
 
                 now = 0;
-                for (int i = 0; i < values.size(); i++)
+                for (std::size_t i = 0; i < values.size(); i++)
                 {
                     for (int j = 0; j < multiplicity[i]; j++)
                     {
@@ -1145,7 +1221,7 @@ namespace TCL_Matrix
                     Matrix zero(U.row, 1);
                     Matrix U2(U.row, U.col - U1.col);
                     Matrix U1T(Transpose(U1));
-                    int p = 0;
+
                     int nowExpandDim = 0;
                     int iterateTimes = 0;
                     double mod;
@@ -1203,7 +1279,7 @@ namespace TCL_Matrix
                     Matrix zero(V.row, 1);
                     Matrix V2(V.row, V.col - V1.col);
                     Matrix V1T(Transpose(V1));
-                    int p = 0;
+
                     int nowExpandDim = 0;
                     int iterateTimes = 0;
                     double mod;
@@ -1269,6 +1345,7 @@ namespace TCL_Matrix
         /// <returns></returns>
         bool SimplifiedSVD(Matrix& Ur, Matrix& Sigmar, Matrix& VrT, double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
         {
+            if (*this == nullptr) return false;
             Matrix A(*this);
             A.TransposeDirectly(); //A是原矩阵的转置
             std::vector<double> values;
@@ -1498,9 +1575,11 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="precision"></param>
         /// <param name="minIteration"></param>
-        /// <returns>若计算过程中无错误，则返回广义逆；否则返回NULL</returns>
+        /// <returns>若计算过程中无错误，则返回广义逆；否则返回nullptr</returns>
         Matrix MoorePenrosGeneralizedInverse(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 50)
         {
+            TCL_MATRIX_UNUSED_PARAMETER(precision);
+            TCL_MATRIX_UNUSED_PARAMETER(minIteration);
             Matrix UrT, Vr, SigmarInverse, AT(Transpose((*this)));
             if (AT.SimplifiedSVD(Vr, SigmarInverse, UrT))
             {
@@ -1512,7 +1591,7 @@ namespace TCL_Matrix
             }
             else
             {
-                return NULL;
+                return nullptr;
             }
         }
 
@@ -1520,7 +1599,7 @@ namespace TCL_Matrix
         /// 求行/列满秩矩阵的Moore-Penrose广义逆
         /// </summary>
         /// <param name="judgeRank">是否判断矩阵行满秩或列满秩</param>
-        /// <returns>若计算过程中无错误，则返回广义逆；否则返回NULL</returns>
+        /// <returns>若计算过程中无错误，则返回广义逆；否则返回nullptr</returns>
         Matrix MPGeneralizedInverseForFullRankMatrix(bool judgeRank = true)
         {
             int theoreticRank = row < col ? row : col;
@@ -1530,8 +1609,8 @@ namespace TCL_Matrix
                 this->rank = r;
                 if (r != theoreticRank)
                 {
-                    std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
-                    return NULL;
+                    std::cout << "The matrix is not a full-rank matrix. Return nullptr" << std::endl;
+                    return nullptr;
                 }
             }
             if (col < row)
@@ -1544,8 +1623,8 @@ namespace TCL_Matrix
                 }
                 else
                 {
-                    std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
-                    return NULL;
+                    std::cout << "The matrix is not a full-rank matrix. Return nullptr" << std::endl;
+                    return nullptr;
                 }
             }
             else
@@ -1558,8 +1637,8 @@ namespace TCL_Matrix
                 }
                 else
                 {
-                    std::cout << "The matrix is not a full-rank matrix. Return NULL" << std::endl;
-                    return NULL;
+                    std::cout << "The matrix is not a full-rank matrix. Return nullptr" << std::endl;
+                    return nullptr;
                 }
             }
         }
@@ -1735,6 +1814,11 @@ namespace TCL_Matrix
             return true;
         }
 
+        bool operator ==(std::nullptr_t) const
+        {
+            return this->row == 0;
+        }
+
         /// <summary>
         /// 矩阵不等判断
         /// </summary>
@@ -1744,6 +1828,11 @@ namespace TCL_Matrix
         friend bool operator !=(const Matrix& A, const Matrix& B)
         {
             return !(A == B);
+        }
+
+        bool operator !=(std::nullptr_t nop) const
+        {
+            return !(*this == nop);
         }
 
         /// <summary>
@@ -1795,9 +1884,16 @@ namespace TCL_Matrix
                 delete[] matrix;
                 row = A.row;
                 col = A.col;
-                matrix = new double* [row];
-                for (int i = 0; i < row; i++)
-                    matrix[i] = new double[col];
+                if (A == nullptr)
+                {
+                    matrix = nullptr;
+                }
+                else
+                {
+                    matrix = new double* [row];
+                    for (int i = 0; i < row; i++)
+                        matrix[i] = new double[col];
+                }
             }
             for (int i = 0; i < row; i++)
             {
@@ -1818,8 +1914,8 @@ namespace TCL_Matrix
         {
             if (column >= col || column < 0)
             {
-                std::cout << "Index out of range! Return NULL." << std::endl;
-                return NULL;
+                std::cout << "Index out of range! Return nullptr." << std::endl;
+                return nullptr;
             }
             else
             {
@@ -1848,6 +1944,10 @@ namespace TCL_Matrix
             {
                 std::cout << "The specified power is less than 0! No changes!" << std::endl;
                 return *this;
+            }
+            else if (*this == nullptr)
+            {
+                return nullptr;
             }
             else
             {
@@ -2691,4 +2791,7 @@ namespace TCL_Matrix
         }
     };
 }
+
+#undef TCL_MATRIX_UNUSED_PARAMETER
+
 #endif
