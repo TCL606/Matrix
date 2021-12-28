@@ -13,6 +13,9 @@
 #include <complex>
 #include <string>
 #include <fstream>
+#include <cstddef>
+#include <initializer_list>
+
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
 
@@ -124,7 +127,34 @@ namespace TCL_Matrix
             
         }
 
-        
+        Matrix(std::initializer_list<std::initializer_list<double>> init)
+        {
+            row = init.size();
+            if (row == 0)
+            {
+                col = 0;
+                return;
+            }
+            col = init.begin()->size();
+            if (col == 0)
+            {
+                return;
+            }
+
+            matrix = new double* [row];
+            for (int i = 0; i < row; i++)
+                matrix[i] = new double[col];
+
+            auto p = init.begin();
+            for (int i = 0; i < row; ++i, ++p)
+            {
+                auto q = p->begin();
+                for (int j = 0; j < col; j++, ++q)
+                {
+                    matrix[i][j] = *q;
+                }
+            }
+        }
 
         /// <summary>
         /// 复制构造函数，深复制
