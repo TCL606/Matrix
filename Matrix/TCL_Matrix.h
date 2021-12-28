@@ -2488,6 +2488,192 @@ namespace TCL_Matrix
             }
             of.close();
         }
+
+        
+        class const_row_vector_iterator
+        {
+        public:
+            class const_row_vector_reference
+            {
+            public:
+                using const_iterator = const double*;
+
+                const_iterator cbegin() const
+                {
+                    return ptr;
+                }
+
+                const_iterator cend() const
+                {
+                    return end_ptr;
+                }
+
+                const_iterator begin() const
+                {
+                    return this->cbegin();
+                }
+
+                const_iterator end() const
+                {
+                    return this->cend();
+                }
+
+                const_row_vector_reference(const const_row_vector_reference&) = default;
+                const_row_vector_reference& operator=(const const_row_vector_reference&) = default;
+                
+            protected:
+                const_row_vector_reference() = default;
+                const_row_vector_reference(double* ptr, double* end_ptr) : ptr(ptr), end_ptr(end_ptr) {}
+
+                double* ptr = nullptr;
+                double* end_ptr = nullptr;
+
+                friend class const_row_vector_iterator;
+            };
+
+            using value_type = const_row_vector_reference;
+
+            const_row_vector_iterator() = default;
+            const_row_vector_iterator(const const_row_vector_iterator&) = default;
+            const_row_vector_iterator& operator=(const const_row_vector_iterator&) = default;
+
+            explicit const_row_vector_iterator(double** ptr, int col) : ptr(ptr), col(col) {}
+
+            bool operator==(const const_row_vector_iterator& op) const
+            {
+                return this->ptr == op.ptr;
+            }
+
+            bool operator!=(const const_row_vector_iterator& op) const
+            {
+                return !(*this == op);
+            }
+            
+            value_type operator*() const
+            {
+                return const_row_vector_reference(*ptr, *ptr + col);
+            }
+
+            const_row_vector_iterator& operator++()
+            {
+                ++this->ptr;
+                return *this;
+            }
+
+            const_row_vector_iterator operator++(int)
+            {
+                auto org = *this;
+                this->operator++();
+                return org;
+            }
+
+        protected:
+            double** ptr = nullptr;
+            int col = 0;
+        };
+
+        class row_vector_iterator final : public const_row_vector_iterator
+        {
+        public:
+
+            class row_vector_reference final : public const_row_vector_reference
+            {
+            public:
+                using const_row_vector_reference::begin;
+                using const_row_vector_reference::end;
+                using const_row_vector_reference::cbegin;
+                using const_row_vector_reference::cend;
+                using const_row_vector_reference::const_iterator;
+                using iterator = double*;
+
+                row_vector_reference& operator=(const row_vector_reference& op)
+                {
+                    this->const_row_vector_reference::operator=(op);
+                    return *this;
+                }
+
+                row_vector_reference(const row_vector_reference&) = default;
+
+                iterator begin()
+                {
+                    return ptr;
+                }
+
+                iterator end()
+                {
+                    return end_ptr;
+                }
+
+            protected:
+                row_vector_reference() = default;
+                row_vector_reference(double* ptr, double* end_ptr) : const_row_vector_reference(ptr, end_ptr) {}
+                friend class row_vector_iterator;
+            };
+
+            using const_row_vector_iterator::operator==;
+            using const_row_vector_iterator::operator!=;
+            
+            using value_type = row_vector_reference;
+
+            row_vector_iterator() = default;
+            row_vector_iterator(const row_vector_iterator& op) = default;
+
+            row_vector_iterator& operator=(const row_vector_iterator& op)
+            {
+                this->const_row_vector_iterator::operator=(op);
+                return *this;
+            }
+
+            explicit row_vector_iterator(double** ptr, int col) : const_row_vector_iterator(ptr, col) {}
+
+            row_vector_reference operator*()
+            {
+                return row_vector_reference(*ptr, *ptr + col);
+            }
+
+            row_vector_iterator& operator++()
+            {
+                this->const_row_vector_iterator::operator++();
+                return *this;
+            }
+
+            row_vector_iterator& operator++(int)
+            {
+                auto origin = *this;
+                this->operator++();
+                return origin;
+            }
+        };
+
+        const_row_vector_iterator cbegin() const
+        {
+            return const_row_vector_iterator(this->matrix, this->col);
+        }
+
+        const_row_vector_iterator cend() const
+        {
+            return const_row_vector_iterator(this->matrix + this->row, this->col);
+        }
+
+        const_row_vector_iterator begin() const
+        {
+            return this->cbegin();
+        }
+
+        const_row_vector_iterator end() const
+        {
+            return this->cend();
+        }
+
+        row_vector_iterator begin()
+        {
+            return row_vector_iterator(this->matrix, this->col);
+        }
+
+        row_vector_iterator end()
+        {
+            return row_vector_iterator(this->matrix + this->row, this->col);
+        }
     };
 
     /// <summary>
