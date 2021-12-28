@@ -135,7 +135,7 @@ namespace TCL_Matrix
             
         }
 
-        Matrix(std::initializer_list<std::initializer_list<double>> init)
+        Matrix(std::initializer_list<std::initializer_list<double>> init) : rank(-1)
         {
             row = init.size();
             if (row == 0)
@@ -172,8 +172,10 @@ namespace TCL_Matrix
         /// <param name="A"></param>
         Matrix(const Matrix& A) : row(A.row), col(A.col), rank(A.rank)
         {
-            if (A == nullptr)
+            if (&A == this || A == nullptr)
             {
+                row = col = 0;
+                rank = -1;
                 matrix = nullptr;
                 return;
             }
@@ -188,6 +190,26 @@ namespace TCL_Matrix
                     matrix[i][j] = A.matrix[i][j];
                 }
             }
+        }
+
+        /// <summary>
+        /// 移动构造函数
+        /// </summary>
+        /// <param name="A"></param>
+        Matrix(Matrix&& A) noexcept : row(A.row), col(A.col), rank(A.rank)
+        {
+            if (&A == this || A == nullptr)
+            {
+                row = col = 0;
+                rank = -1;
+                matrix = nullptr;
+                return;
+            }
+
+            this->matrix = A.matrix;
+            A.matrix = nullptr;
+            A.row = A.col = 0;
+            A.rank = -1;
         }
 
         ~Matrix()
@@ -1874,8 +1896,9 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="A"></param>
         /// <returns></returns>
-        Matrix operator =(const Matrix& A)
+        Matrix& operator =(const Matrix& A)
         {
+            if (&A == this) return *this;
             rank = A.rank;
             if (A.col != col || A.row != row)
             {
@@ -1902,6 +1925,33 @@ namespace TCL_Matrix
                     matrix[i][j] = A.matrix[i][j];
                 }
             }
+            return *this;
+        }
+
+        /// <summary>
+        /// 移动赋值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <returns></returns>
+        Matrix& operator =(Matrix&& A) noexcept
+        {
+            if (&A == this) return *this;
+            if (A == nullptr)
+            {
+                row = col = 0;
+                rank = -1;
+                matrix = nullptr;
+                return *this;
+            }
+
+            row = A.row;
+            col = A.col;
+            rank = A.rank;
+            matrix = A.matrix;
+            A.row = A.col = 0;
+            A.matrix = nullptr;
+            A.rank = -1;
+
             return *this;
         }
 
