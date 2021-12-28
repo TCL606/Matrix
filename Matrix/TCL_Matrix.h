@@ -171,8 +171,9 @@ namespace TCL_Matrix
         /// <param name="A"></param>
         Matrix(const Matrix& A) : row(A.row), col(A.col)
         {
-            if (A == nullptr)
+            if (&A == this || A == nullptr)
             {
+                row = col = 0;
                 matrix = nullptr;
                 return;
             }
@@ -187,6 +188,24 @@ namespace TCL_Matrix
                     matrix[i][j] = A.matrix[i][j];
                 }
             }
+        }
+
+        /// <summary>
+        /// 移动构造函数
+        /// </summary>
+        /// <param name="A"></param>
+        Matrix(Matrix&& A) noexcept : row(A.row), col(A.col)
+        {
+            if (&A == this || A == nullptr)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return;
+            }
+
+            this->matrix = A.matrix;
+            A.matrix = nullptr;
+            A.row = A.col = 0;
         }
 
         ~Matrix()
@@ -1875,10 +1894,10 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="A"></param>
         /// <returns></returns>
-        Matrix operator =(const Matrix& A)
+        Matrix& operator =(const Matrix& A)
         {
-            if (A == nullptr)
-                return nullptr;
+            if (&A == this) return *this;
+
             if (A.col != col || A.row != row)
             {
                 for (int i = 0; i < row; i++)
@@ -1904,6 +1923,30 @@ namespace TCL_Matrix
                     matrix[i][j] = A.matrix[i][j];
                 }
             }
+            return *this;
+        }
+
+        /// <summary>
+        /// 移动赋值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <returns></returns>
+        Matrix& operator =(Matrix&& A) noexcept
+        {
+            if (&A == this) return *this;
+            if (A == nullptr)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return *this;
+            }
+
+            row = A.row;
+            col = A.col;
+            matrix = A.matrix;
+            A.row = A.col = 0;
+            A.matrix = nullptr;
+
             return *this;
         }
 
