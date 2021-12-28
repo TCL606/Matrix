@@ -7,7 +7,7 @@ using namespace TCL_Matrix;
 /// <returns></returns>
 int main()
 {
-    //样例1：创建矩阵
+    /*//样例1：创建矩阵
     double a[8][8] =   //注：这是一个正交矩阵，下面会用这个正交矩阵生成一个矩阵来求特征值
     {
         {0.33333333,-0.66666667,0,0.666666667,0,0,0,0},
@@ -21,31 +21,7 @@ int main()
     };
     Matrix A((double*)a, 8, 8);  //创建一个8*8，以数组a为矩阵的对象
     A.Display(10); //显示A矩阵
-
-    // range-based-for
-    const Matrix& crA = A;
-    for (auto&& row_vec : crA)
-    {
-        for (auto&& elem : row_vec)
-        {
-            std::cout << std::setprecision(3) << std::setw(10) << elem << " ";
-        }
-        std::cout << '\n';
-    }
-    std::cout << std::endl;
-
-    Matrix& rA = A;
-    for (auto&& row_vec : rA)
-    {
-        for (auto&& elem : row_vec)
-        {
-            elem = 1.5;
-        }
-    }
-    rA.Display(10);
-
     std::cout << "=========================================================================================" << std::endl;
-    /*
 
     //样例2：矩阵转置
     Matrix A1 = Transpose(A); //创建A1矩阵，为A矩阵的转置
