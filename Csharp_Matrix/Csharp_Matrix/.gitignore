@@ -35,5 +35,5 @@
 .vs/
 
 #Csharp compile files
-./bin/
-./obj
+bin/
+obj
