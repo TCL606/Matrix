@@ -2481,7 +2481,7 @@ namespace TCL_Matrix
             {
                 I.matrix[i][i] = 1;
             }
-            return I; //会调用复制构造函数，因此效率比直接构造要低；此函数只是为了方便
+            return I; 
         }
 
         /// <summary>

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using System.Collections;
 
 namespace TCL_Matrix
 {
-    public class Matrix : ICloneable
+    public class Matrix : ICloneable, IEnumerable
     {
         private static void ExceptionHandling(Exception e)
         {
@@ -18,6 +18,37 @@ namespace TCL_Matrix
 
         public double[,] matrix { get; set; }
 
+        #region 接口实现
+
+        /// <summary>
+        /// 克隆
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            Matrix ret = new Matrix(row, col);
+            if (matrix == null)
+                ret.matrix = null;
+            else
+            {
+                Array.Copy(matrix, ret.matrix, row * col);
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// 迭代
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+        public MatrixEnum GetEnumerator()
+        {
+            return new MatrixEnum(matrix);
+        }
+        #endregion
         #region 辅助函数
         /// <summary>
         /// 创建一个空矩阵
@@ -57,22 +88,6 @@ namespace TCL_Matrix
         }
 
         /// <summary>
-        /// 克隆
-        /// </summary>
-        /// <returns></returns>
-        public object Clone()
-        {
-            Matrix ret = new Matrix(row, col);
-            if (matrix == null)
-                ret.matrix = null;
-            else
-            {
-                Array.Copy(matrix, ret.matrix, row * col);
-            }
-            return ret;
-        }
-
-        /// <summary>
         /// 显示
         /// </summary>
         /// <param name="width"></param>
@@ -90,12 +105,26 @@ namespace TCL_Matrix
                         if (j == col - 1)
                             Console.WriteLine("");
                     }
+                Console.WriteLine();
             }
             catch (Exception e)
             {
                 ExceptionHandling(e);
             }
         }
+
+        #region 产生矩阵
+        static public Matrix IdentityMatrix(int n)
+        {
+            Matrix I = new Matrix(n, n);
+            for (int i = 0; i < n; i++)
+            {
+                I.matrix[i, i] = 1;
+            }
+            return I;
+        }
+        #endregion
+
         #endregion
 
         #region 计算函数
@@ -637,6 +666,61 @@ namespace TCL_Matrix
         }
         #endregion
 
+        #region 矩阵分解
+        public bool LU(out Matrix? L, out Matrix? U)
+        {
+            try
+            {
+                if (this.matrix == null)
+                    throw new Exception("Try to LU factorization on a null matrix!");
+                if (col != row)
+                    throw new Exception("The matrix is not a square.LU decomposition failed.");
+                L = IdentityMatrix(col);
+                U = this.Clone() as Matrix;
+                for (int i = 0; i < col; i++)
+                {
+                    if (Math.Abs(U.matrix[i, i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        for (int j = i + 1; j < row; j++)
+                        {
+                            L.matrix[j, i] = U.matrix[j, i] / U.matrix[i, i];
+                            for (int k = i; k < col; k++)
+                            {
+                                U.matrix[j, k] -= L.matrix[j, i] * U.matrix[i, k];
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bool flag = false;
+                        for (int k = i + 1; k < row; k++)
+                        {
+                            if (Math.Abs(U.matrix[k, i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                flag = true;
+                                break;
+                            }
+                        }
+                        if (flag)
+                            throw new Exception("The matrix can't be LU decomposed.");
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                L = null;
+                U = null;
+                return false;
+            }
+        }
+        #endregion
+
+        #region 特征值相关
+
+        #endregion
+
         #endregion
 
         #region 操作符重载
@@ -757,4 +841,59 @@ namespace TCL_Matrix
         #endregion
     }
 
+    public class MatrixEnum : IEnumerator
+    {
+        public double[,]? _matrix;
+        private int row;
+        private int col;
+        private int row_position = 0;
+        private int col_position = -1;
+
+        public MatrixEnum(double[,]? matrix)
+        {
+            _matrix = matrix;
+            row = matrix?.GetLength(0) ?? 0;
+            col = matrix?.GetLength(1) ?? 0;
+        }
+
+        public bool MoveNext()
+        {
+            col_position++;
+            if (col_position >= col)
+            {
+                col_position = 0;
+                row_position++;
+                return row_position < row;
+            }
+            else return true;
+        }
+        public void Reset()
+        {
+            row_position = 0;
+            col_position = -1;
+        }
+        public double Current
+        {
+            get
+            {
+                try
+                {
+                    if (_matrix == null)
+                        throw new NullReferenceException();
+                    return _matrix[row_position, col_position];
+                }
+                catch (NullReferenceException e)
+                {
+                    throw e;
+                }
+                catch
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
+
+        // 装箱
+        object IEnumerator.Current { get => Current; }
+    }
 }

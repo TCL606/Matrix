@@ -230,11 +230,14 @@ int main()
     A11.Display(10); //ÏÔÊ¾A¾ØÕó
     std::cout << "=========================================================================================" << std::endl;
 
+    Matrix m{
+               { 1,1,1,1},
+               { 1,2,3,4},
+               { 1,3,6,10},
+               { 1,3,6,10},
+    };
     Matrix file;
-    if (ReadFromFile("C:\\Users\\admin\\Desktop\\t.txt", file))
-    {
-        file.Display();
-        WriteToFile("C:\\Users\\admin\\Desktop\\ttt.txt", file);
-    }
+    m.GetBasesOfNullSpace(file);
+    file.Display();
     return 0;
 }
