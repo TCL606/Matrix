@@ -2829,32 +2829,35 @@ namespace TCL_Matrix
             }
         };
 
-        const_row_vector_iterator cbegin() const
+        using const_iterator = const_row_vector_iterator;
+        using iterator = row_vector_iterator;
+
+        const_iterator cbegin() const
         {
             return const_row_vector_iterator(this->matrix, this->col);
         }
 
-        const_row_vector_iterator cend() const
+        const_iterator cend() const
         {
             return const_row_vector_iterator(this->matrix + this->row, this->col);
         }
 
-        const_row_vector_iterator begin() const
+        const_iterator begin() const
         {
             return this->cbegin();
         }
 
-        const_row_vector_iterator end() const
+        const_iterator end() const
         {
             return this->cend();
         }
 
-        row_vector_iterator begin()
+        iterator begin()
         {
             return row_vector_iterator(this->matrix, this->col);
         }
 
-        row_vector_iterator end()
+        iterator end()
         {
             return row_vector_iterator(this->matrix + this->row, this->col);
         }
