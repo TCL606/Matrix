@@ -1,5 +1,9 @@
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#   define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include"TCL_Matrix.h"
-#pragma warning(disable:4996)
+
 using namespace TCL_Matrix;
 /// <summary>
 /// TCL_Matrix.h สนำรั๙ภý
