@@ -153,16 +153,44 @@ namespace TCL_Matrix
             }
         }
 
-        //public static bool ReadFromFile(out Matrix m, String path)
-        //{
-        //    try 
-        //    {
-        //        using (StreamReader sr = new StreamReader(path))
-        //        {
-
-        //        }
-        //    }
-        //}
+        public static Matrix? ReadFromFile(String path)
+        {
+            try
+            {
+                int row, col;
+                Matrix m;
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    var str = sr.ReadLine()?.Split(' ');
+                    if (str != null && str.Length >= 2)
+                    {
+                        row = int.Parse(str[0]);
+                        col = int.Parse(str[1]);
+                        m = new Matrix(row, col);
+                    }
+                    else throw new Exception("Failed to read row and col!");
+                    str = sr.ReadLine()?.Split(' ');
+                    int k = 0;
+                    while (str != null && k < row)
+                    {
+                        if (str.Length >= col)
+                        {
+                            for (int i = 0; i < col; i++)
+                                m.matrix[k, i] = int.Parse(str[i]);
+                            k++;
+                            str = sr.ReadLine()?.Split(' ');
+                        }
+                        else throw new Exception("Failed to read the matrix!");
+                    }
+                    return m;
+                }
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return null;
+            }
+        }
         #endregion
 
         #endregion
@@ -783,6 +811,56 @@ namespace TCL_Matrix
             }
         }
 
+        /// <summary>
+        /// 矩阵的幂，矩阵必须为方阵
+        /// </summary>
+        /// <param name="n">必须是自然数</param>
+        /// <returns>若矩阵不为方阵或参数小于0，则返回原矩阵</returns>
+        public Matrix Power(int n)
+        {
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square!");
+                }
+                if (n < 0)
+                {
+                    throw new Exception("The specified power is less than 0! No changes!");
+                }
+                if (this.matrix == null)
+                {
+                    throw new Exception("Null matrix cannot be exponentiated!");
+                }
+                else
+                {
+                    Matrix ori = new Matrix(this.matrix);
+                    Matrix ret = IdentityMatrix(row);
+                    while (n > 0)
+                    {
+                        if (n % 2 >= 1)
+                        {
+                            ret *= ori;
+                            n -= 1;
+                            ori *= ori;
+                            n /= 2;
+                        }
+                        else
+                        {
+                            ori *= ori;
+                            n /= 2;
+                        }
+                    }
+                    return ret;
+                }
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                return this;
+            }
+        }
+
         #region 特征值相关
 
         /// <summary>
@@ -829,6 +907,203 @@ namespace TCL_Matrix
                 li.Clear();
             }
             return li;
+        }
+
+        /// <summary>
+        /// Aberth方法计算矩阵所有特征值
+        /// </summary>
+        /// <param name="possibleMaxMultiplicity"></param>
+        /// <param name="aberthIteration"></param>
+        /// <param name="newtonIteration"></param>
+        /// <param name="possibleMaxMod"></param>
+        /// <returns></returns>
+        public IList GetAllEigenValues(int possibleMaxMultiplicity = 5, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
+        {
+            List<Complex> v = new List<Complex>();
+            Random rand = new Random();
+            try
+            {
+                if (col != row)
+                {
+                    throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
+                }
+                List<double> coeff = GetCoefficientsOfCharacteristicPolynomial() as List<double>;
+
+                double[][] poly = new double[possibleMaxMultiplicity + 1][];
+                for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
+                {
+                    poly[i] = new double[col + 1];
+                }
+                for (int i = 0; i < col + 1; i++)
+                {
+                    poly[0][i] = coeff[i];
+                }
+                for (int i = 1; i < possibleMaxMultiplicity + 1; i++)
+                {
+                    for (int j = 0; j < col + 1 - i; j++)
+                    {
+                        poly[i][j] = poly[i - 1][j + 1] * (j + 1);
+                    }
+                }
+                Complex[] roots = new Complex[col];
+                Complex[] multiroots = new Complex[col];
+                int[] multiplicity = new int[col];
+                int multirootnum = 0;
+                for (int i = 0; i < col; i++)
+                {
+                    roots[i] = new Complex(rand.Next(2 * possibleMaxMod) - possibleMaxMod, rand.Next(2 * possibleMaxMod) - possibleMaxMod);
+                }
+
+                //Aberth
+                Complex[] w = new Complex[col];
+                Complex one = new Complex(1, 0);
+                Complex zero = new Complex(0, 0);
+                Complex sum;
+                Func<double[], int, Complex, Complex> PolynomialFunc = (double[] coeff, int degree, Complex z) =>
+                   {
+                       Complex ret = new Complex(0, 0);
+                       for (int i = 0; i < degree + 1; i++)
+                       {
+                           ret += (coeff[i] * Complex.Power(z, i));
+                       }
+                       return ret;
+                   };
+                Func<Complex, Complex, double, bool> Greater = (Complex z1, Complex z2, double precision) =>
+                  {
+                      if (z1.real > precision + z2.real)
+                          return true;
+                      else if (z1.real + precision < z2.real)
+                          return false;
+                      else if (Math.Abs(z1.imag) - Math.Abs(z2.imag) > precision)
+                          return true;
+                      else if (Math.Abs(z1.imag) < Math.Abs(z2.imag) + precision)
+                          return false;
+                      else if (z1.imag > z2.imag + precision)
+                          return true;
+                      else return false;
+                  };
+                while (aberthIteration > 0)
+                {
+                    aberthIteration--;
+                    for (int i = 0; i < col; i++)
+                    {
+                        sum = zero;
+                        Complex rate = PolynomialFunc(poly[0], col, roots[i]) / PolynomialFunc(poly[1], col - 1, roots[i]);
+                        for (int j = 0; j < col; j++)
+                        {
+                            if (j != i)
+                            {
+                                sum += (one / (roots[i] - roots[j]));
+                            }
+                        }
+                        w[i] = rate / (one - rate * sum);
+                    }
+                    for (int i = 0; i < col; i++)
+                    {
+                        roots[i] -= w[i];
+                    }
+                }
+                
+                //懒得定义新变量了，直接开辟一块区域算了
+                {
+                    int i, j, max = 0;
+                    Complex temp;
+                    for (i = 0; i < col - 1; i++)
+                    {
+                        max = i;
+                        for (j = i + 1; j < col; j++)
+                        {
+                            if (Greater(roots[j], roots[max], 0.1 * PRECISION_OF_DIFFERENCE))
+                            {
+                                max = j;
+                            }
+                        }
+                        temp = roots[i];
+                        roots[i] = roots[max];
+                        roots[max] = temp;
+                    }
+                }
+
+                for (int i = 0; i < col; i++)
+                    multiplicity[i] = 0;
+                for (int i = 0; i < col; i++)
+                {
+                    int x = -1;
+                    for (int j = 0; j < multirootnum; ++j)
+                    {
+                        if (Complex.Abs(multiroots[j] - roots[i]) < PRECISION_OF_DIFFERENCE * 20) //这里的精度不能太大
+                        {
+                            x = j;
+                            break;
+                        }
+                    }
+                    if (x != -1)
+                    {
+                        multiplicity[x]++;
+                    }
+                    else
+                    {
+                        multiroots[multirootnum] = roots[i];
+                        multiplicity[multirootnum] = 1;
+                        multirootnum++;
+                    }
+                }
+
+                //Newton
+                {
+                    Complex z0, z1;
+                    for (int i = 0; i < multirootnum; i++)
+                    {
+                        for (int j = 1; j <= possibleMaxMultiplicity; j++)
+                        {
+                            if (j == multiplicity[i])
+                            {
+                                for (int k = 0; k < newtonIteration; k++)
+                                {
+                                    multiroots[i] = multiroots[i] - PolynomialFunc(poly[j - 1], col - j + 1, multiroots[i]) / PolynomialFunc(poly[j], col - j, multiroots[i]);
+                                }
+                                break;
+                            }
+                            else if (j > possibleMaxMultiplicity)
+                            {
+                                for (int k = 0; k < newtonIteration; k++)
+                                {
+                                    multiroots[i] = multiroots[i] - PolynomialFunc(poly[possibleMaxMultiplicity - 1], col - possibleMaxMultiplicity + 1, multiroots[i]) / PolynomialFunc(poly[possibleMaxMultiplicity], col - possibleMaxMultiplicity, multiroots[i]);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    int x = 0;
+                    for (int i = 0; i < multirootnum; i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            roots[x + j] = multiroots[i];
+                        }
+                        x += multiplicity[i];
+                    }
+                }
+
+                for (int i = 0; i < col; i++)
+                {
+                    if (Math.Abs(roots[i].imag) < 0.1 * PRECISION_OF_DIFFERENCE)
+                    {
+                        v.Add(roots[i]);
+                    }
+                    else if (roots[i].imag >= 0)
+                    {
+                        v.Add(new Complex(roots[i].real, Math.Abs(roots[i].imag)));
+                        v.Add(new Complex(roots[i].real, -Math.Abs(roots[i].imag)));
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                v.Clear();
+            }
+            return v;
         }
 
         #endregion
@@ -1110,10 +1385,46 @@ namespace TCL_Matrix
         {
             return new Complex(z1.real * z2.real - z1.imag * z2.imag, z1.imag * z2.real + z1.real * z2.imag);
         }
+        public static Complex operator *(double k, Complex z1)
+        {
+            return new Complex(k * z1.real, k * z1.imag);
+        }
         public static Complex operator /(Complex z1, Complex z2)
         {
             double z2mod2 = z2.real * z2.real + z2.imag * z2.imag;
+            if (z2mod2 == 0)
+                throw new Exception("Divided by zero!");
             return new((z1.real * z2.real + z1.imag * z2.imag) / z2mod2, (z1.imag * z2.real - z1.real * z2.imag) / z2mod2);
+        }
+        public static Complex Power(Complex z1, int n)
+        {
+            Complex ori = z1;
+            Complex ret = new Complex(1, 0);
+            if (n < 0)
+            {
+                ori = ret / ori;
+                n = -n;
+            }
+            while (n > 0)
+            {
+                if (n % 2 >= 1)
+                {
+                    ret *= ori;
+                    n -= 1;
+                    ori *= ori;
+                    n /= 2;
+                }
+                else
+                {
+                    ori *= ori;
+                    n /= 2;
+                }
+            }
+            return ret;
+        }
+        public override string ToString()
+        {
+            return new String($"({this.real}, {this.imag})");
         }
     }
 }

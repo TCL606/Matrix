@@ -7,10 +7,11 @@ namespace Program
     {
         static void Main()
         {
-            Matrix m = new Matrix(5, 5);
-            foreach(var i in m)
+            var A = Matrix.ReadFromFile("C:\\Users\\admin\\Desktop\\test.txt");
+            A?.Display();
+            var v = A?.GetAllEigenValues();
+            foreach(var i in v)
                 Console.WriteLine(i);
-            Matrix.WriteToFile(m, "C:\\Users\\admin\\Desktop\\test.txt");
         }
     }
 }
