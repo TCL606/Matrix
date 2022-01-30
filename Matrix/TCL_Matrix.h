@@ -15,6 +15,7 @@
 #include <fstream>
 #include <cstddef>
 #include <initializer_list>
+#include <iterator>
 
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
@@ -66,7 +67,7 @@ namespace TCL_Matrix
                 return true;
             else return false;
         }
-    
+
     protected:
         int row;
         int col;
@@ -131,7 +132,7 @@ namespace TCL_Matrix
 
         Matrix(std::nullptr_t) : row(0), col(0), matrix(nullptr)
         {
-            
+
         }
 
         Matrix(std::initializer_list<std::initializer_list<double>> init)
@@ -1662,7 +1663,7 @@ namespace TCL_Matrix
                 }
             }
         }
-       
+
         /// <summary>
         /// æÿ’Û≥À∑®
         /// </summary>
@@ -2072,7 +2073,7 @@ namespace TCL_Matrix
                     rank++;
                 else break;
             }
-            return rank; 
+            return rank;
         }
 
         int GetRow() const
@@ -2481,7 +2482,7 @@ namespace TCL_Matrix
             {
                 I.matrix[i][i] = 1;
             }
-            return I; 
+            return I;
         }
 
         /// <summary>
@@ -2673,41 +2674,76 @@ namespace TCL_Matrix
             }
             of.close();
         }
-        
+
         class const_row_vector_iterator
         {
         public:
+
             class const_row_vector_reference
             {
             public:
+                using value_type = double;
+                using const_reference = const value_type&;
+                using reference = const_reference;
+                using const_pointer = const double*;
+                using pointer = const_pointer;
+                using difference_type = ::std::ptrdiff_t;
                 using const_iterator = const double*;
+                using iterator = const_iterator;
+                using const_reverse_iterator = ::std::reverse_iterator<const_iterator>;
+                using reverse_iterator = ::std::reverse_iterator<iterator>;
 
-                const_iterator cbegin() const
+                const_iterator cbegin() const noexcept
                 {
-                    return ptr;
+                    return this->ptr;
                 }
 
-                const_iterator cend() const
+                const_iterator cend() const noexcept
                 {
-                    return end_ptr;
+                    return this->end_ptr;
                 }
 
-                const_iterator begin() const
+                iterator begin() const noexcept
                 {
                     return this->cbegin();
                 }
 
-                const_iterator end() const
+                iterator end() const noexcept
                 {
                     return this->cend();
                 }
 
-                const_row_vector_reference(const const_row_vector_reference&) = default;
-                const_row_vector_reference& operator=(const const_row_vector_reference&) = default;
+                const_reverse_iterator crbegin() const noexcept
+                {
+                    return const_reverse_iterator(this->cend());
+                }
+
+                const_reverse_iterator crend() const noexcept
+                {
+                    return const_reverse_iterator(this->cbegin());
+                }
+
+                reverse_iterator rbegin() const noexcept
+                {
+                    return this->crbegin();
+                }
+
+                reverse_iterator rend() const noexcept
+                {
+                    return this->crend();
+                }
+
+                const_row_vector_reference(const const_row_vector_reference&) noexcept = default;
+                const_row_vector_reference& operator=(const const_row_vector_reference&) noexcept = default;
+
+                const double& operator[](::std::ptrdiff_t offset) const noexcept
+                {
+                    return this->ptr[offset];
+                }
                 
             protected:
-                const_row_vector_reference() = default;
-                const_row_vector_reference(double* ptr, double* end_ptr) : ptr(ptr), end_ptr(end_ptr) {}
+                const_row_vector_reference() noexcept = default;
+                const_row_vector_reference(double* ptr, double* end_ptr) noexcept : ptr(ptr), end_ptr(end_ptr) {}
 
                 double* ptr = nullptr;
                 double* end_ptr = nullptr;
@@ -2716,39 +2752,118 @@ namespace TCL_Matrix
             };
 
             using value_type = const_row_vector_reference;
+            using difference_type = ::std::ptrdiff_t;
+            using const_reference = const_row_vector_reference;
+            using reference = const_reference;
+            using const_pointer = const_reference*;
+            using pointer = const_pointer*;
+            using iterator_category = ::std::random_access_iterator_tag;
 
-            const_row_vector_iterator() = default;
-            const_row_vector_iterator(const const_row_vector_iterator&) = default;
-            const_row_vector_iterator& operator=(const const_row_vector_iterator&) = default;
+            const_row_vector_iterator() noexcept = default;
+            const_row_vector_iterator(const const_row_vector_iterator&) noexcept = default;
+            const_row_vector_iterator& operator=(const const_row_vector_iterator&) noexcept = default;
 
-            explicit const_row_vector_iterator(double** ptr, int col) : ptr(ptr), col(col) {}
+            const_row_vector_iterator(double** ptr, int col) noexcept : ptr(ptr), col(col) {}
 
-            bool operator==(const const_row_vector_iterator& op) const
+            bool operator==(const const_row_vector_iterator& op) const noexcept
             {
                 return this->ptr == op.ptr;
             }
 
-            bool operator!=(const const_row_vector_iterator& op) const
+            bool operator!=(const const_row_vector_iterator& op) const noexcept
             {
                 return !(*this == op);
             }
-            
-            value_type operator*() const
+
+            const_reference operator*() const noexcept
             {
-                return const_row_vector_reference(*ptr, *ptr + col);
+                return const_row_vector_reference(*this->ptr, *this->ptr + this->col);
             }
 
-            const_row_vector_iterator& operator++()
+            const_row_vector_iterator& operator++() noexcept
             {
                 ++this->ptr;
                 return *this;
             }
 
-            const_row_vector_iterator operator++(int)
+            const_row_vector_iterator operator++(int) noexcept
             {
                 auto org = *this;
                 this->operator++();
                 return org;
+            }
+
+            const_row_vector_iterator& operator--()
+            {
+                --this->ptr;
+                return *this;
+            }
+
+            const_row_vector_iterator operator--(int) noexcept
+            {
+                auto org = *this;
+                this->operator--();
+                return org;
+            }
+
+            const_row_vector_iterator operator+(difference_type offset) const noexcept
+            {
+                return const_row_vector_iterator(this->ptr + offset, col);
+            }
+
+            const_row_vector_iterator operator-(difference_type offset) const noexcept
+            {
+                return const_row_vector_iterator(this->ptr - offset, col);
+            }
+
+            const_row_vector_iterator& operator+=(difference_type offset) noexcept
+            {
+                this->ptr += offset;
+                return *this;
+            }
+
+            const_row_vector_iterator& operator-=(difference_type offset) noexcept
+            {
+                this->ptr -= offset;
+                return *this;
+            }
+
+            ::std::ptrdiff_t operator-(const const_row_vector_iterator& op) const noexcept
+            {
+                return this->ptr - op.ptr;
+            }
+
+            bool operator<(const const_row_vector_iterator& op) const noexcept
+            {
+                return this->ptr < op.ptr;
+            }
+
+            bool operator>(const const_row_vector_iterator& op) const noexcept
+            {
+                return op < *this;
+            }
+
+            bool operator<=(const const_row_vector_iterator& op) const noexcept
+            {
+                return !(op < *this);
+            }
+
+            bool operator>=(const const_row_vector_iterator& op) const noexcept
+            {
+                return !(*this < op);
+            }
+
+            const_reference operator[](difference_type offset) const noexcept
+            {
+                return const_row_vector_reference
+                        (
+                            *(this->ptr + offset), *(this->ptr + offset) + this->col
+                        );
+            }
+
+            friend inline const_row_vector_iterator operator+(difference_type offset, const const_row_vector_iterator& base) noexcept
+            {
+                return base + offset;
             }
 
         protected:
@@ -2763,12 +2878,10 @@ namespace TCL_Matrix
             class row_vector_reference final : public const_row_vector_reference
             {
             public:
-                using const_row_vector_reference::begin;
-                using const_row_vector_reference::end;
-                using const_row_vector_reference::cbegin;
-                using const_row_vector_reference::cend;
                 using const_row_vector_reference::const_iterator;
+                using const_row_vector_reference::const_reverse_iterator;
                 using iterator = double*;
+                using reverse_iterator = ::std::reverse_iterator<iterator>;
 
                 row_vector_reference& operator=(const row_vector_reference& op)
                 {
@@ -2778,14 +2891,40 @@ namespace TCL_Matrix
 
                 row_vector_reference(const row_vector_reference&) = default;
 
-                iterator begin()
+                using const_row_vector_reference::begin;
+                using const_row_vector_reference::end;
+                using const_row_vector_reference::cbegin;
+                using const_row_vector_reference::cend;
+                using const_row_vector_reference::rbegin;
+                using const_row_vector_reference::rend;
+                using const_row_vector_reference::crbegin;
+                using const_row_vector_reference::crend;
+
+                iterator begin() noexcept
                 {
-                    return ptr;
+                    return this->ptr;
                 }
 
-                iterator end()
+                iterator end() noexcept
                 {
-                    return end_ptr;
+                    return this->end_ptr;
+                }
+
+                reverse_iterator rbegin() noexcept
+                {
+                    return reverse_iterator(this->end());
+                }
+
+                reverse_iterator rend() noexcept
+                {
+                    return reverse_iterator(this->begin());
+                }
+
+                using const_row_vector_reference::operator[];
+
+                double& operator[](::std::ptrdiff_t offset) noexcept
+                {
+                    return this->ptr[offset];
                 }
 
             protected:
@@ -2796,70 +2935,195 @@ namespace TCL_Matrix
 
             using const_row_vector_iterator::operator==;
             using const_row_vector_iterator::operator!=;
-            
+            using const_row_vector_iterator::operator<;
+            using const_row_vector_iterator::operator>;
+            using const_row_vector_iterator::operator<=;
+            using const_row_vector_iterator::operator>=;
+            using const_row_vector_iterator::operator-;
+
+            using const_row_vector_iterator::difference_type;
             using value_type = row_vector_reference;
+            using reference = row_vector_reference;
+            using const_reference = const_row_vector_reference;
+            using pointer = reference*;
+            using const_pointer = const_reference*;
+            using iterator_category = ::std::random_access_iterator_tag;
 
-            row_vector_iterator() = default;
-            row_vector_iterator(const row_vector_iterator& op) = default;
+            row_vector_iterator() noexcept = default;
+            row_vector_iterator(const row_vector_iterator& op) noexcept = default;
 
-            row_vector_iterator& operator=(const row_vector_iterator& op)
+            row_vector_iterator& operator=(const row_vector_iterator& op) noexcept
             {
                 this->const_row_vector_iterator::operator=(op);
                 return *this;
             }
 
-            explicit row_vector_iterator(double** ptr, int col) : const_row_vector_iterator(ptr, col) {}
+            explicit row_vector_iterator(double** ptr, int col) noexcept : const_row_vector_iterator(ptr, col) {}
 
-            row_vector_reference operator*()
+            // C++20 says only using operator== exsits an ambiguous.
+            // C++ is so awful!
+
+            bool operator==(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator==(op);
+            }
+
+            bool operator!=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator<(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator>(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator<=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator>=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            reference operator*() const noexcept
             {
                 return row_vector_reference(*ptr, *ptr + col);
             }
 
-            row_vector_iterator& operator++()
+            row_vector_iterator& operator++() noexcept
             {
                 this->const_row_vector_iterator::operator++();
                 return *this;
             }
 
-            row_vector_iterator& operator++(int)
+            row_vector_iterator operator++(int) noexcept
             {
                 auto origin = *this;
                 this->operator++();
                 return origin;
             }
+
+            row_vector_iterator& operator--() noexcept
+            {
+                this->const_row_vector_iterator::operator--();
+                return *this;
+            }
+
+            row_vector_iterator operator--(int) noexcept
+            {
+                auto origin = *this;
+                this->operator--();
+                return origin;
+            }
+
+            row_vector_iterator operator+(difference_type offset) const noexcept
+            {
+                return row_vector_iterator(this->ptr + offset, col);
+            }
+
+            row_vector_iterator operator-(difference_type offset) const noexcept
+            {
+                return row_vector_iterator(this->ptr - offset, col);
+            }
+
+            row_vector_iterator& operator+=(difference_type offset) noexcept
+            {
+                this->ptr += offset;
+                return *this;
+            }
+
+            row_vector_iterator& operator-=(difference_type offset) noexcept
+            {
+                this->ptr -= offset;
+                return *this;
+            }
+
+            reference operator[](difference_type offset) const noexcept
+            {
+                return row_vector_reference
+                        (
+                            *(this->ptr + offset), *(this->ptr + offset) + this->col
+                        );
+            }
+
+            friend inline row_vector_iterator operator+(difference_type offset, const row_vector_iterator& base) noexcept
+            {
+                return base + offset;
+            }
+
         };
 
         using const_iterator = const_row_vector_iterator;
         using iterator = row_vector_iterator;
+        using const_reverse_iterator = ::std::reverse_iterator<const_iterator>;
+        using reverse_iterator = ::std::reverse_iterator<iterator>;
 
-        const_iterator cbegin() const
+        const_iterator cbegin() const noexcept
         {
             return const_row_vector_iterator(this->matrix, this->col);
         }
 
-        const_iterator cend() const
+        const_iterator cend() const noexcept
         {
             return const_row_vector_iterator(this->matrix + this->row, this->col);
         }
 
-        const_iterator begin() const
+        const_iterator begin() const noexcept
         {
             return this->cbegin();
         }
 
-        const_iterator end() const
+        const_iterator end() const noexcept
         {
             return this->cend();
         }
 
-        iterator begin()
+        iterator begin() noexcept
         {
             return row_vector_iterator(this->matrix, this->col);
         }
 
-        iterator end()
+        iterator end() noexcept
         {
             return row_vector_iterator(this->matrix + this->row, this->col);
+        }
+
+        const_reverse_iterator crbegin() const noexcept
+        {
+            return const_reverse_iterator(this->cend());
+        }
+
+        const_reverse_iterator crend() const noexcept
+        {
+            return const_reverse_iterator(this->cbegin());
+        }
+
+        reverse_iterator rbegin() noexcept
+        {
+            return reverse_iterator(this->end());
+        }
+
+        reverse_iterator rend() noexcept
+        {
+            return reverse_iterator(this->begin());
+        }
+
+        const_reverse_iterator rbegin() const noexcept
+        {
+            return const_reverse_iterator(this->end());
+        }
+
+        const_reverse_iterator rend() const noexcept
+        {
+            return const_reverse_iterator(this->begin());
         }
     };
 
