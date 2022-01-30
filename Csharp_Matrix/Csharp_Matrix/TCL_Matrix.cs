@@ -757,7 +757,79 @@ namespace TCL_Matrix
         }
         #endregion
 
+        /// <summary>
+        /// 求矩阵的迹
+        /// </summary>
+        /// <returns>若不是方阵，则返回Double.MaxValue</returns>
+        public double Trace()
+        {
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square so trace is not defined.");
+                }
+                double tr = 0;
+                for (int i = 0; i < row; i++)
+                {
+                    tr += matrix[i, i];
+                }
+                return tr;
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return Double.MaxValue;
+            }
+        }
+
         #region 特征值相关
+
+        /// <summary>
+        /// 计算方阵特征多项式系数
+        /// </summary>
+        /// <returns></returns>
+        public IList GetCoefficientsOfCharacteristicPolynomial()
+        {
+            List<double> li = new List<double>();
+            try
+            {
+                if (col != row)
+                {
+                    throw new Exception("The matrix is not a square so its characteristic polynomial is not defined.");
+                }
+                double[] tr = new double[col + 1];
+                double[] co = new double[col + 1];
+                Matrix A = new Matrix(matrix);
+                for (int i = 1; i <= col; i++)
+                {
+                    tr[i] = A.Trace();
+                    if (i != col)
+                        A *= this;
+                }
+                co[col] = 1;
+                for (int i = col - 1; i >= 0; i--)
+                {
+                    co[i] = 0;
+                    for (int j = col - i; j >= 1; j--)
+                    {
+                        co[i] += (co[i + j] * tr[j]);
+                    }
+                    co[i] /= (i - col);
+                }
+                for (int i = 0; i < col; i++)
+                {
+                    li.Add(co[i]);
+                }
+                li.Add(co[col]);
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                li.Clear();
+            }
+            return li;
+        }
 
         #endregion
 
@@ -1003,5 +1075,45 @@ namespace TCL_Matrix
 
         // 装箱
         object IEnumerator.Current { get => Current; }
+    }
+
+    public class Complex
+    {
+        public double real;
+        public double imag;
+        public Complex(double real, double imag)
+        {
+            this.real = real;
+            this.imag = imag;
+        }
+        public static double Abs(Complex z1)
+        {
+            return Math.Sqrt(z1.real * z1.real + z1.imag * z1.imag);
+        }
+        public static Complex operator +(Complex z1, Complex z2)
+        {
+            return new Complex(z1.real + z2.real, z1.imag + z2.imag);
+        }
+        public static Complex operator -(Complex z1, Complex z2)
+        {
+            return new Complex(z1.real - z2.real, z1.imag - z2.imag);
+        }
+        public static Complex operator +(Complex z1)
+        {
+            return new Complex(z1.real, z1.imag);
+        }
+        public static Complex operator -(Complex z1)
+        {
+            return new Complex(-z1.real, -z1.imag);
+        }
+        public static Complex operator *(Complex z1, Complex z2)
+        {
+            return new Complex(z1.real * z2.real - z1.imag * z2.imag, z1.imag * z2.real + z1.real * z2.imag);
+        }
+        public static Complex operator /(Complex z1, Complex z2)
+        {
+            double z2mod2 = z2.real * z2.real + z2.imag * z2.imag;
+            return new((z1.real * z2.real + z1.imag * z2.imag) / z2mod2, (z1.imag * z2.real - z1.real * z2.imag) / z2mod2);
+        }
     }
 }
