@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO;
 
 namespace TCL_Matrix
 {
@@ -49,6 +50,7 @@ namespace TCL_Matrix
             return new MatrixEnum(matrix);
         }
         #endregion
+
         #region 辅助函数
         /// <summary>
         /// 创建一个空矩阵
@@ -123,6 +125,44 @@ namespace TCL_Matrix
             }
             return I;
         }
+        #endregion
+
+        #region 文件读写
+        public static bool WriteToFile(Matrix m, String path)
+        {
+            try 
+            {   
+                using(StreamWriter sw = new StreamWriter(path))
+                {
+                    sw.WriteLine($"{m.row}  {m.col}");
+                    for(int i = 0; i < m.row; i++)
+                    {
+                        for(int j = 0; j < m.col; j++)
+                        {
+                            sw.Write($"{m.matrix[i, j]} ");
+                        }
+                        sw.WriteLine("");
+                    }
+                }
+                return true;
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return false;
+            }
+        }
+
+        //public static bool ReadFromFile(out Matrix m, String path)
+        //{
+        //    try 
+        //    {
+        //        using (StreamReader sr = new StreamReader(path))
+        //        {
+
+        //        }
+        //    }
+        //}
         #endregion
 
         #endregion
@@ -778,6 +818,74 @@ namespace TCL_Matrix
                 ExceptionHandling(e);
             }
             return B;
+        }
+        public static Matrix operator +(Matrix A, Matrix B)
+        {
+            try
+            {
+                if (A.col != B.col || A.row != B.row)
+                {
+                    throw new Exception("The dimension does not match! Matrix addtion failed. Return the first matrix.");
+                }
+                Matrix ret = new Matrix(A.row, B.row);
+                for (int i = 0; i < ret.row; i++)
+                {
+                    for (int j = 0; j < ret.col; j++)
+                    {
+                        ret.matrix[i, j] += A.matrix[i, j] + B.matrix[i, j];
+                    }
+                }
+                return ret;
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+            }
+            return A;
+        }
+        public static Matrix operator -(Matrix A, Matrix B)
+        {
+            try
+            {
+                if (A.col != B.col || A.row != B.row)
+                {
+                    throw new Exception("The dimension does not match! Matrix subtraction failed. Return the first matrix.");
+                }
+                Matrix ret = new(A.row, A.col);
+                for (int i = 0; i < ret.row; i++)
+                {
+                    for (int j = 0; j < ret.col; j++)
+                    {
+                        ret.matrix[i , j] += A.matrix[i , j] - B.matrix[i , j];
+                    }
+                }
+                return ret;
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                return A;
+            }
+        }
+        public static Matrix operator -(Matrix A)
+        {
+            try
+            {
+                Matrix ret = new(A.row, A.col);
+                for (int i = 0; i < A.col; i++)
+                {
+                    for (int j = 0; j < A.row; j++)
+                    {
+                        ret[i, j] = -A.matrix[i, j];
+                    }
+                }
+                return ret;
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return A;
+            }
         }
         public double this[int i, int j]
         {
