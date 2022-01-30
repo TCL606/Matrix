@@ -1,5 +1,9 @@
+#if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
+#   define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include"TCL_Matrix.h"
-#pragma warning(disable:4996)
+
 using namespace TCL_Matrix;
 /// <summary>
 /// TCL_Matrix.h 使用样例
@@ -45,7 +49,7 @@ int main()
     rA.Display(10);
 
     std::cout << "=========================================================================================" << std::endl;
-    /*
+    
 
     //样例2：矩阵转置
     Matrix A1 = Transpose(A); //创建A1矩阵，为A矩阵的转置
@@ -181,7 +185,7 @@ int main()
         std::cout << "No Simplified SVD！Wrong！" << std::endl;
     }
     std::cout << "=========================================================================================" << std::endl;
-    */
+    
 
     //样例9：广义逆与最小二乘法
     //y=ax2+bx+c，现有四个点(0,0),(1,8),(3,8),(4,20)，用广义逆进行最小二乘拟合
@@ -230,11 +234,14 @@ int main()
     A11.Display(10); //显示A矩阵
     std::cout << "=========================================================================================" << std::endl;
 
+    Matrix m{
+               { 1,1,1,1},
+               { 1,2,3,4},
+               { 1,3,6,10},
+               { 1,3,6,10},
+    };
     Matrix file;
-    if (ReadFromFile("C:\\Users\\admin\\Desktop\\t.txt", file))
-    {
-        file.Display();
-        WriteToFile("C:\\Users\\admin\\Desktop\\ttt.txt", file);
-    }
+    m.GetBasesOfNullSpace(file);
+    file.Display();
     return 0;
 }
