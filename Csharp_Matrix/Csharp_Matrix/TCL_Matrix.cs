@@ -125,6 +125,20 @@ namespace TCL_Matrix
             }
             return I;
         }
+
+        static public Matrix RandomMatrix(int row, int col, double MaxPossibleValue = 10)
+        {
+            Matrix ret = new Matrix(row, col);
+            Random r = new Random(Environment.TickCount);
+            for (int i = 0; i < row; i++)
+            {
+                for(int j = 0; j < col; j++)
+                {
+                    ret.matrix[i, j] = r.NextDouble() * MaxPossibleValue * (r.Next() % 2 == 1 ? 1 : -1);
+                }
+            }
+            return ret;
+        }
         #endregion
 
         #region 文件读写
@@ -861,6 +875,23 @@ namespace TCL_Matrix
             }
         }
 
+        /// <summary>
+        /// 矩阵转置
+        /// </summary>
+        /// <returns></returns>
+        public Matrix Transpose()
+        {
+            Matrix ret = new Matrix(col, row);
+            for (int i = 0; i < col; i++)
+            {
+                for (int j = 0; j < row; j++)
+                {
+                    ret.matrix[i, j] = this.matrix[j, i];
+                }
+            }
+            return ret;
+        }
+
         #region 特征值相关
 
         /// <summary>
@@ -917,7 +948,7 @@ namespace TCL_Matrix
         /// <param name="newtonIteration"></param>
         /// <param name="possibleMaxMod"></param>
         /// <returns></returns>
-        public IList GetAllEigenValues(int possibleMaxMultiplicity = 5, int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
+        public IList GetAllEigenValues(int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
         {
             List<Complex> v = new List<Complex>();
             Random rand = new Random();
@@ -928,7 +959,7 @@ namespace TCL_Matrix
                     throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
                 }
                 List<double> coeff = GetCoefficientsOfCharacteristicPolynomial() as List<double>;
-
+                int possibleMaxMultiplicity = row;
                 double[][] poly = new double[possibleMaxMultiplicity + 1][];
                 for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
                 {
