@@ -1631,7 +1631,7 @@ namespace TCL_Matrix
                 var complexEigen = GetAllEigenValues();
                 foreach(Complex i in complexEigen)
                 {
-                    if(v.Contains(i.real))
+                    if(!v.Contains(i.real))
                         v.Add(i.real);
                 }
             }
