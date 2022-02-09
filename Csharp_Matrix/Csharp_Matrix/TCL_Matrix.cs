@@ -711,7 +711,7 @@ namespace TCL_Matrix
             try
             {
                 if (this.matrix == null)
-                    throw new Exception("Try to get null space of null matrix!");
+                    throw new Exception("Try to get null space of a null matrix!");
                 Matrix ret = new Matrix(row, col + 1);
                 for (int i = 0; i < row; i++)
                 {
@@ -814,7 +814,7 @@ namespace TCL_Matrix
                 if (this.col< this.row)
                 {
                     Matrix ATA = A * this;
-                    values = ATA.GetEigenValuesOfDefiniteMatrix(false) as List<double>;
+                    values = ATA.GetEigenValuesOfDefiniteMatrix(false);
                     values.Sort();
                     List<int> multiplicity = new List<int>();
                     Matrix eigenSubSpace;
@@ -1037,7 +1037,7 @@ namespace TCL_Matrix
                 else
                 {
                     Matrix AAT = this * A;
-                    values = AAT.GetEigenValuesOfDefiniteMatrix(false) as List<double>;
+                    values = AAT.GetEigenValuesOfDefiniteMatrix(false);
                     values.Sort();
                     List<int> multiplicity = new List<int>();
                     Matrix eigenSubSpace;
@@ -1267,6 +1267,52 @@ namespace TCL_Matrix
             }
             return true;
         }
+
+        /// <summary>
+        /// 矩阵QR分解
+        /// </summary>
+        /// <param name="Q">列正交矩阵</param>
+        /// <param name="R">上三角矩阵</param>
+        /// <returns></returns>
+        public bool QR(out Matrix? Q, out Matrix? R)
+        {
+            try 
+            {
+                if (this.matrix == null)
+                    throw new Exception("Try to do QR factorization on a null matrix!");
+                Q = new Matrix(this.row, this.col);
+                R = IdentityMatrix(this.col);
+                for (int i = 0; i < this.col; i++)
+                {
+                    Matrix a = this[i];
+                    Matrix aT = a.Transpose();
+                    for (int j = 0; j < i; j++)
+                    {
+                        R[j, i] = (aT * Q[j])[0, 0];
+                        a -= R[j, i] * Q[j];
+                    }
+                    double norm2 = 0;
+                    for (int k = 0; k < a.row; k++)
+                    {
+                        norm2 += a[k, 0] * a[k, 0];
+                    }
+                    R[i, i] = Math.Sqrt(norm2);
+                    a = 1 / R[i, i] * a;
+                    for (int k = 0; k < this.row; k++)
+                    {
+                        Q[k, i] = a[k, 0];
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                Q = null;
+                R = null;
+                ExceptionHandling(e);
+                return false;
+            }
+        }
         #endregion
 
         /// <summary>
@@ -1363,12 +1409,11 @@ namespace TCL_Matrix
         }
 
         #region 特征值相关
-
         /// <summary>
         /// 计算方阵特征多项式系数
         /// </summary>
         /// <returns></returns>
-        public IList GetCoefficientsOfCharacteristicPolynomial()
+        public List<double> GetCoefficientsOfCharacteristicPolynomial()
         {
             List<double> li = new List<double>();
             try
@@ -1418,7 +1463,7 @@ namespace TCL_Matrix
         /// <param name="newtonIteration"></param>
         /// <param name="possibleMaxMod"></param>
         /// <returns></returns>
-        public IList GetAllEigenValues(int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
+        public List<Complex> GetAllEigenValues(int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
         {
             List<Complex> v = new List<Complex>();
             Random rand = new Random();
@@ -1428,7 +1473,7 @@ namespace TCL_Matrix
                 {
                     throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
                 }
-                List<double> coeff = GetCoefficientsOfCharacteristicPolynomial() as List<double>;
+                List<double> coeff = GetCoefficientsOfCharacteristicPolynomial();
                 int possibleMaxMultiplicity = row;
                 double[][] poly = new double[possibleMaxMultiplicity + 1][];
                 for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
@@ -1606,7 +1651,12 @@ namespace TCL_Matrix
             return v;
         }
 
-        public IList GetEigenValuesOfDefiniteMatrix(bool judgeSymmetry = true)
+        /// <summary>
+        /// 计算对称非不定矩阵特征值
+        /// </summary>
+        /// <param name="judgeSymmetry">是否对矩阵的对称性进行判断</param>
+        /// <returns></returns>
+        public List<double> GetEigenValuesOfDefiniteMatrix(bool judgeSymmetry = true)
         {
             List<double> v = new List<double>();
             try
@@ -1643,6 +1693,61 @@ namespace TCL_Matrix
             return v;
         }
 
+        /// <summary>
+        /// 求方阵谱半径
+        /// </summary>
+        /// <param name="precision"></param>
+        /// <param name="minIteration"></param>
+        /// <returns></returns>
+        public double SpectralRadius(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 10)
+        {
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square so its spectral radius is not defined! Return Double.MaxValue.");
+                }
+                Matrix T = this.Clone() as Matrix;
+                Matrix vector = new Matrix(T.col, 1);
+                for (int i = 0; i < T.col; i++)
+                {
+                    vector.matrix[i , 0] = 1;
+                }
+
+                vector = T * vector;
+                int maxpos = 0; //最大位置
+                for (int i = 0; i < T.col; i++)
+                {
+                    if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                        maxpos = i;
+                }
+                double last = vector.matrix[maxpos , 0];
+                double now = last;
+                int iteration = 0; //归0迭代次数
+                do
+                {
+                    last = now;
+                    for (int i = 0; i < T.col; i++)
+                    {
+                        vector.matrix[i , 0] /= last;
+                    }
+                    vector = T * vector;
+                    for (int i = 0; i < T.col; i++)
+                    {
+                        if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                            maxpos = i;
+                    }
+                    now = vector.matrix[maxpos , 0];
+                    iteration++;
+                } while (iteration < minIteration || Math.Abs(now - last) > precision);
+                return now;
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                return Double.MaxValue;
+            }
+        }
         #endregion
 
         #endregion

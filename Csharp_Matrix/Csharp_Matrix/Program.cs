@@ -7,14 +7,16 @@ namespace Program
     {
         static void Main()
         {
-            var A = Matrix.ReadFromFile("C:\\Users\\admin\\Desktop\\test.txt");
+            //var A = Matrix.ReadFromFile("C:\\Users\\admin\\Desktop\\test.txt");
+            Matrix A = Matrix.RandomMatrix(4, 3);
             A?.Display();
-            Matrix? U, VT, Sigma;
-            if (A.SVD(out U, out Sigma, out VT))
+            Matrix? Q, R;
+            if (A.QR(out Q, out R))
             {
-                U?.Display();
-                Sigma?.Display();
-                VT?.Display();
+                Q?.Display();
+                R?.Display();
+                (Q.Transpose()*Q).Display();
+                (Q * R).Display();
             }
         }
     }
