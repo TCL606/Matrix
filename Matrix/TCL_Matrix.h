@@ -15,12 +15,13 @@
 #include <fstream>
 #include <cstddef>
 #include <initializer_list>
+#include <iterator>
 
 #define PRECISION_OF_DIFFERENCE 1e-3
 #define PRECISION_WHEN_CALCULATING 1e-5
 
 #ifndef TCL_MATRIX_UNUSED_PARAMETER
-#   define TCL_MATRIX_UNUSED_PARAMETER(x) ((void)(x))
+#define TCL_MATRIX_UNUSED_PARAMETER(x) ((void)(x))
 #endif
 
 namespace TCL_Matrix
@@ -66,26 +67,25 @@ namespace TCL_Matrix
                 return true;
             else return false;
         }
-    
+
     protected:
         int row;
         int col;
-        int rank;
 
     public:
         double** matrix;
 
         /// <summary>
-        /// 将已有矩阵深复制到对象矩阵中，初始时不知道秩，令秩为-1。
+        /// 将已有矩阵深复制到对象矩阵中。
         /// </summary>
         /// <param name="matrix">使用时，可以将double**类型强转为double*类型输入</param>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        Matrix(double* newMatrix, int row, int col) :row(row), col(col), rank(-1)
+        Matrix(double* newMatrix, int row, int col) :row(row), col(col)
         {
             if (row <= 0 || col <= 0)
             {
-                row = col = 0;
+                this->row = this->col = 0;
                 matrix = nullptr;
                 return;
             }
@@ -105,15 +105,15 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="row"></param>
         /// <param name="col"></param>
-        explicit Matrix(int row = 1, int col = 1) :row(row), col(col), rank(-1)
+        explicit Matrix(int row = 1, int col = 1) :row(row), col(col)
         {
             if (row < 0)
-                row = 0;
+                this->row = row = 0;
             if (col < 0)
-                col = 0;
+                this->col = col = 0;
             if (row == 0 || col == 0)
             {
-                row = col = 0;
+                this->row = this->col = 0;
                 matrix = nullptr;
                 return;
             }
@@ -130,9 +130,9 @@ namespace TCL_Matrix
             }
         }
 
-        Matrix(std::nullptr_t) : row(0), col(0), rank(-1), matrix(nullptr)
+        Matrix(std::nullptr_t) : row(0), col(0), matrix(nullptr)
         {
-            
+
         }
 
         Matrix(std::initializer_list<std::initializer_list<double>> init)
@@ -170,10 +170,11 @@ namespace TCL_Matrix
         /// 复制构造函数，深复制
         /// </summary>
         /// <param name="A"></param>
-        Matrix(const Matrix& A) : row(A.row), col(A.col), rank(A.rank)
+        Matrix(const Matrix& A) : row(A.row), col(A.col)
         {
-            if (A == nullptr)
+            if (&A == this || A == nullptr)
             {
+                row = col = 0;
                 matrix = nullptr;
                 return;
             }
@@ -190,6 +191,24 @@ namespace TCL_Matrix
             }
         }
 
+        /// <summary>
+        /// 移动构造函数
+        /// </summary>
+        /// <param name="A"></param>
+        Matrix(Matrix&& A) noexcept : row(A.row), col(A.col)
+        {
+            if (&A == this || A == nullptr)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return;
+            }
+
+            this->matrix = A.matrix;
+            A.matrix = nullptr;
+            A.row = A.col = 0;
+        }
+
         ~Matrix()
         {
             if (row == 0) return;
@@ -204,6 +223,7 @@ namespace TCL_Matrix
         void Gauss_Jordan_Elimination()
         {
             int zeroRow = 0;
+            int rank = -1;
             for (int i = 0; i < col && i < row; i++)  //i看成列
             {
                 int nonZero = row - 1;  //先设非零行为最后一行
@@ -303,7 +323,7 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="solution">用于接收一个解向量</param>
         /// <returns>若返回值为false，则方程无解，未对返回参数操作</returns>
-        bool GetAnswerForAugmentedMatrix(Matrix& ret)
+        bool GetOneAnswerForAugmentedMatrix(Matrix& ret)
         {
             if (*this == nullptr) return false;
 
@@ -370,10 +390,11 @@ namespace TCL_Matrix
                     zeroRow++;
                 }
             }
+            int rank;
             if (original.col - 1 > original.row)
-                original.rank = original.row - zeroRow;
-            else original.rank = original.col - 1 - zeroRow;
-            if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
+                rank = original.row - zeroRow;
+            else rank = original.col - 1 - zeroRow;
+            if (original.col - 1 > original.row && rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
             {
                 int k = original.row;
                 while (std::abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
@@ -387,7 +408,7 @@ namespace TCL_Matrix
                     {
                         original.matrix[original.row - 1][i] /= temp;
                     }
-                    original.rank++; //加上最后一行的秩
+                    rank++; //加上最后一行的秩
                     for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                     {
                         if (std::abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
@@ -403,7 +424,7 @@ namespace TCL_Matrix
             }
 
             //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
-            for (int i = original.row - 1; i >= original.rank; i--)
+            for (int i = original.row - 1; i >= rank; i--)
             {
                 if (std::abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
                 {
@@ -508,10 +529,11 @@ namespace TCL_Matrix
                     zeroRow++;
                 }
             }
+            int rank;
             if (original.col - 1 > original.row)
-                original.rank = original.row - zeroRow;  //这里是指原矩阵的秩，不是增广矩阵的秩。
-            else original.rank = original.col - 1 - zeroRow;
-            if (original.col - 1 > original.row && original.rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
+                rank = original.row - zeroRow;  //这里是指原矩阵的秩，不是增广矩阵的秩。
+            else rank = original.col - 1 - zeroRow;
+            if (original.col - 1 > original.row && rank < original.row) //若此时原矩阵不满秩，且col - 1>row，则最后一行可能不会被归一化，且最后一行的秩不会被计算，要单独处理
             {
                 int k = original.row;
                 while (std::abs(original.matrix[original.row - 1][k]) < PRECISION_OF_DIFFERENCE && k < original.col - 1)
@@ -525,7 +547,7 @@ namespace TCL_Matrix
                     {
                         original.matrix[original.row - 1][i] /= temp;
                     }
-                    original.rank++; //加上最后一行的秩
+                    rank++; //加上最后一行的秩
                     for (int j = original.row - 2; j >= 0; j--) //把上面部分消为0
                     {
                         if (std::abs(original.matrix[j][k]) > PRECISION_OF_DIFFERENCE)
@@ -540,7 +562,7 @@ namespace TCL_Matrix
                 }
             }
             //先看有没有解，即看行简化阶梯型的全零行对应增广矩阵最右行的元素是否为0
-            for (int i = original.row - 1; i >= original.rank; i--)
+            for (int i = original.row - 1; i >= rank; i--)
             {
                 if (std::abs(original.matrix[i][original.col - 1]) > PRECISION_OF_DIFFERENCE)
                 {
@@ -548,7 +570,7 @@ namespace TCL_Matrix
                 }
             }
 
-            Matrix solution(original.col - 1, original.col - original.rank);
+            Matrix solution(original.col - 1, original.col - rank);
             int numOfFreeColumn = 0;
             int temp = 0;
             for (temp = 0; temp < original.col - 1 && temp - numOfFreeColumn < original.row; temp++) //先找零空间的基
@@ -582,17 +604,17 @@ namespace TCL_Matrix
             {
                 if (std::abs(original.matrix[temp - numOfFreeColumn][temp]) > PRECISION_OF_DIFFERENCE)
                 {
-                    solution.matrix[temp][original.col - original.rank - 1] = original.matrix[temp - numOfFreeColumn][original.col - 1];
+                    solution.matrix[temp][original.col - rank - 1] = original.matrix[temp - numOfFreeColumn][original.col - 1];
                 }
                 else
                 {
                     numOfFreeColumn++;
-                    solution.matrix[temp][original.col - original.rank - 1] = 0;
+                    solution.matrix[temp][original.col - rank - 1] = 0;
                 }
             }
             while (temp < original.col - 1)
             {
-                solution.matrix[temp++][original.col - original.rank - 1] = 0;
+                solution.matrix[temp++][original.col - rank - 1] = 0;
             }
             ret = solution;
             return true;
@@ -1606,7 +1628,6 @@ namespace TCL_Matrix
             if (judgeRank)
             {
                 int r = GetRank();
-                this->rank = r;
                 if (r != theoreticRank)
                 {
                     std::cout << "The matrix is not a full-rank matrix. Return nullptr" << std::endl;
@@ -1642,7 +1663,7 @@ namespace TCL_Matrix
                 }
             }
         }
-       
+
         /// <summary>
         /// 矩阵乘法
         /// </summary>
@@ -1874,9 +1895,10 @@ namespace TCL_Matrix
         /// </summary>
         /// <param name="A"></param>
         /// <returns></returns>
-        Matrix operator =(const Matrix& A)
+        Matrix& operator =(const Matrix& A)
         {
-            rank = A.rank;
+            if (&A == this) return *this;
+
             if (A.col != col || A.row != row)
             {
                 for (int i = 0; i < row; i++)
@@ -1902,6 +1924,30 @@ namespace TCL_Matrix
                     matrix[i][j] = A.matrix[i][j];
                 }
             }
+            return *this;
+        }
+
+        /// <summary>
+        /// 移动赋值
+        /// </summary>
+        /// <param name="A"></param>
+        /// <returns></returns>
+        Matrix& operator =(Matrix&& A) noexcept
+        {
+            if (&A == this) return *this;
+            if (A == nullptr)
+            {
+                row = col = 0;
+                matrix = nullptr;
+                return *this;
+            }
+
+            row = A.row;
+            col = A.col;
+            matrix = A.matrix;
+            A.row = A.col = 0;
+            A.matrix = nullptr;
+
             return *this;
         }
 
@@ -1979,15 +2025,55 @@ namespace TCL_Matrix
         /// <returns></returns>
         int GetRank()
         {
-            if (rank != -1)
-                return rank;
-            else
+            if (*this == nullptr) return 0;
+            if (row != col)
+                return 0;
+            Matrix mtemp(*this);
+            int rank = 0;
+            int zeroRow = 0;
+            for (int i = 0; i < col && i < row; i++)  //i看成列
             {
-                Matrix temp(*this);
-                temp.Gauss_Jordan_Elimination();
-                rank = temp.rank;
-                return temp.rank;
+                int nonZero = row - 1;  //先设非零行为最后一行
+                for (int j = i - zeroRow; j < row; j++) // 找到非0元素
+                    if (std::abs(mtemp.matrix[j][i]) > PRECISION_OF_DIFFERENCE)
+                    {
+                        nonZero = j;
+                        break;
+                    }
+
+                if (std::abs(mtemp.matrix[nonZero][i]) > PRECISION_OF_DIFFERENCE)
+                {
+                    if (nonZero != i - zeroRow) //如果非0元素不是第i-zeroRow行
+                    {
+                        for (int k = i; k < col; k++) // 把非0元素所在行交换到当前行
+                        {
+                            double t = mtemp.matrix[i - zeroRow][k];
+                            mtemp.matrix[i - zeroRow][k] = mtemp.matrix[nonZero][k];
+                            mtemp.matrix[nonZero][k] = t;
+                        }
+                        nonZero = i - zeroRow;
+                    }
+
+                    for (int j = i - zeroRow + 1; j < row; j++) //把下面部分消为0
+                    {
+                        if (std::abs(mtemp.matrix[j][i]) > PRECISION_OF_DIFFERENCE) //如果mtemp.matrix[j][i]不是0
+                        {
+                            double temp = mtemp.matrix[j][i] / mtemp.matrix[i - zeroRow][i];
+                            for (int k = i; k < col; k++)
+                            {
+                                mtemp.matrix[j][k] = mtemp.matrix[j][k] - mtemp.matrix[i - zeroRow][k] * temp;
+                            }
+                        }
+                    }
+                }
             }
+            for (int i = 0; i < row; i++)
+            {
+                if (std::abs(mtemp.matrix[i][i]) > PRECISION_OF_DIFFERENCE)
+                    rank++;
+                else break;
+            }
+            return rank;
         }
 
         int GetRow() const
@@ -2396,7 +2482,7 @@ namespace TCL_Matrix
             {
                 I.matrix[i][i] = 1;
             }
-            return I; //会调用复制构造函数，因此效率比直接构造要低；此函数只是为了方便
+            return I;
         }
 
         /// <summary>
@@ -2589,41 +2675,75 @@ namespace TCL_Matrix
             of.close();
         }
 
-        
         class const_row_vector_iterator
         {
         public:
+
             class const_row_vector_reference
             {
             public:
+                using value_type = double;
+                using const_reference = const value_type&;
+                using reference = const_reference;
+                using const_pointer = const double*;
+                using pointer = const_pointer;
+                using difference_type = ::std::ptrdiff_t;
                 using const_iterator = const double*;
+                using iterator = const_iterator;
+                using const_reverse_iterator = ::std::reverse_iterator<const_iterator>;
+                using reverse_iterator = ::std::reverse_iterator<iterator>;
 
-                const_iterator cbegin() const
+                const_iterator cbegin() const noexcept
                 {
-                    return ptr;
+                    return this->ptr;
                 }
 
-                const_iterator cend() const
+                const_iterator cend() const noexcept
                 {
-                    return end_ptr;
+                    return this->end_ptr;
                 }
 
-                const_iterator begin() const
+                iterator begin() const noexcept
                 {
                     return this->cbegin();
                 }
 
-                const_iterator end() const
+                iterator end() const noexcept
                 {
                     return this->cend();
                 }
 
-                const_row_vector_reference(const const_row_vector_reference&) = default;
-                const_row_vector_reference& operator=(const const_row_vector_reference&) = default;
+                const_reverse_iterator crbegin() const noexcept
+                {
+                    return const_reverse_iterator(this->cend());
+                }
+
+                const_reverse_iterator crend() const noexcept
+                {
+                    return const_reverse_iterator(this->cbegin());
+                }
+
+                reverse_iterator rbegin() const noexcept
+                {
+                    return this->crbegin();
+                }
+
+                reverse_iterator rend() const noexcept
+                {
+                    return this->crend();
+                }
+
+                const_row_vector_reference(const const_row_vector_reference&) noexcept = default;
+                const_row_vector_reference& operator=(const const_row_vector_reference&) noexcept = default;
+
+                const double& operator[](::std::ptrdiff_t offset) const noexcept
+                {
+                    return this->ptr[offset];
+                }
                 
             protected:
-                const_row_vector_reference() = default;
-                const_row_vector_reference(double* ptr, double* end_ptr) : ptr(ptr), end_ptr(end_ptr) {}
+                const_row_vector_reference() noexcept = default;
+                const_row_vector_reference(double* ptr, double* end_ptr) noexcept : ptr(ptr), end_ptr(end_ptr) {}
 
                 double* ptr = nullptr;
                 double* end_ptr = nullptr;
@@ -2632,39 +2752,118 @@ namespace TCL_Matrix
             };
 
             using value_type = const_row_vector_reference;
+            using difference_type = ::std::ptrdiff_t;
+            using const_reference = const_row_vector_reference;
+            using reference = const_reference;
+            using const_pointer = const_reference*;
+            using pointer = const_pointer*;
+            using iterator_category = ::std::random_access_iterator_tag;
 
-            const_row_vector_iterator() = default;
-            const_row_vector_iterator(const const_row_vector_iterator&) = default;
-            const_row_vector_iterator& operator=(const const_row_vector_iterator&) = default;
+            const_row_vector_iterator() noexcept = default;
+            const_row_vector_iterator(const const_row_vector_iterator&) noexcept = default;
+            const_row_vector_iterator& operator=(const const_row_vector_iterator&) noexcept = default;
 
-            explicit const_row_vector_iterator(double** ptr, int col) : ptr(ptr), col(col) {}
+            const_row_vector_iterator(double** ptr, int col) noexcept : ptr(ptr), col(col) {}
 
-            bool operator==(const const_row_vector_iterator& op) const
+            bool operator==(const const_row_vector_iterator& op) const noexcept
             {
                 return this->ptr == op.ptr;
             }
 
-            bool operator!=(const const_row_vector_iterator& op) const
+            bool operator!=(const const_row_vector_iterator& op) const noexcept
             {
                 return !(*this == op);
             }
-            
-            value_type operator*() const
+
+            const_reference operator*() const noexcept
             {
-                return const_row_vector_reference(*ptr, *ptr + col);
+                return const_row_vector_reference(*this->ptr, *this->ptr + this->col);
             }
 
-            const_row_vector_iterator& operator++()
+            const_row_vector_iterator& operator++() noexcept
             {
                 ++this->ptr;
                 return *this;
             }
 
-            const_row_vector_iterator operator++(int)
+            const_row_vector_iterator operator++(int) noexcept
             {
                 auto org = *this;
                 this->operator++();
                 return org;
+            }
+
+            const_row_vector_iterator& operator--()
+            {
+                --this->ptr;
+                return *this;
+            }
+
+            const_row_vector_iterator operator--(int) noexcept
+            {
+                auto org = *this;
+                this->operator--();
+                return org;
+            }
+
+            const_row_vector_iterator operator+(difference_type offset) const noexcept
+            {
+                return const_row_vector_iterator(this->ptr + offset, col);
+            }
+
+            const_row_vector_iterator operator-(difference_type offset) const noexcept
+            {
+                return const_row_vector_iterator(this->ptr - offset, col);
+            }
+
+            const_row_vector_iterator& operator+=(difference_type offset) noexcept
+            {
+                this->ptr += offset;
+                return *this;
+            }
+
+            const_row_vector_iterator& operator-=(difference_type offset) noexcept
+            {
+                this->ptr -= offset;
+                return *this;
+            }
+
+            ::std::ptrdiff_t operator-(const const_row_vector_iterator& op) const noexcept
+            {
+                return this->ptr - op.ptr;
+            }
+
+            bool operator<(const const_row_vector_iterator& op) const noexcept
+            {
+                return this->ptr < op.ptr;
+            }
+
+            bool operator>(const const_row_vector_iterator& op) const noexcept
+            {
+                return op < *this;
+            }
+
+            bool operator<=(const const_row_vector_iterator& op) const noexcept
+            {
+                return !(op < *this);
+            }
+
+            bool operator>=(const const_row_vector_iterator& op) const noexcept
+            {
+                return !(*this < op);
+            }
+
+            const_reference operator[](difference_type offset) const noexcept
+            {
+                return const_row_vector_reference
+                        (
+                            *(this->ptr + offset), *(this->ptr + offset) + this->col
+                        );
+            }
+
+            friend inline const_row_vector_iterator operator+(difference_type offset, const const_row_vector_iterator& base) noexcept
+            {
+                return base + offset;
             }
 
         protected:
@@ -2679,12 +2878,10 @@ namespace TCL_Matrix
             class row_vector_reference final : public const_row_vector_reference
             {
             public:
-                using const_row_vector_reference::begin;
-                using const_row_vector_reference::end;
-                using const_row_vector_reference::cbegin;
-                using const_row_vector_reference::cend;
                 using const_row_vector_reference::const_iterator;
+                using const_row_vector_reference::const_reverse_iterator;
                 using iterator = double*;
+                using reverse_iterator = ::std::reverse_iterator<iterator>;
 
                 row_vector_reference& operator=(const row_vector_reference& op)
                 {
@@ -2694,14 +2891,40 @@ namespace TCL_Matrix
 
                 row_vector_reference(const row_vector_reference&) = default;
 
-                iterator begin()
+                using const_row_vector_reference::begin;
+                using const_row_vector_reference::end;
+                using const_row_vector_reference::cbegin;
+                using const_row_vector_reference::cend;
+                using const_row_vector_reference::rbegin;
+                using const_row_vector_reference::rend;
+                using const_row_vector_reference::crbegin;
+                using const_row_vector_reference::crend;
+
+                iterator begin() noexcept
                 {
-                    return ptr;
+                    return this->ptr;
                 }
 
-                iterator end()
+                iterator end() noexcept
                 {
-                    return end_ptr;
+                    return this->end_ptr;
+                }
+
+                reverse_iterator rbegin() noexcept
+                {
+                    return reverse_iterator(this->end());
+                }
+
+                reverse_iterator rend() noexcept
+                {
+                    return reverse_iterator(this->begin());
+                }
+
+                using const_row_vector_reference::operator[];
+
+                double& operator[](::std::ptrdiff_t offset) noexcept
+                {
+                    return this->ptr[offset];
                 }
 
             protected:
@@ -2712,67 +2935,195 @@ namespace TCL_Matrix
 
             using const_row_vector_iterator::operator==;
             using const_row_vector_iterator::operator!=;
-            
+            using const_row_vector_iterator::operator<;
+            using const_row_vector_iterator::operator>;
+            using const_row_vector_iterator::operator<=;
+            using const_row_vector_iterator::operator>=;
+            using const_row_vector_iterator::operator-;
+
+            using const_row_vector_iterator::difference_type;
             using value_type = row_vector_reference;
+            using reference = row_vector_reference;
+            using const_reference = const_row_vector_reference;
+            using pointer = reference*;
+            using const_pointer = const_reference*;
+            using iterator_category = ::std::random_access_iterator_tag;
 
-            row_vector_iterator() = default;
-            row_vector_iterator(const row_vector_iterator& op) = default;
+            row_vector_iterator() noexcept = default;
+            row_vector_iterator(const row_vector_iterator& op) noexcept = default;
 
-            row_vector_iterator& operator=(const row_vector_iterator& op)
+            row_vector_iterator& operator=(const row_vector_iterator& op) noexcept
             {
                 this->const_row_vector_iterator::operator=(op);
                 return *this;
             }
 
-            explicit row_vector_iterator(double** ptr, int col) : const_row_vector_iterator(ptr, col) {}
+            explicit row_vector_iterator(double** ptr, int col) noexcept : const_row_vector_iterator(ptr, col) {}
 
-            row_vector_reference operator*()
+            // C++20 says only using operator== exsits an ambiguous.
+            // C++ is so awful!
+
+            bool operator==(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator==(op);
+            }
+
+            bool operator!=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator<(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator>(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator<=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            bool operator>=(const row_vector_iterator& op) const noexcept
+            {
+                return this->const_row_vector_iterator::operator!=(op);
+            }
+
+            reference operator*() const noexcept
             {
                 return row_vector_reference(*ptr, *ptr + col);
             }
 
-            row_vector_iterator& operator++()
+            row_vector_iterator& operator++() noexcept
             {
                 this->const_row_vector_iterator::operator++();
                 return *this;
             }
 
-            row_vector_iterator& operator++(int)
+            row_vector_iterator operator++(int) noexcept
             {
                 auto origin = *this;
                 this->operator++();
                 return origin;
             }
+
+            row_vector_iterator& operator--() noexcept
+            {
+                this->const_row_vector_iterator::operator--();
+                return *this;
+            }
+
+            row_vector_iterator operator--(int) noexcept
+            {
+                auto origin = *this;
+                this->operator--();
+                return origin;
+            }
+
+            row_vector_iterator operator+(difference_type offset) const noexcept
+            {
+                return row_vector_iterator(this->ptr + offset, col);
+            }
+
+            row_vector_iterator operator-(difference_type offset) const noexcept
+            {
+                return row_vector_iterator(this->ptr - offset, col);
+            }
+
+            row_vector_iterator& operator+=(difference_type offset) noexcept
+            {
+                this->ptr += offset;
+                return *this;
+            }
+
+            row_vector_iterator& operator-=(difference_type offset) noexcept
+            {
+                this->ptr -= offset;
+                return *this;
+            }
+
+            reference operator[](difference_type offset) const noexcept
+            {
+                return row_vector_reference
+                        (
+                            *(this->ptr + offset), *(this->ptr + offset) + this->col
+                        );
+            }
+
+            friend inline row_vector_iterator operator+(difference_type offset, const row_vector_iterator& base) noexcept
+            {
+                return base + offset;
+            }
+
         };
 
-        const_row_vector_iterator cbegin() const
+        using const_iterator = const_row_vector_iterator;
+        using iterator = row_vector_iterator;
+        using const_reverse_iterator = ::std::reverse_iterator<const_iterator>;
+        using reverse_iterator = ::std::reverse_iterator<iterator>;
+
+        const_iterator cbegin() const noexcept
         {
             return const_row_vector_iterator(this->matrix, this->col);
         }
 
-        const_row_vector_iterator cend() const
+        const_iterator cend() const noexcept
         {
             return const_row_vector_iterator(this->matrix + this->row, this->col);
         }
 
-        const_row_vector_iterator begin() const
+        const_iterator begin() const noexcept
         {
             return this->cbegin();
         }
 
-        const_row_vector_iterator end() const
+        const_iterator end() const noexcept
         {
             return this->cend();
         }
 
-        row_vector_iterator begin()
+        iterator begin() noexcept
         {
             return row_vector_iterator(this->matrix, this->col);
         }
 
-        row_vector_iterator end()
+        iterator end() noexcept
         {
             return row_vector_iterator(this->matrix + this->row, this->col);
+        }
+
+        const_reverse_iterator crbegin() const noexcept
+        {
+            return const_reverse_iterator(this->cend());
+        }
+
+        const_reverse_iterator crend() const noexcept
+        {
+            return const_reverse_iterator(this->cbegin());
+        }
+
+        reverse_iterator rbegin() noexcept
+        {
+            return reverse_iterator(this->end());
+        }
+
+        reverse_iterator rend() noexcept
+        {
+            return reverse_iterator(this->begin());
+        }
+
+        const_reverse_iterator rbegin() const noexcept
+        {
+            return const_reverse_iterator(this->end());
+        }
+
+        const_reverse_iterator rend() const noexcept
+        {
+            return const_reverse_iterator(this->begin());
         }
     };
 

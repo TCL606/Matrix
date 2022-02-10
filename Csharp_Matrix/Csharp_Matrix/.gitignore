@@ -31,6 +31,9 @@
 *.out
 *.app
 
-# VS2019
+# VS2019/2022
 .vs/
-.vscode/
+
+#Csharp compile files
+bin/
+obj
