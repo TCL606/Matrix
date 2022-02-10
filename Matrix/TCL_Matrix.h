@@ -2791,7 +2791,6 @@ namespace TCL_Matrix
         }
     };
 }
-
 #undef TCL_MATRIX_UNUSED_PARAMETER
 
 #endif
