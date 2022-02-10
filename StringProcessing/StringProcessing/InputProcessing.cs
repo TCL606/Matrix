@@ -17,8 +17,11 @@ namespace StringProcessing
                 else if(arr[i] == ")")
                 {
                     var t = stack.Pop();
-                    if (t != "(")
+                    while (t != "(")
+                    {
                         sb.Append(t + " ");
+                        t = stack.Pop();
+                    }
                 }
                 else if(!IsOperator(arr[i]))
                 {
@@ -26,9 +29,9 @@ namespace StringProcessing
                 }
                 else
                 {
-                    if (stack.Count == 0)
+                    if (stack.Count == 0 || stack.Peek() == "(")
                         stack.Push(arr[i]);
-                    else if (GetPrioraty(stack.Peek()) < GetPrioraty(arr[i]))
+                    else if (GetPriority(stack.Peek()) < GetPriority(arr[i]))
                         stack.Push(arr[i]);
                     else
                     {
@@ -43,7 +46,7 @@ namespace StringProcessing
             }
             return sb.ToString();
         }
-        public static int GetPrioraty(string sign)
+        public static int GetPriority(string sign)
         {
             switch (sign)
             {
@@ -63,7 +66,7 @@ namespace StringProcessing
         }
         public static bool IsOperator(string str)
         {
-            return GetPrioraty(str) > 0;
+            return GetPriority(str) > 0;
         }
     }
 }

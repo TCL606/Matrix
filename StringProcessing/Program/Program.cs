@@ -6,7 +6,7 @@ namespace Test
     {
         public static void Main()
         {
-            String str = "3 + 2 * 5 - 6";
+            String str = "3 / ( 12 * ( 5 + 6 ) )";
             Console.WriteLine(InputProcessing.Infix2Suffix(str));
         }
     }
