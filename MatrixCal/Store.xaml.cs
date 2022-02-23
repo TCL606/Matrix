@@ -36,7 +36,7 @@ namespace MatrixCal
             int col = row + 1;
             Height = (ButtonHeight + VerticalInterval) * row + 30;
             Width = (ButtonWidth + HorizontalInterval) * col + 54;
-            Button[] btns = new Button[App.matpool.Count - 4];//这里测试之后需要-4
+            Button[] btns = new Button[App.matpool.Count - 4];
             int i = 0;
             foreach (string s in App.matpool.Keys)
             {

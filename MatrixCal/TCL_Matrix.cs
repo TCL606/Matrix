@@ -144,7 +144,7 @@ namespace TCL_Matrix
         #endregion
 
         #region 文件读写
-        public static bool WriteToFile(Matrix m, String path)
+        public static bool WriteToFile(Matrix m, string path)
         {
             try 
             {   
@@ -169,7 +169,7 @@ namespace TCL_Matrix
             }
         }
 
-        public static Matrix? ReadFromFile(String path)
+        public static Matrix? ReadFromFile(string path)
         {
             try
             {
@@ -818,7 +818,6 @@ namespace TCL_Matrix
                     values = ATA.GetEigenValuesOfDefiniteMatrix(false);
                     values.Sort();
                     List<int> multiplicity = new();
-                    Matrix eigenSubSpace;
                     int nowDim = 0;
                     int ATADim = 0;
                     double mod = 0;
@@ -826,7 +825,7 @@ namespace TCL_Matrix
 
                     foreach (var val in values)
                     {
-                        if ((ATA - val * IdentityMatrix(ATA.row)).GetBasesOfNullSpace(out eigenSubSpace))
+                        if ((ATA - val * IdentityMatrix(ATA.row)).GetBasesOfNullSpace(out Matrix eigenSubSpace))
                         {
                             for (int i = 0; i < eigenSubSpace.row; i++)
                             {
@@ -1041,7 +1040,6 @@ namespace TCL_Matrix
                     values = AAT.GetEigenValuesOfDefiniteMatrix(false);
                     values.Sort();
                     List<int> multiplicity = new();
-                    Matrix eigenSubSpace;
                     int nowDim = 0;
                     int AATDim = 0;
                     double mod = 0;
@@ -1049,7 +1047,7 @@ namespace TCL_Matrix
 
                     foreach (var val in values)
                     {
-                        if ((AAT - val * IdentityMatrix(AAT.row)).GetBasesOfNullSpace(out eigenSubSpace))
+                        if ((AAT - val * IdentityMatrix(AAT.row)).GetBasesOfNullSpace(out Matrix eigenSubSpace))
                         {
                             for (int i = 0; i < eigenSubSpace.row; i++)
                             {
@@ -1338,7 +1336,7 @@ namespace TCL_Matrix
             catch(Exception e)
             {
                 ExceptionHandling(e);
-                return Double.MaxValue;
+                return double.MaxValue;
             }
         }
 
@@ -1746,7 +1744,7 @@ namespace TCL_Matrix
             catch (Exception e)
             {
                 ExceptionHandling(e);
-                return Double.MaxValue;
+                return double.MaxValue;
             }
         }
         #endregion
@@ -2101,7 +2099,7 @@ namespace TCL_Matrix
         }
         public override string ToString()
         {
-            return new String($"({this.real}, {this.imag})");
+            return new string($"({this.real}, {this.imag})");
         }
     }
 }

@@ -8,7 +8,7 @@ namespace MatrixCal
     /// </summary>
     public partial class App : Application
     {
-        public static Dictionary<string, TCL_Matrix.Matrix>? matpool;
+        public static Dictionary<string, TCL_Matrix.Matrix>? matpool,temppool;
         public static bool storeFlag;
     }
 }

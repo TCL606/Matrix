@@ -84,8 +84,15 @@ namespace MatrixCal
                 }
                 catch (Exception ex)
                 {
-                    ErrorDisplayer err = new(ex.Message);
-                    err.Show();
+                    var _mainWindow = Application.Current.Windows
+             .Cast<Window>()
+             .FirstOrDefault(window => window is MainWindow) as MainWindow;
+                    _mainWindow.err.errorDisplayer.Text = ex.Message;
+                    if (!_mainWindow.errflag)
+                    {
+                        _mainWindow.err.Show();
+                        _mainWindow.errflag = true;
+                    }
                 }
             }
             else
@@ -120,8 +127,15 @@ namespace MatrixCal
                 }
                 catch (Exception ex)
                 {
-                    ErrorDisplayer err = new(ex.Message);
-                    err.Show();
+                    var _mainWindow = Application.Current.Windows
+            .Cast<Window>()
+            .FirstOrDefault(window => window is MainWindow) as MainWindow;
+                    _mainWindow.err.errorDisplayer.Text = ex.Message;
+                    if (!_mainWindow.errflag)
+                    {
+                        _mainWindow.err.Show();
+                        _mainWindow.errflag = true;
+                    }
                 }
             }
         }
