@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Blend for Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrixCal", "MatrixCal.csproj", "{743B5EDA-3EFE-42AF-8DBF-09AFB48824CF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{743B5EDA-3EFE-42AF-8DBF-09AFB48824CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{743B5EDA-3EFE-42AF-8DBF-09AFB48824CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{743B5EDA-3EFE-42AF-8DBF-09AFB48824CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{743B5EDA-3EFE-42AF-8DBF-09AFB48824CF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29CC39B7-77DF-440C-9B57-3AC248ED8134}
+	EndGlobalSection
+EndGlobal
