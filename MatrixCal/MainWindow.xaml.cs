@@ -71,9 +71,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -113,9 +113,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -155,9 +155,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -216,12 +216,12 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
-                if(!errflag)
+                if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
-                }    
+                }
             }
         }
         private void ELM(object sender, RoutedEventArgs e)
@@ -250,9 +250,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -287,9 +287,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -327,9 +327,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -362,9 +362,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -396,9 +396,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -430,9 +430,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -466,9 +466,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -500,9 +500,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -534,9 +534,9 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -544,9 +544,9 @@ namespace MatrixCal
         }
         private void Others(object sender, RoutedEventArgs e)
         {
-            err.errorDisplayer.Text = "更多算法请等待更新！";
             if (!errflag)
             {
+                err = new("更多算法请等待更新！");
                 err.Show();
                 errflag = true;
             }
@@ -557,12 +557,13 @@ namespace MatrixCal
             {
                 formula = InputProcessing.Infix2Suffix(Interface.Text);
                 var arr = formula.Split(' ');
-                TCL_Matrix.Matrix temp;
-                for (int i = 0; i < arr.Length; i++)
+                for (int i = 0; i < arr.Length-1; i++)
                 {
                     if (arr[i] != "+" && arr[i] != "-" && arr[i] != "*" && arr[i] != "^")//不是运算符
                     {
                         stack.Push(arr[i]);
+                        log.Content = Convert.ToString(stack.Count);
+                        App.temppool[arr[i]]=App.matpool[arr[i]];
                     }
                     else//是运算符
                     {
@@ -570,14 +571,15 @@ namespace MatrixCal
                     }
                 }
                 App.matpool["1"] = App.temppool[stack.Pop()];//结果存在temp1中
+                App.temppool.Clear();
                 Output output = new("1");
                 output.Show();
             }
             catch (Exception ex)
             {
-                err.errorDisplayer.Text = ex.Message;
                 if (!errflag)
                 {
+                    err = new(ex.Message);
                     err.Show();
                     errflag = true;
                 }
@@ -595,13 +597,30 @@ namespace MatrixCal
             if((s1.Length==1&& Convert.ToInt32(s1) >= 65 && Convert.ToInt32(s1) <= 90)&&
                 (s2.Length == 1 && Convert.ToInt32(s2) >= 65 && Convert.ToInt32(s2) <= 90))//s1，s2表示矩阵
             {
-                if(!(App.matpool.ContainsKey(s1)&& App.matpool.ContainsKey(s2)))
+                if (!(App.matpool.ContainsKey(s1) && App.matpool.ContainsKey(s2)))
                 {
                     throw new Exception("输入的式子含有未被赋值的矩阵");
                 }
                 else
                 {
-
+                    switch (s3)
+                    {
+                        case "+":
+                            App.temppool[s1]+=App.temppool[s2];
+                            stack.Push(s1);
+                            break;
+                        case "-":
+                            App.temppool[s1] -= App.temppool[s2];
+                            stack.Push(s1);
+                            break;
+                        case "*":
+                            App.temppool[s1] *= App.temppool[s2];
+                            stack.Push(s1);
+                            break;
+                        case "^":
+                            throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
+                            break;
+                    }
                 }
             }
             else if (s1.Length == 1 && Convert.ToInt32(s1) >= 65 && Convert.ToInt32(s1) <= 90)//s1为矩阵，s2为数
@@ -612,7 +631,26 @@ namespace MatrixCal
                 }
                 else
                 {
-
+                    switch (s3)
+                    {
+                        case "+":     
+                        case "-":
+                            throw new Exception("矩阵不能和数相加减");
+                            break;
+                        case "*":
+                            App.temppool[s1] = Convert.ToDouble(s2)* App.temppool[s1];
+                            stack.Push(s1);
+                            break;
+                        case "^":
+                            if (Convert.ToInt32(s2) == Convert.ToDouble(s2))
+                            {
+                                App.temppool[s1] = App.temppool[s1].Power(Convert.ToInt32(s2));
+                                stack.Push(s1);
+                            }
+                            else
+                                throw new Exception("不支持矩阵分数幂运算");
+                            break;
+                    }
                 }
             }
             else if (s2.Length == 1 && Convert.ToInt32(s2) >= 65 && Convert.ToInt32(s2) <= 90)//s2为矩阵，s1为数
@@ -623,7 +661,18 @@ namespace MatrixCal
                 }
                 else
                 {
-
+                    switch (s3)
+                    {
+                        case "+":
+                        case "-":
+                            throw new Exception("矩阵不能和数相加减");        
+                        case "*":
+                            App.temppool[s2] = App.temppool[s2].Power(Convert.ToInt32(s1));
+                            stack.Push(s2);
+                            break;
+                        case "^":
+                                throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
+                    }
                 }
             }
             else//全是数

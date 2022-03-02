@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\hp\\source\\repos\\MatrixCal\\MatrixCal.csproj",
+      "projectUniqueName": "C:\\Users\\hp\\source\\repos\\Matrix\\MatrixCal\\MatrixCal.csproj",
       "projectName": "MatrixCal",
-      "projectPath": "C:\\Users\\hp\\source\\repos\\MatrixCal\\MatrixCal.csproj",
+      "projectPath": "C:\\Users\\hp\\source\\repos\\Matrix\\MatrixCal\\MatrixCal.csproj",
       "packagesPath": "C:\\Users\\hp\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\hp\\source\\repos\\MatrixCal\\obj\\",
+      "outputPath": "C:\\Users\\hp\\source\\repos\\Matrix\\MatrixCal\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\hp\\AppData\\Roaming\\NuGet\\NuGet.Config",

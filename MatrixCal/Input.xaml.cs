@@ -12,7 +12,7 @@ namespace MatrixCal
     public partial class Input : Window
     {  
         const int TextBoxHeight = 15;
-        const int TextBoxWidth = 30;
+        const int TextBoxWidth = 36;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;
         public Input(string s)
@@ -47,9 +47,9 @@ namespace MatrixCal
                     {
                         throw new Exception("请填写完整的信息");
                     }
-                    else if(Convert.ToInt32(Col.Text) > 40 || Convert.ToInt32(Row.Text) > 40)
+                    else if(Convert.ToInt32(Col.Text) > 35 || Convert.ToInt32(Row.Text) > 35)
                     {
-                        throw new Exception("受屏幕尺寸限制，不支持40行/列以上的输入");
+                        throw new Exception("受屏幕尺寸限制，不支持35行/列以上的输入");
                     }
                     else
                     {
@@ -90,6 +90,7 @@ namespace MatrixCal
                     _mainWindow.err.errorDisplayer.Text = ex.Message;
                     if (!_mainWindow.errflag)
                     {
+                        _mainWindow.err = new(ex.Message);
                         _mainWindow.err.Show();
                         _mainWindow.errflag = true;
                     }
@@ -108,14 +109,17 @@ namespace MatrixCal
                         {
                             if (textBoxes[i, j].Text.Length == 0)
                             {
-                                throw new Exception("请输入完整的数据");
+                                temp[i, j] = 0;
                             }
                             else
                             {
                                 temp[i,j]=Convert.ToDouble(textBoxes[i, j].Text);
                             }
                         }
-                    App.matpool.Add(key, temp);
+                    if (!App.matpool.ContainsKey(key))
+                        App.matpool.Add(key, temp);
+                    else
+                        App.matpool[key] = temp;
                     var _mainWindow = Application.Current.Windows
                    .Cast<Window>()
                    .FirstOrDefault(window => window is MainWindow) as MainWindow;
@@ -133,7 +137,8 @@ namespace MatrixCal
                     _mainWindow.err.errorDisplayer.Text = ex.Message;
                     if (!_mainWindow.errflag)
                     {
-                        _mainWindow.err.Show();
+                        _mainWindow.err = new(ex.Message);
+                         _mainWindow.err.Show();
                         _mainWindow.errflag = true;
                     }
                 }

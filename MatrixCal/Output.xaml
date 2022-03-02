@@ -22,10 +22,10 @@
     <Grid Name="OutputGrid" Background="Transparent">
         <Border BorderBrush="#FF252424" BorderThickness="0" CornerRadius="15" Background="Black" Opacity="0.8" OpacityMask="Black" Visibility="Visible"/>
         <TextBox x:Name="Key" Opacity="0.5" Background="#FF313131" BorderBrush="#FF313131" Foreground="White" TextWrapping="Wrap" Margin="0,6,9,0" Height="15" Width="22" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-        <TextBox Name="Col" Opacity="0.5" Background="#FF313131" BorderBrush="#FF313131" Foreground="White" TextWrapping="Wrap" Margin="0,28,41,0" Height="25" Width="84" VerticalAlignment="Top" HorizontalAlignment="Right"/>
+        <TextBox Name="Col" Opacity="0.5" Background="#FF313131" BorderBrush="#FF313131" Foreground="White" TextWrapping="Wrap" Margin="0,28,41,0" Height="25" Width="84" VerticalAlignment="Top" HorizontalAlignment="Right" IsReadOnly="True"/>
         <Label Height="26" Content="Column:" VerticalAlignment="Top" Background="#FF313131" Foreground="White" Opacity="0.5" BorderBrush="#FF313131" Margin="0,2,67,0" HorizontalAlignment="Right" Width="58"/>
         <Label HorizontalAlignment="Left" Height="26" Content="Row:" VerticalAlignment="Top" Width="47" Background="#FF313131" Foreground="White" Opacity="0.5" BorderBrush="#FF313131" Margin="27,2,0,0"/>
         <Button Content="×" Template="{StaticResource roundbutton}" Background="#FFF01008" Margin="5,3,0,0" Width="15" Height="15" Click="OutputClose" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-        <TextBox Name="Row" Opacity="0.5" Background="#FF313131" BorderBrush="#FF313131" Foreground="White" TextWrapping="Wrap" Margin="27,28,0,0"  Height="25" Width="84" VerticalAlignment="Top" HorizontalAlignment="Left" />
+        <TextBox Name="Row" Opacity="0.5" Background="#FF313131" BorderBrush="#FF313131" Foreground="White" TextWrapping="Wrap" Margin="27,28,0,0"  Height="25" Width="84" VerticalAlignment="Top" HorizontalAlignment="Left" IsReadOnly="True"/>
     </Grid>
 </Window>

@@ -20,7 +20,7 @@ namespace MatrixCal
     public partial class Output : Window
     {
         const int TextBoxHeight = 15;
-        const int TextBoxWidth = 30;
+        const int TextBoxWidth = 36;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;
         public Output(string s)

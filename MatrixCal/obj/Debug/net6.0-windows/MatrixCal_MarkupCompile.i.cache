@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\hp\source\repos\MatrixCal\obj\Debug\net6.0-windows\
+C:\Users\hp\source\repos\Matrix\MatrixCal\obj\Debug\net6.0-windows\
 MatrixCal
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-C:\Users\hp\source\repos\MatrixCal\App.xaml
+C:\Users\hp\source\repos\Matrix\MatrixCal\App.xaml
 5-1212146342
 194854677
 11443338792
 1941905061893
 ErrorDisplayer.xaml;Input.xaml;MainWindow.xaml;Output.xaml;Store.xaml;
 
-True
+False
 

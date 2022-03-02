@@ -8,9 +8,17 @@ namespace StringProcessing
     {
         public static string PreProcess(string str)
         {
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] == ' ')
+                {
+                    str = str.Remove(i, 1);
+                    i--;
+                }
+            }
             foreach (var i in str)
             {
-                if (i != '(' && i != ')' && i != '+' && i != '-' && i != '*' && i != '^' &&
+                if (i != '(' && i != ')' && i != '+' && i != '-' && i != '*' && i != '^' && i != '.' &&
                     (Convert.ToInt32(i) < 65 || Convert.ToInt32(i) > 90) &&
                     (Convert.ToInt32(i) < 48 || Convert.ToInt32(i) > 57))
                 {
@@ -20,20 +28,20 @@ namespace StringProcessing
             for (int i = 1; i < str.Length; i++)
             {
                 if ((!(Convert.ToInt32(str[i]) < 65 || Convert.ToInt32(str[i]) > 90) || str[i] == '(') &&
-                   str[i - 1] != '+' && str[i - 1] != '-' && str[i - 1] != '*' && str[i - 1] != '^' && str[i - 1] != '(')
+                   str[i - 1] != '+' && str[i - 1] != '-' && str[i - 1] != '*' && str[i - 1] != '^' && str[i - 1] != '(' && str[i - 1] != '.')
                     str = str.Insert(i, "*");
                 i++;
             }
             for (int i = 0; i < str.Length; i++)
             {
-                if ((Convert.ToInt32(str[i]) < 48 || Convert.ToInt32(str[i]) > 57))//不是数
+                if ((Convert.ToInt32(str[i]) < 48 || Convert.ToInt32(str[i]) > 57) && str[i] != '.')//不是数
                 {
                     if (str[i] != ' ')
                         str = str.Insert(i + 1, " ");
                 }
                 else//是数
                 {
-                    if (i < str.Length - 1 && (Convert.ToInt32(str[i + 1]) < 48 || Convert.ToInt32(str[i + 1]) > 57))//后一个不是数
+                    if (i < str.Length - 1 && (Convert.ToInt32(str[i + 1]) < 48 || Convert.ToInt32(str[i + 1]) > 57) && str[i + 1] != '.')//后一个不是数
                         str = str.Insert(i + 1, " ");
                 }
             }
