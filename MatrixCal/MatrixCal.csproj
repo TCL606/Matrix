@@ -38,4 +38,9 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Csharp_Matrix\Csharp_Matrix\Csharp_Matrix.csproj" />
+    <ProjectReference Include="..\StringProcessing\StringProcessing\StringProcessing.csproj" />
+  </ItemGroup>
+
 </Project>
