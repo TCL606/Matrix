@@ -1,7 +1,4 @@
-﻿using System;
-using TCL_Matrix;
-
-namespace Program
+﻿namespace Program
 {
     public class Program
     {
