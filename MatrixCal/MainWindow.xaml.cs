@@ -1,7 +1,7 @@
 ﻿using System;
+using TCL_Matrix;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
 using StringProcessing;
 using System.Collections.Generic;
 
@@ -21,10 +21,10 @@ namespace MatrixCal
             errflag = false;
             App.matpool = new();
             App.temppool = new();
-            App.matpool.Add("0", new TCL_Matrix.Matrix(1, 1));//字符0对应输入算式的暂时结果；DISP后结果存入temp1中
-            App.matpool.Add("1", new TCL_Matrix.Matrix(1, 1));
-            App.matpool.Add("2", new TCL_Matrix.Matrix(1, 1));
-            App.matpool.Add("3", new TCL_Matrix.Matrix(1, 1));
+            App.matpool.Add("0", new Matrix(1, 1));//字符0对应输入算式的暂时结果；DISP后结果存入temp1中
+            App.matpool.Add("1", new Matrix(1, 1));
+            App.matpool.Add("2", new Matrix(1, 1));
+            App.matpool.Add("3", new Matrix(1, 1));
             InitializeComponent();
         }
 
@@ -46,7 +46,7 @@ namespace MatrixCal
                     if (!EnvalueFlag)
                     {
                         EnvalueFlag = true;
-                        tmp1.Background = Brushes.Crimson;
+                        tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("1");
                         input.Show();
                     }
@@ -88,7 +88,7 @@ namespace MatrixCal
                     if (!EnvalueFlag)
                     {
                         EnvalueFlag = true;
-                        tmp1.Background = Brushes.Crimson;
+                        tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("2");
                         input.Show();
                     }
@@ -130,7 +130,7 @@ namespace MatrixCal
                     if (!EnvalueFlag)
                     {
                         EnvalueFlag = true;
-                        tmp1.Background = Brushes.Crimson;
+                        tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("3");
                         input.Show();
                     }
@@ -203,8 +203,8 @@ namespace MatrixCal
                 }
                 else if(App.matpool.ContainsKey(Interface.Text))
                 {
-                    TCL_Matrix.Matrix matrix = App.matpool[Interface.Text];
-                    matrix.QR(out TCL_Matrix.Matrix temp1, out TCL_Matrix.Matrix temp2);
+                    Matrix matrix = App.matpool[Interface.Text];
+                    matrix.QR(out Matrix temp1, out Matrix temp2);
                     App.matpool["1"] = temp1;
                     App.matpool["2"] = temp2;
                     log.Content = "已对" + Interface.Text + "进行QR分解";
@@ -239,7 +239,7 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
+                    Matrix matrix = App.matpool[key];
                     matrix.Gauss_Elimination();
                     log.Content = "已对" + Interface.Text + "进行高斯消元";
                 }
@@ -273,8 +273,8 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
-                    matrix.SVD(out TCL_Matrix.Matrix temp1, out TCL_Matrix.Matrix temp2, out TCL_Matrix.Matrix temp3);
+                    Matrix matrix = App.matpool[key];
+                    matrix.SVD(out Matrix temp1, out Matrix temp2, out Matrix temp3);
                     App.matpool["1"] = temp1;
                     App.matpool["2"] = temp2;
                     App.matpool["3"] = temp3;
@@ -314,9 +314,9 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
-                    TCL_Matrix.Matrix temp1;
-                    temp1=matrix.Transpose();
+                    Matrix matrix = App.matpool[key];
+                    Matrix temp1;
+                    temp1 = matrix.Transpose();
                     App.matpool["1"] = temp1;
                     log.Content = "已对" + Interface.Text + "进行转置";
                 }
@@ -350,8 +350,8 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
-                    matrix.InverseMatrix(out TCL_Matrix.Matrix temp1);
+                    Matrix matrix = App.matpool[key];
+                    matrix.InverseMatrix(out Matrix temp1);
                     App.matpool["1"] = temp1;
                     log.Content = "已对" + Interface.Text + "进行求逆";
                 }
@@ -385,7 +385,7 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
+                    Matrix matrix = App.matpool[key];
                     int rank = matrix.GetRank();
                     log.Content = Interface.Text+"的秩是"+Convert.ToString(rank);
                 }
@@ -419,9 +419,9 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
+                    Matrix matrix = App.matpool[key];
                     double det=matrix.Determinant();
-                    log.Content = Interface.Text + "的秩是" + Convert.ToString(det);
+                    log.Content = Interface.Text + "的行列式为" + Convert.ToString(det);
                 }
                 else
                 {
@@ -453,8 +453,8 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
-                    matrix.LU(out TCL_Matrix.Matrix temp1, out TCL_Matrix.Matrix temp2);
+                    Matrix matrix = App.matpool[key];
+                    matrix.LU(out Matrix temp1, out Matrix temp2);
                     App.matpool["1"] = temp1;
                     App.matpool["2"] = temp2;
                     log.Content = "已对" + Interface.Text + "进行LU分解";
@@ -489,7 +489,7 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
+                    Matrix matrix = App.matpool[key];
                     matrix.Gauss_Jordan_Elimination();
                     log.Content = "已对" + Interface.Text + "进行高斯-约旦消元";
                 }
@@ -523,9 +523,9 @@ namespace MatrixCal
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     string key = Interface.Text;
-                    TCL_Matrix.Matrix matrix = App.matpool[key];
+                    Matrix matrix = App.matpool[key];
                     double rad = matrix.SpectralRadius();
-                    log.Content = Interface.Text + "的秩是" + Convert.ToString(rad);
+                    log.Content = Interface.Text + "的谱半径是" + Convert.ToString(rad);
                 }
                 else
                 {
@@ -585,6 +585,12 @@ namespace MatrixCal
                 }
             }
         }
+        private bool IsValidMatrixName(string str)
+        {
+            if (str[0] >= 'A' && str[0] <= 'Z')
+                return true;
+            return false;
+        }
         private void CalculateAndPush(string s3)
         {
             string s1, s2;
@@ -594,8 +600,7 @@ namespace MatrixCal
                 s1 = stack.Pop();
             }
             else throw new Exception("表达式操作数个数有误");
-            if((s1.Length==1&& Convert.ToInt32(s1) >= 65 && Convert.ToInt32(s1) <= 90)&&
-                (s2.Length == 1 && Convert.ToInt32(s2) >= 65 && Convert.ToInt32(s2) <= 90))//s1，s2表示矩阵
+            if(s1.Length==1 && IsValidMatrixName(s1) && s2.Length == 1 && IsValidMatrixName(s2))//s1，s2表示矩阵
             {
                 if (!(App.matpool.ContainsKey(s1) && App.matpool.ContainsKey(s2)))
                 {
@@ -623,7 +628,7 @@ namespace MatrixCal
                     }
                 }
             }
-            else if (s1.Length == 1 && Convert.ToInt32(s1) >= 65 && Convert.ToInt32(s1) <= 90)//s1为矩阵，s2为数
+            else if (s1.Length == 1 && IsValidMatrixName(s1))//s1为矩阵，s2为数
             {
                 if (!App.matpool.ContainsKey(s1))
                 {
@@ -653,7 +658,7 @@ namespace MatrixCal
                     }
                 }
             }
-            else if (s2.Length == 1 && Convert.ToInt32(s2) >= 65 && Convert.ToInt32(s2) <= 90)//s2为矩阵，s1为数
+            else if (s2.Length == 1 && IsValidMatrixName(s2))//s2为矩阵，s1为数
             {
                 if (!App.matpool.ContainsKey(s2))
                 {

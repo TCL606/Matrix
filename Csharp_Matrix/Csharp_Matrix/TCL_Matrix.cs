@@ -9,8 +9,8 @@ namespace TCL_Matrix
         {
             Console.WriteLine(e.Message);
         }
-        private const double PRECISION_OF_DIFFERENCE = 1e-3;
-        private const double PRECISION_WHEN_CALCULATING = 1e-5;
+        public const double PRECISION_OF_DIFFERENCE = 1e-3;
+        public const double PRECISION_WHEN_CALCULATING = 1e-5;
 
         protected int row;
         public int Row { get => row; }
@@ -1886,7 +1886,7 @@ namespace TCL_Matrix
                 }
                 else
                 {
-                    Matrix ret = new Matrix(A.row, A.col +B.col);
+                    Matrix ret = new Matrix(A.row, A.col + B.col);
                     for (int i = 0; i < A.row; i++)
                     {
                         for (int j = 0; j < A.col; j++)

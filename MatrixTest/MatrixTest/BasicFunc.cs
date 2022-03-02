@@ -5,9 +5,9 @@ using System;
 namespace MatrixTest
 {
     [TestClass]
-    public partial class UnitTest
+    public static partial class UnitTest
     {
-        public bool IsEqual(Matrix A, Matrix B)
+        public static bool IsEqual(Matrix A, Matrix B)
         {
             if (A.Col != B.Col || A.Row != B.Row)
                 return false;
@@ -21,7 +21,7 @@ namespace MatrixTest
             }
             return true;
         }
-        public bool IsUpTri(Matrix A)
+        public static bool IsUpTri(Matrix A)
         {
             if (A.Col != A.Row)
                 return false;
@@ -35,7 +35,7 @@ namespace MatrixTest
             }
             return true;
         }
-        public bool IsDownTri(Matrix A)
+        public static bool IsDownTri(Matrix A)
         {
             if (A.Col != A.Row)
                 return false;
@@ -49,11 +49,11 @@ namespace MatrixTest
             }
             return true;
         }
-        public bool IsColOrthogonal(Matrix Q)
+        public static bool IsColOrthogonal(Matrix Q)
         {
             return IsEqual(Q.Transpose() * Q, Matrix.IdentityMatrix(Q.Col));
         }
-        public bool IsOrthogonal(Matrix Q)
+        public static bool IsOrthogonal(Matrix Q)
         {
             return Q.Col == Q.Row && IsEqual(Q.Transpose() * Q, Matrix.IdentityMatrix(Q.Col));
         }
