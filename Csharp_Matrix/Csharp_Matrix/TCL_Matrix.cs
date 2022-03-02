@@ -9,7 +9,8 @@ namespace TCL_Matrix
         {
             Console.WriteLine(e.Message);
         }
-        private const double PRECISION_OF_DIFFERENCE = 1e-3;
+        public const double PRECISION_OF_DIFFERENCE = 1e-3;
+        public const double PRECISION_WHEN_CALCULATING = 1e-5;
 
         protected int row;
         public int Row { get => row; }
@@ -125,6 +126,20 @@ namespace TCL_Matrix
             }
             return I;
         }
+
+        static public Matrix RandomMatrix(int row, int col, double MaxPossibleValue = 10)
+        {
+            Matrix ret = new Matrix(row, col);
+            Random r = new Random(Environment.TickCount);
+            for (int i = 0; i < row; i++)
+            {
+                for(int j = 0; j < col; j++)
+                {
+                    ret.matrix[i, j] = r.NextDouble() * MaxPossibleValue * (r.Next() % 2 == 1 ? 1 : -1);
+                }
+            }
+            return ret;
+        }
         #endregion
 
         #region 文件读写
@@ -153,16 +168,44 @@ namespace TCL_Matrix
             }
         }
 
-        //public static bool ReadFromFile(out Matrix m, String path)
-        //{
-        //    try 
-        //    {
-        //        using (StreamReader sr = new StreamReader(path))
-        //        {
-
-        //        }
-        //    }
-        //}
+        public static Matrix? ReadFromFile(String path)
+        {
+            try
+            {
+                int row, col;
+                Matrix m;
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    var str = sr.ReadLine()?.Split(' ');
+                    if (str != null && str.Length >= 2)
+                    {
+                        row = int.Parse(str[0]);
+                        col = int.Parse(str[1]);
+                        m = new Matrix(row, col);
+                    }
+                    else throw new Exception("Failed to read row and col!");
+                    str = sr.ReadLine()?.Split(' ');
+                    int k = 0;
+                    while (str != null && k < row)
+                    {
+                        if (str.Length >= col)
+                        {
+                            for (int i = 0; i < col; i++)
+                                m.matrix[k, i] = int.Parse(str[i]);
+                            k++;
+                            str = sr.ReadLine()?.Split(' ');
+                        }
+                        else throw new Exception("Failed to read the matrix!");
+                    }
+                    return m;
+                }
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return null;
+            }
+        }
         #endregion
 
         #endregion
@@ -668,7 +711,7 @@ namespace TCL_Matrix
             try
             {
                 if (this.matrix == null)
-                    throw new Exception("Try to get null space of null matrix!");
+                    throw new Exception("Try to get null space of a null matrix!");
                 Matrix ret = new Matrix(row, col + 1);
                 for (int i = 0; i < row; i++)
                 {
@@ -712,7 +755,7 @@ namespace TCL_Matrix
             try
             {
                 if (this.matrix == null)
-                    throw new Exception("Try to LU factorization on a null matrix!");
+                    throw new Exception("Try to do LU factorization on a null matrix!");
                 if (col != row)
                     throw new Exception("The matrix is not a square.LU decomposition failed.");
                 L = IdentityMatrix(col);
@@ -755,6 +798,521 @@ namespace TCL_Matrix
                 return false;
             }
         }
+
+        public bool SVD(out Matrix? U, out Matrix? Sigma, out Matrix? VT)
+        {
+            try
+            {
+                if (this.matrix == null)
+                    throw new Exception("Try to do SVD factorization on a null matrix!");
+                Matrix A = (this.Clone() as Matrix)?.Transpose();
+                List<double> values;
+                Sigma = new Matrix(this.row, this.col);
+                Matrix V = new Matrix(this.col, this.col);
+                U = new Matrix(this.row, this.row);
+
+                if (this.col< this.row)
+                {
+                    Matrix ATA = A * this;
+                    values = ATA.GetEigenValuesOfDefiniteMatrix(false);
+                    values.Sort();
+                    List<int> multiplicity = new List<int>();
+                    Matrix eigenSubSpace;
+                    int nowDim = 0;
+                    int ATADim = 0;
+                    double mod = 0;
+                    int len = 0;  //非0奇异值个数
+
+                    foreach (var val in values)
+                    {
+                        if ((ATA - val * IdentityMatrix(ATA.row)).GetBasesOfNullSpace(out eigenSubSpace))
+                        {
+                            for (int i = 0; i < eigenSubSpace.row; i++)
+                            {
+                                for (int j = 0; j < eigenSubSpace.col; j++)
+                                {
+                                    V.matrix[i , j + nowDim] = eigenSubSpace.matrix[i , j];
+                                }
+                            }
+                            multiplicity.Add(eigenSubSpace.col);
+                            nowDim += eigenSubSpace.col;
+                            if (Math.Abs(val) > PRECISION_OF_DIFFERENCE)
+                            {
+                                ATADim += eigenSubSpace.col;
+                                len++;
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"The eigen value {val} is not explicit!");
+                        }
+                    }
+                    Matrix V1 = new Matrix(V.row, ATADim);
+                    for (int i = 0; i < V1.row; i++)
+                    {
+                        for (int j = 0; j < V1.col; j++)
+                        {
+                            V1.matrix[i , j] = V.matrix[i , j];
+                        }
+                    }
+                    //V1作正交化
+                    int nowCol = 0;
+                    for (int j = 0; j < V1.col; j++)
+                    {
+                        mod = 0;
+                        for (int i = 0; i < V1.row; i++)
+                        {
+                            mod += V1.matrix[i , j] * V1.matrix[i , j];
+                        }
+                        mod = Math.Sqrt(mod);
+                        for (int i = 0; i < V1.row; i++)
+                        {
+                            V1.matrix[i , j] /= mod; //归一化
+                        }
+                        mod = 0;
+                        for (int k = 0; k < nowCol; k++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < V1.row; p++)
+                            {
+                                innerProduct += V1.matrix[p , k] * V1.matrix[p , nowCol];
+                            }
+                            for (int p = 0; p < V1.row; p++)
+                            {
+                                V1.matrix[p , nowCol] -= innerProduct * V1.matrix[p , k];
+                                mod += V1.matrix[p , nowCol] * V1.matrix[p , nowCol];
+                            }
+                            mod = Math.Sqrt(mod);
+                            for (int p = 0; p < V1.row; p++)
+                            {
+                                V1.matrix[p , nowCol] /= mod; //归一化
+                            }
+                            nowCol++;
+                        }
+                    }
+
+                    int now = 0;
+                    Matrix Sigmar = new Matrix(ATADim, ATADim);  //作一个Sigmar矩阵
+                    for (int i = 0; i < len; i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                Sigmar.matrix[now , now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
+                                now++;
+                            }
+                        }
+                    }
+
+                    now = 0;
+                    for (int i = 0; i < values.Count(); i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                Sigma.matrix[now , now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
+                                now++;
+                            }
+                        }
+                    }
+
+                    Matrix U1 = this * V1 * Sigmar;
+
+                    //还要生成V的正交基
+                    if (V1.col < V.col)
+                    {
+                        Matrix I = IdentityMatrix(V.row);
+                        Matrix zero = new Matrix(V.row, 1);
+                        Matrix V2 = new Matrix(V.row, V.col -V1.col);
+                        Matrix V1T = V1.Transpose();
+
+                        int nowExpandDim = 0;
+                        int iterateTimes = 0;
+                        double _mod;
+                        while (iterateTimes < V.col - V1.col)
+                        {
+                            for (int i = 0; i < V.row; i++)
+                            {
+                                _mod = 0;
+                                Matrix vector = new Matrix(V.row, 1);
+                                vector.matrix[i , 0] = 1;
+                                vector = (I - V1 * V1T) * vector;
+                                for (int j = 0; j < nowExpandDim; j++)
+                                {
+                                    double innerProduct = 0;
+                                    for (int p = 0; p < V2.row; p++)
+                                    {
+                                        innerProduct += V2.matrix[p , j] * vector.matrix[p , 0];
+                                    }
+                                    for (int p = 0; p < V1.row; p++)
+                                    {
+                                        vector.matrix[p , 0] -= innerProduct * V2.matrix[p , j];
+                                    }
+                                }
+
+                                if (vector != zero)
+                                {
+                                    for (int p = 0; p < vector.row; p++)
+                                    {
+                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                    }
+                                    _mod = Math.Sqrt(_mod);
+                                    for (int p = 0; p < V2.row; p++)
+                                    {
+                                        V2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                    }
+                                    nowExpandDim++;
+                                    break;
+                                }
+                            }
+                            iterateTimes++;
+                        }
+                        if (nowExpandDim != V.col - V1.col)
+                        {
+                                throw new Exception("Something went wrong that the program can't find all V's orthogonal bases!");
+                        }
+                        V = V1 & V2;
+                    }
+                    else V = V1;
+
+                    //生成U的正交基
+                    if (U1.col < U.col)  //当原矩阵不是方阵时，这里的U1还不是U，要补充正交向量
+                    {
+                        Matrix I = IdentityMatrix(U.row);
+                        Matrix zero = new Matrix(U.row, 1);
+                        Matrix U2 = new Matrix(U.row, U.col - U1.col);
+                        Matrix U1T = U1.Transpose();
+
+                        int nowExpandDim = 0;
+                        int iterateTimes = 0;
+                        double _mod;
+                        while (iterateTimes<U.col - U1.col)
+                        {
+                            for (int i = 0; i<U.row; i++)
+                            {
+                                _mod = 0;
+                                Matrix vector = new Matrix(U.row, 1);
+                                vector.matrix[i , 0] = 1;
+                                vector = (I - U1* U1T) * vector;
+                                for (int j = 0; j<nowExpandDim; j++)
+                                {
+                                    double innerProduct = 0;
+                                    for (int p = 0; p<U2.row; p++)
+                                    {
+                                        innerProduct += U2.matrix[p , j] * vector.matrix[p , 0];
+                                    }
+                                    for (int p = 0; p<U1.row; p++)
+                                    {
+                                        vector.matrix[p , 0] -= innerProduct* U2.matrix[p , j];
+                                    }
+                                }
+
+                                if (vector != zero)
+                                {
+                                    for (int p = 0; p < vector.row; p++)
+                                    {
+                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                    }
+                                    _mod = Math.Sqrt(_mod);
+                                    for (int p = 0; p < U2.row; p++)
+                                    {
+                                        U2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                    }
+                                    nowExpandDim++;
+                                    break;
+                                }
+                            }
+                            iterateTimes++;
+                        }
+                        if (nowExpandDim != U.col - U1.col)
+                        {
+                            throw new Exception("Something went wrong that the program can't find all U's orthogonal bases!");
+                        }
+                        U = U1 & U2;
+                    }
+                    else U = U1;
+                }
+                else
+                {
+                    Matrix AAT = this * A;
+                    values = AAT.GetEigenValuesOfDefiniteMatrix(false);
+                    values.Sort();
+                    List<int> multiplicity = new List<int>();
+                    Matrix eigenSubSpace;
+                    int nowDim = 0;
+                    int AATDim = 0;
+                    double mod = 0;
+                    int len = 0;
+
+                    foreach (var val in values)
+                    {
+                        if ((AAT - val * IdentityMatrix(AAT.row)).GetBasesOfNullSpace(out eigenSubSpace))
+                        {
+                            for (int i = 0; i < eigenSubSpace.row; i++)
+                            {
+                                for (int j = 0; j < eigenSubSpace.col; j++)
+                                {
+                                    U.matrix[i , j + nowDim] = eigenSubSpace.matrix[i , j];
+                                }
+                            }
+                            multiplicity.Add(eigenSubSpace.col);
+                            nowDim += eigenSubSpace.col;
+                            if (Math.Abs(val) > PRECISION_OF_DIFFERENCE)
+                            {
+                                AATDim += eigenSubSpace.col;
+                                len++;
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"The eigen value {val} is not explicit!");
+                        }
+                    }
+                    Matrix U1 = new Matrix(U.row, AATDim);
+                    for (int i = 0; i < U1.row; i++)
+                    {
+                        for (int j = 0; j < U1.col; j++)
+                        {
+                            U1.matrix[i , j] = U.matrix[i , j];
+                        }
+                    }
+                    //U1作正交化
+                    int nowCol = 0;
+                    for (int j = 0; j < U1.col; j++)
+                    {
+                        mod = 0;
+                        for (int i = 0; i < U1.row; i++)
+                        {
+                            mod += U1.matrix[i , j] * U1.matrix[i , j];
+                        }
+                        mod = Math.Sqrt(mod);
+                        for (int i = 0; i < U1.row; i++)
+                        {
+                            U1.matrix[i , j] /= mod; //归一化
+                        }
+                        mod = 0;
+                        for (int k = 0; k < nowCol; k++)
+                        {
+                            double innerProduct = 0;
+                            for (int p = 0; p < U1.row; p++)
+                            {
+                                innerProduct += U1.matrix[p , k] * U1.matrix[p , nowCol];
+                            }
+                            for (int p = 0; p < U1.row; p++)
+                            {
+                                U1.matrix[p , nowCol] -= innerProduct * U1.matrix[p , k];
+                                mod += U1.matrix[p , nowCol] * U1.matrix[p , nowCol];
+                            }
+                            mod = Math.Sqrt(mod);
+                            for (int p = 0; p < U1.row; p++)
+                            {
+                                U1.matrix[p , nowCol] /= mod; //归一化
+                            }
+                            nowCol++;
+                        }
+                    }
+
+                    int now = 0;
+                    Matrix Sigmar = new Matrix(AATDim, AATDim);  //作一个Sigmar矩阵
+                    for (int i = 0; i < len; i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                Sigmar.matrix[now , now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
+                                now++;
+                            }
+                        }
+                    }
+
+                    now = 0;
+                    for (int i = 0; i < values.Count(); i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                Sigma.matrix[now , now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
+                                now++;
+                            }
+                        }
+                    }
+
+                    Matrix V1 = A* U1 *Sigmar;
+
+                    //还要生成U的正交基
+                    if (U1.col < U.col)
+                    {
+                        Matrix I = IdentityMatrix(U.row);
+                        Matrix zero = new Matrix(U.row, 1);
+                        Matrix U2 = new Matrix(U.row, U.col -U1.col);
+                        Matrix U1T = U1.Transpose();
+
+                        int nowExpandDim = 0;
+                        int iterateTimes = 0;
+                        double _mod;
+                        while (iterateTimes < U.col - U1.col)
+                        {
+                            for (int i = 0; i < U.row; i++)
+                            {
+                                _mod = 0;
+                                Matrix vector = new Matrix(U.row, 1);
+                                vector.matrix[i , 0] = 1;
+                                vector = (I - U1 * U1T) * vector;
+                                for (int j = 0; j < nowExpandDim; j++)
+                                {
+                                    double innerProduct = 0;
+                                    for (int p = 0; p < U2.row; p++)
+                                    {
+                                        innerProduct += U2.matrix[p , j] * vector.matrix[p , 0];
+                                    }
+                                    for (int p = 0; p < U1.row; p++)
+                                    {
+                                        vector.matrix[p , 0] -= innerProduct * U2.matrix[p , j];
+                                    }
+                                }
+
+                                if (vector != zero)
+                                {
+                                    for (int p = 0; p < vector.row; p++)
+                                    {
+                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                    }
+                                    _mod = Math.Sqrt(_mod);
+                                    for (int p = 0; p < U2.row; p++)
+                                    {
+                                        U2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                    }
+                                    nowExpandDim++;
+                                    break;
+                                }
+                            }
+                            iterateTimes++;
+                        }
+                        if (nowExpandDim != U.col - U1.col)
+                        {
+                            throw new Exception("Something went wrong that the program can't find all U's orthogonal bases!");
+                        }
+                        U = U1 & U2;
+                    }
+                    else U = U1;
+
+                    //生成V的正交基
+                    if (V1.col < V.col)  //当原矩阵不是方阵时，这里的V1还不是V，要补充正交向量
+                    {
+                        Matrix I = IdentityMatrix(V.row);
+                        Matrix zero = new Matrix(V.row, 1);
+                        Matrix V2 = new Matrix(V.row, V.col -V1.col);
+                        Matrix V1T = V1.Transpose();
+
+                        int nowExpandDim = 0;
+                        int iterateTimes = 0;
+                        double _mod;
+                        while (iterateTimes < V.col - V1.col)
+                        {
+                            for (int i = 0; i < V.row; i++)
+                            {
+                                _mod = 0;
+                                Matrix vector = new Matrix(V.row, 1);
+                                vector.matrix[i , 0] = 1;
+                                vector = (I - V1 * V1T) * vector;
+                                for (int j = 0; j < nowExpandDim; j++)
+                                {
+                                    double innerProduct = 0;
+                                    for (int p = 0; p < V2.row; p++)
+                                    {
+                                        innerProduct += V2.matrix[p , j] * vector.matrix[p , 0];
+                                    }
+                                    for (int p = 0; p < V1.row; p++)
+                                    {
+                                        vector.matrix[p , 0] -= innerProduct * V2.matrix[p , j];
+                                    }
+                                }
+
+                                if (vector != zero)
+                                {
+                                    for (int p = 0; p < vector.row; p++)
+                                    {
+                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                    }
+                                    _mod = Math.Sqrt(_mod);
+                                    for (int p = 0; p < V2.row; p++)
+                                    {
+                                        V2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                    }
+                                    nowExpandDim++;
+                                    break;
+                                }
+                            }
+                            iterateTimes++;
+                        }
+                        if (nowExpandDim != V.col - V1.col)
+                        {
+                            throw new Exception("Something went wrong that the program can't find all V's orthogonal bases!");
+                        }
+                        V = V1 & V2;
+                    }
+                    else V = V1;
+                }
+                VT = V.Transpose();
+            }
+            catch (Exception e)
+            {
+                Sigma = VT = U = null;
+                ExceptionHandling(e);
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 矩阵QR分解
+        /// </summary>
+        /// <param name="Q">列正交矩阵</param>
+        /// <param name="R">上三角矩阵</param>
+        /// <returns></returns>
+        public bool QR(out Matrix? Q, out Matrix? R)
+        {
+            try 
+            {
+                if (this.matrix == null)
+                    throw new Exception("Try to do QR factorization on a null matrix!");
+                Q = new Matrix(this.row, this.col);
+                R = IdentityMatrix(this.col);
+                for (int i = 0; i < this.col; i++)
+                {
+                    Matrix a = this[i];
+                    Matrix aT = a.Transpose();
+                    for (int j = 0; j < i; j++)
+                    {
+                        R[j, i] = (aT * Q[j])[0, 0];
+                        a -= R[j, i] * Q[j];
+                    }
+                    double norm2 = 0;
+                    for (int k = 0; k < a.row; k++)
+                    {
+                        norm2 += a[k, 0] * a[k, 0];
+                    }
+                    R[i, i] = Math.Sqrt(norm2);
+                    a = 1 / R[i, i] * a;
+                    for (int k = 0; k < this.row; k++)
+                    {
+                        Q[k, i] = a[k, 0];
+                    }
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                Q = null;
+                R = null;
+                ExceptionHandling(e);
+                return false;
+            }
+        }
         #endregion
 
         /// <summary>
@@ -783,13 +1341,79 @@ namespace TCL_Matrix
             }
         }
 
-        #region 特征值相关
+        /// <summary>
+        /// 矩阵的幂，矩阵必须为方阵
+        /// </summary>
+        /// <param name="n">必须是自然数</param>
+        /// <returns>若矩阵不为方阵或参数小于0，则返回原矩阵</returns>
+        public Matrix Power(int n)
+        {
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square!");
+                }
+                if (n < 0)
+                {
+                    throw new Exception("The specified power is less than 0! No changes!");
+                }
+                if (this.matrix == null)
+                {
+                    throw new Exception("Null matrix cannot be exponentiated!");
+                }
+                else
+                {
+                    Matrix ori = new Matrix(this.matrix);
+                    Matrix ret = IdentityMatrix(row);
+                    while (n > 0)
+                    {
+                        if (n % 2 >= 1)
+                        {
+                            ret *= ori;
+                            n -= 1;
+                            ori *= ori;
+                            n /= 2;
+                        }
+                        else
+                        {
+                            ori *= ori;
+                            n /= 2;
+                        }
+                    }
+                    return ret;
+                }
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                return this;
+            }
+        }
 
+        /// <summary>
+        /// 矩阵转置
+        /// </summary>
+        /// <returns></returns>
+        public Matrix Transpose()
+        {
+            Matrix ret = new Matrix(col, row);
+            for (int i = 0; i < col; i++)
+            {
+                for (int j = 0; j < row; j++)
+                {
+                    ret.matrix[i, j] = this.matrix[j, i];
+                }
+            }
+            return ret;
+        }
+
+        #region 特征值相关
         /// <summary>
         /// 计算方阵特征多项式系数
         /// </summary>
         /// <returns></returns>
-        public IList GetCoefficientsOfCharacteristicPolynomial()
+        public List<double> GetCoefficientsOfCharacteristicPolynomial()
         {
             List<double> li = new List<double>();
             try
@@ -831,6 +1455,299 @@ namespace TCL_Matrix
             return li;
         }
 
+        /// <summary>
+        /// Aberth方法计算矩阵所有特征值
+        /// </summary>
+        /// <param name="possibleMaxMultiplicity"></param>
+        /// <param name="aberthIteration"></param>
+        /// <param name="newtonIteration"></param>
+        /// <param name="possibleMaxMod"></param>
+        /// <returns></returns>
+        public List<Complex> GetAllEigenValues(int aberthIteration = 700, int newtonIteration = 5, int possibleMaxMod = 150)
+        {
+            List<Complex> v = new List<Complex>();
+            Random rand = new Random();
+            try
+            {
+                if (col != row)
+                {
+                    throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
+                }
+                List<double> coeff = GetCoefficientsOfCharacteristicPolynomial();
+                int possibleMaxMultiplicity = row;
+                double[][] poly = new double[possibleMaxMultiplicity + 1][];
+                for (int i = 0; i < possibleMaxMultiplicity + 1; i++)
+                {
+                    poly[i] = new double[col + 1];
+                }
+                for (int i = 0; i < col + 1; i++)
+                {
+                    poly[0][i] = coeff[i];
+                }
+                for (int i = 1; i < possibleMaxMultiplicity + 1; i++)
+                {
+                    for (int j = 0; j < col + 1 - i; j++)
+                    {
+                        poly[i][j] = poly[i - 1][j + 1] * (j + 1);
+                    }
+                }
+                Complex[] roots = new Complex[col];
+                Complex[] multiroots = new Complex[col];
+                int[] multiplicity = new int[col];
+                int multirootnum = 0;
+                for (int i = 0; i < col; i++)
+                {
+                    roots[i] = new Complex(rand.Next(2 * possibleMaxMod) - possibleMaxMod, rand.Next(2 * possibleMaxMod) - possibleMaxMod);
+                }
+
+                //Aberth
+                Complex[] w = new Complex[col];
+                Complex one = new Complex(1, 0);
+                Complex zero = new Complex(0, 0);
+                Complex sum;
+                Func<double[], int, Complex, Complex> PolynomialFunc = (double[] coeff, int degree, Complex z) =>
+                   {
+                       Complex ret = new Complex(0, 0);
+                       for (int i = 0; i < degree + 1; i++)
+                       {
+                           ret += (coeff[i] * Complex.Power(z, i));
+                       }
+                       return ret;
+                   };
+                Func<Complex, Complex, double, bool> Greater = (Complex z1, Complex z2, double precision) =>
+                  {
+                      if (z1.real > precision + z2.real)
+                          return true;
+                      else if (z1.real + precision < z2.real)
+                          return false;
+                      else if (Math.Abs(z1.imag) - Math.Abs(z2.imag) > precision)
+                          return true;
+                      else if (Math.Abs(z1.imag) < Math.Abs(z2.imag) + precision)
+                          return false;
+                      else if (z1.imag > z2.imag + precision)
+                          return true;
+                      else return false;
+                  };
+                while (aberthIteration > 0)
+                {
+                    aberthIteration--;
+                    for (int i = 0; i < col; i++)
+                    {
+                        sum = zero;
+                        Complex rate = PolynomialFunc(poly[0], col, roots[i]) / PolynomialFunc(poly[1], col - 1, roots[i]);
+                        for (int j = 0; j < col; j++)
+                        {
+                            if (j != i)
+                            {
+                                sum += (one / (roots[i] - roots[j]));
+                            }
+                        }
+                        w[i] = rate / (one - rate * sum);
+                    }
+                    for (int i = 0; i < col; i++)
+                    {
+                        roots[i] -= w[i];
+                    }
+                }
+                
+                //懒得定义新变量了，直接开辟一块区域算了
+                {
+                    int i, j, max = 0;
+                    Complex temp;
+                    for (i = 0; i < col - 1; i++)
+                    {
+                        max = i;
+                        for (j = i + 1; j < col; j++)
+                        {
+                            if (Greater(roots[j], roots[max], 0.1 * PRECISION_OF_DIFFERENCE))
+                            {
+                                max = j;
+                            }
+                        }
+                        temp = roots[i];
+                        roots[i] = roots[max];
+                        roots[max] = temp;
+                    }
+                }
+
+                for (int i = 0; i < col; i++)
+                    multiplicity[i] = 0;
+                for (int i = 0; i < col; i++)
+                {
+                    int x = -1;
+                    for (int j = 0; j < multirootnum; ++j)
+                    {
+                        if (Complex.Abs(multiroots[j] - roots[i]) < PRECISION_OF_DIFFERENCE * 20) //这里的精度不能太大
+                        {
+                            x = j;
+                            break;
+                        }
+                    }
+                    if (x != -1)
+                    {
+                        multiplicity[x]++;
+                    }
+                    else
+                    {
+                        multiroots[multirootnum] = roots[i];
+                        multiplicity[multirootnum] = 1;
+                        multirootnum++;
+                    }
+                }
+
+                //Newton
+                {
+                    for (int i = 0; i < multirootnum; i++)
+                    {
+                        for (int j = 1; j <= possibleMaxMultiplicity; j++)
+                        {
+                            if (j == multiplicity[i])
+                            {
+                                for (int k = 0; k < newtonIteration; k++)
+                                {
+                                    multiroots[i] = multiroots[i] - PolynomialFunc(poly[j - 1], col - j + 1, multiroots[i]) / PolynomialFunc(poly[j], col - j, multiroots[i]);
+                                }
+                                break;
+                            }
+                            else if (j > possibleMaxMultiplicity)
+                            {
+                                for (int k = 0; k < newtonIteration; k++)
+                                {
+                                    multiroots[i] = multiroots[i] - PolynomialFunc(poly[possibleMaxMultiplicity - 1], col - possibleMaxMultiplicity + 1, multiroots[i]) / PolynomialFunc(poly[possibleMaxMultiplicity], col - possibleMaxMultiplicity, multiroots[i]);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    int x = 0;
+                    for (int i = 0; i < multirootnum; i++)
+                    {
+                        for (int j = 0; j < multiplicity[i]; j++)
+                        {
+                            roots[x + j] = multiroots[i];
+                        }
+                        x += multiplicity[i];
+                    }
+                }
+
+                for (int i = 0; i < col; i++)
+                {
+                    if (Math.Abs(roots[i].imag) < 0.1 * PRECISION_OF_DIFFERENCE)
+                    {
+                        v.Add(roots[i]);
+                    }
+                    else if (roots[i].imag >= 0)
+                    {
+                        v.Add(new Complex(roots[i].real, Math.Abs(roots[i].imag)));
+                        v.Add(new Complex(roots[i].real, -Math.Abs(roots[i].imag)));
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                ExceptionHandling(e);
+                v.Clear();
+            }
+            return v;
+        }
+
+        /// <summary>
+        /// 计算对称非不定矩阵特征值
+        /// </summary>
+        /// <param name="judgeSymmetry">是否对矩阵的对称性进行判断</param>
+        /// <returns></returns>
+        public List<double> GetEigenValuesOfDefiniteMatrix(bool judgeSymmetry = true)
+        {
+            List<double> v = new List<double>();
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
+                }
+                if(judgeSymmetry)
+                {
+                    for (int i = 0; i < row; i++)
+                    {
+                        for (int j = i + 1; j < col; j++)
+                        {
+                            if (Math.Abs(matrix[i , j] - matrix[j , i]) > PRECISION_OF_DIFFERENCE)
+                            {
+                                throw new Exception("The matrix is not symmetric!");
+                            }
+                        }
+                    }
+                }
+                var complexEigen = GetAllEigenValues();
+                foreach(Complex i in complexEigen)
+                {
+                    if(!v.Contains(i.real))
+                        v.Add(i.real);
+                }
+            }
+            catch(Exception e)
+            {
+                v.Clear();
+                ExceptionHandling(e);
+            }
+            return v;
+        }
+
+        /// <summary>
+        /// 求方阵谱半径
+        /// </summary>
+        /// <param name="precision"></param>
+        /// <param name="minIteration"></param>
+        /// <returns></returns>
+        public double SpectralRadius(double precision = PRECISION_WHEN_CALCULATING, int minIteration = 10)
+        {
+            try
+            {
+                if (row != col)
+                {
+                    throw new Exception("The matrix is not a square so its spectral radius is not defined! Return Double.MaxValue.");
+                }
+                Matrix T = this.Clone() as Matrix;
+                Matrix vector = new Matrix(T.col, 1);
+                for (int i = 0; i < T.col; i++)
+                {
+                    vector.matrix[i , 0] = 1;
+                }
+
+                vector = T * vector;
+                int maxpos = 0; //最大位置
+                for (int i = 0; i < T.col; i++)
+                {
+                    if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                        maxpos = i;
+                }
+                double last = vector.matrix[maxpos , 0];
+                double now = last;
+                int iteration = 0; //归0迭代次数
+                do
+                {
+                    last = now;
+                    for (int i = 0; i < T.col; i++)
+                    {
+                        vector.matrix[i , 0] /= last;
+                    }
+                    vector = T * vector;
+                    for (int i = 0; i < T.col; i++)
+                    {
+                        if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                            maxpos = i;
+                    }
+                    now = vector.matrix[maxpos , 0];
+                    iteration++;
+                } while (iteration < minIteration || Math.Abs(now - last) > precision);
+                return now;
+            }
+            catch (Exception e)
+            {
+                ExceptionHandling(e);
+                return Double.MaxValue;
+            }
+        }
         #endregion
 
         #endregion
@@ -954,6 +1871,40 @@ namespace TCL_Matrix
                 return ret;
             }
             catch(Exception e)
+            {
+                ExceptionHandling(e);
+                return A;
+            }
+        }
+        public static Matrix operator &(Matrix A, Matrix B)
+        {
+            try
+            {
+                if (A.row != B.row)
+                {
+                    throw new Exception("A and B don't have the same rows! Failed to merge. Return the first matrix.");
+                }
+                else
+                {
+                    Matrix ret = new Matrix(A.row, A.col + B.col);
+                    for (int i = 0; i < A.row; i++)
+                    {
+                        for (int j = 0; j < A.col; j++)
+                        {
+                            ret.matrix[i , j] = A.matrix[i , j];
+                        }
+                    }
+                    for (int i = 0; i < B.row; i++)
+                    {
+                        for (int j = 0; j < B.col; j++)
+                        {
+                            ret.matrix[i , j + A.col] = B.matrix[i , j];
+                        }
+                    }
+                    return ret;
+                }
+            }
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 return A;
@@ -1110,10 +2061,46 @@ namespace TCL_Matrix
         {
             return new Complex(z1.real * z2.real - z1.imag * z2.imag, z1.imag * z2.real + z1.real * z2.imag);
         }
+        public static Complex operator *(double k, Complex z1)
+        {
+            return new Complex(k * z1.real, k * z1.imag);
+        }
         public static Complex operator /(Complex z1, Complex z2)
         {
             double z2mod2 = z2.real * z2.real + z2.imag * z2.imag;
+            if (z2mod2 == 0)
+                throw new Exception("Divided by zero!");
             return new((z1.real * z2.real + z1.imag * z2.imag) / z2mod2, (z1.imag * z2.real - z1.real * z2.imag) / z2mod2);
+        }
+        public static Complex Power(Complex z1, int n)
+        {
+            Complex ori = z1;
+            Complex ret = new Complex(1, 0);
+            if (n < 0)
+            {
+                ori = ret / ori;
+                n = -n;
+            }
+            while (n > 0)
+            {
+                if (n % 2 >= 1)
+                {
+                    ret *= ori;
+                    n -= 1;
+                    ori *= ori;
+                    n /= 2;
+                }
+                else
+                {
+                    ori *= ori;
+                    n /= 2;
+                }
+            }
+            return ret;
+        }
+        public override string ToString()
+        {
+            return new String($"({this.real}, {this.imag})");
         }
     }
 }
