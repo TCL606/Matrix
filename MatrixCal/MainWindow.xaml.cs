@@ -62,10 +62,12 @@ namespace MatrixCal
                         throw new Exception("本功能只支持对单个矩阵操作");
                     }
                     else
-                    {
-                        STOflag = false;
-                        App.matpool[Interface.Text] = App.matpool["1"];
-                        log.Content = "已对矩阵" + Interface.Text + "赋值";
+                    {          
+                            STOflag = false;
+                            sto.Background = new System.Windows.Media.SolidColorBrush(
+                                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+                            App.matpool[Interface.Text] = App.matpool["1"];
+                            log.Content = "已对矩阵" + Interface.Text + "赋值";
                     }
                 }
             }
@@ -106,6 +108,8 @@ namespace MatrixCal
                     else
                     {
                         STOflag = false;
+                        sto.Background = new System.Windows.Media.SolidColorBrush(
+                                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
                         App.matpool[Interface.Text] = App.matpool["2"];
                         log.Content = "已对矩阵" + Interface.Text + "赋值";
                     }
@@ -148,6 +152,8 @@ namespace MatrixCal
                     else
                     {
                         STOflag = false;
+                        sto.Background = new System.Windows.Media.SolidColorBrush(
+                                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
                         App.matpool[Interface.Text] = App.matpool["3"];
                         log.Content = "已对矩阵" + Interface.Text + "赋值";
                     }
@@ -238,9 +244,7 @@ namespace MatrixCal
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
-                    string key = Interface.Text;
-                    Matrix matrix = App.matpool[key];
-                    matrix.Gauss_Elimination();
+                    App.matpool[Interface.Text].Gauss_Elimination();
                     log.Content = "已对" + Interface.Text + "进行高斯消元";
                 }
                 else
@@ -297,7 +301,17 @@ namespace MatrixCal
         }
         private void STO(object sender, RoutedEventArgs e)
         {
-            STOflag = true;
+            if (!STOflag)
+            {
+                STOflag = true;
+                sto.Background = System.Windows.Media.Brushes.Crimson;
+            }
+            else
+            {
+                STOflag = false;
+                sto.Background = new System.Windows.Media.SolidColorBrush(
+                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+            }
         }
         private void TRAN(object sender, RoutedEventArgs e)
         {
@@ -421,7 +435,7 @@ namespace MatrixCal
                     string key = Interface.Text;
                     Matrix matrix = App.matpool[key];
                     double det=matrix.Determinant();
-                    log.Content = Interface.Text + "的行列式为" + Convert.ToString(det);
+                    log.Content = Interface.Text + "的行列式是" + Convert.ToString(det);
                 }
                 else
                 {
@@ -488,10 +502,8 @@ namespace MatrixCal
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
-                    string key = Interface.Text;
-                    Matrix matrix = App.matpool[key];
-                    matrix.Gauss_Jordan_Elimination();
-                    log.Content = "已对" + Interface.Text + "进行高斯-约旦消元";
+                    App.matpool[Interface.Text].Gauss_Jordan_Elimination();
+                    log.Content = "已对" + Interface.Text + "G-J消元";
                 }
                 else
                 {
@@ -551,7 +563,11 @@ namespace MatrixCal
                 errflag = true;
             }
         }
-        private void DISP(object sender, RoutedEventArgs e)
+        private void Guide(object sender, RoutedEventArgs e)
+        {
+            _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://eesast.com");
+        }
+            private void DISP(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -562,7 +578,7 @@ namespace MatrixCal
                     if (arr[i] != "+" && arr[i] != "-" && arr[i] != "*" && arr[i] != "^")//不是运算符
                     {
                         stack.Push(arr[i]);
-                        log.Content = Convert.ToString(stack.Count);
+                        if(IsValidMatrixName(arr[i]))
                         App.temppool[arr[i]]=App.matpool[arr[i]];
                     }
                     else//是运算符
@@ -570,10 +586,17 @@ namespace MatrixCal
                         CalculateAndPush(arr[i]);
                     }
                 }
-                App.matpool["1"] = App.temppool[stack.Pop()];//结果存在temp1中
+                if (stack.Count > 1)
+                    throw new Exception("表达式语法有误");
+                if (IsValidMatrixName(stack.Peek()))
+                {
+                    App.matpool["1"] = App.temppool[stack.Pop()];//结果存在temp1中
+                    Output output = new("1");
+                    output.Show();
+                    log.Content = "计算完成";
+                }
+                else log.Content = Convert.ToDouble(stack.Pop()); 
                 App.temppool.Clear();
-                Output output = new("1");
-                output.Show();
             }
             catch (Exception ex)
             {
@@ -600,7 +623,7 @@ namespace MatrixCal
                 s1 = stack.Pop();
             }
             else throw new Exception("表达式操作数个数有误");
-            if(s1.Length==1 && IsValidMatrixName(s1) && s2.Length == 1 && IsValidMatrixName(s2))//s1，s2表示矩阵
+            if(IsValidMatrixName(s1)&&IsValidMatrixName(s2))//s1，s2表示矩阵
             {
                 if (!(App.matpool.ContainsKey(s1) && App.matpool.ContainsKey(s2)))
                 {
@@ -624,11 +647,10 @@ namespace MatrixCal
                             break;
                         case "^":
                             throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
-                            break;
                     }
                 }
             }
-            else if (s1.Length == 1 && IsValidMatrixName(s1))//s1为矩阵，s2为数
+            else if (IsValidMatrixName(s1))//s1为矩阵，s2为数
             {
                 if (!App.matpool.ContainsKey(s1))
                 {
@@ -641,24 +663,18 @@ namespace MatrixCal
                         case "+":     
                         case "-":
                             throw new Exception("矩阵不能和数相加减");
-                            break;
                         case "*":
                             App.temppool[s1] = Convert.ToDouble(s2)* App.temppool[s1];
                             stack.Push(s1);
                             break;
                         case "^":
-                            if (Convert.ToInt32(s2) == Convert.ToDouble(s2))
-                            {
                                 App.temppool[s1] = App.temppool[s1].Power(Convert.ToInt32(s2));
                                 stack.Push(s1);
-                            }
-                            else
-                                throw new Exception("不支持矩阵分数幂运算");
-                            break;
+                                break;
                     }
                 }
             }
-            else if (s2.Length == 1 && IsValidMatrixName(s2))//s2为矩阵，s1为数
+            else if (IsValidMatrixName(s2))//s2为矩阵，s1为数
             {
                 if (!App.matpool.ContainsKey(s2))
                 {
@@ -672,7 +688,7 @@ namespace MatrixCal
                         case "-":
                             throw new Exception("矩阵不能和数相加减");        
                         case "*":
-                            App.temppool[s2] = App.temppool[s2].Power(Convert.ToInt32(s1));
+                            App.temppool[s2] = Convert.ToDouble(s1) * App.temppool[s2];
                             stack.Push(s2);
                             break;
                         case "^":
