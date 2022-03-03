@@ -1,0 +1,47 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "MatrixCal/1.0.0": {
+        "dependencies": {
+          "Csharp_Matrix": "1.0.0",
+          "StringProcessing": "1.0.0"
+        },
+        "runtime": {
+          "MatrixCal.dll": {}
+        }
+      },
+      "Csharp_Matrix/1.0.0": {
+        "runtime": {
+          "Csharp_Matrix.dll": {}
+        }
+      },
+      "StringProcessing/1.0.0": {
+        "runtime": {
+          "StringProcessing.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "MatrixCal/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Csharp_Matrix/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "StringProcessing/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

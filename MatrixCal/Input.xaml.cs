@@ -12,7 +12,7 @@ namespace MatrixCal
     public partial class Input : Window
     {  
         const int TextBoxHeight = 15;
-        const int TextBoxWidth = 36;
+        const int TextBoxWidth = 48;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;
         public Input(string s)

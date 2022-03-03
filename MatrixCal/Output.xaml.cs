@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace MatrixCal
 {
@@ -20,7 +12,7 @@ namespace MatrixCal
     public partial class Output : Window
     {
         const int TextBoxHeight = 15;
-        const int TextBoxWidth = 36;
+        const int TextBoxWidth = 48;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;
         public Output(string s)
@@ -39,7 +31,9 @@ namespace MatrixCal
                 for (int j = 0; j < p.Col; j++)
                 {
                     textBoxes[i, j] = new();
-                    textBoxes[i, j].Text=Convert.ToString(p[i,j]);
+                    textBoxes[i, j].Text = p[i, j].ToString("G4");
+                    if (textBoxes[i, j].Text == "-0")
+                        textBoxes[i, j].Text = "0";
                     textBoxes[i, j].IsReadOnly = true;
                     OutputGrid.Children.Add(textBoxes[i, j]);
                     textBoxes[i, j].HorizontalAlignment = HorizontalAlignment.Left;
