@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Csharp_Matrix", "..\Csharp_
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StringProcessing", "..\StringProcessing\StringProcessing\StringProcessing.csproj", "{4097BFE3-F037-4FBC-917D-5F03995FA8BB}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "..\Setup1\Setup1.vdproj", "{CAE0BC5A-54B7-4E83-AE7B-A045E60F88B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,8 @@ Global
 		{4097BFE3-F037-4FBC-917D-5F03995FA8BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4097BFE3-F037-4FBC-917D-5F03995FA8BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4097BFE3-F037-4FBC-917D-5F03995FA8BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAE0BC5A-54B7-4E83-AE7B-A045E60F88B9}.Debug|Any CPU.ActiveCfg = Debug
+		{CAE0BC5A-54B7-4E83-AE7B-A045E60F88B9}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
