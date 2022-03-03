@@ -565,7 +565,7 @@ namespace MatrixCal
         }
         private void Guide(object sender, RoutedEventArgs e)
         {
-            _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://eesast.com");
+            _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://github.com/TCL606/Matrix/tree/dev/MatrixCal");
         }
             private void DISP(object sender, RoutedEventArgs e)
         {
