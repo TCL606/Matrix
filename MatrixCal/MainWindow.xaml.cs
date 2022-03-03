@@ -244,9 +244,7 @@ namespace MatrixCal
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
-                    string key = Interface.Text;
-                    Matrix matrix = App.matpool[key];
-                    matrix.Gauss_Elimination();
+                    App.matpool[Interface.Text].Gauss_Elimination();
                     log.Content = "已对" + Interface.Text + "进行高斯消元";
                 }
                 else
@@ -303,8 +301,17 @@ namespace MatrixCal
         }
         private void STO(object sender, RoutedEventArgs e)
         {
-            STOflag = true;
-            sto.Background = System.Windows.Media.Brushes.Crimson;    
+            if (!STOflag)
+            {
+                STOflag = true;
+                sto.Background = System.Windows.Media.Brushes.Crimson;
+            }
+            else
+            {
+                STOflag = false;
+                sto.Background = new System.Windows.Media.SolidColorBrush(
+                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+            }
         }
         private void TRAN(object sender, RoutedEventArgs e)
         {
@@ -428,7 +435,7 @@ namespace MatrixCal
                     string key = Interface.Text;
                     Matrix matrix = App.matpool[key];
                     double det=matrix.Determinant();
-                    log.Content = Interface.Text + "的行列式为" + Convert.ToString(det);
+                    log.Content = Interface.Text + "的行列式是" + Convert.ToString(det);
                 }
                 else
                 {
@@ -495,9 +502,7 @@ namespace MatrixCal
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
-                    string key = Interface.Text;
-                    Matrix matrix = App.matpool[key];
-                    matrix.Gauss_Jordan_Elimination();
+                    App.matpool[Interface.Text].Gauss_Jordan_Elimination();
                     log.Content = "已对" + Interface.Text + "G-J消元";
                 }
                 else
@@ -558,7 +563,11 @@ namespace MatrixCal
                 errflag = true;
             }
         }
-        private void DISP(object sender, RoutedEventArgs e)
+        private void Guide(object sender, RoutedEventArgs e)
+        {
+            _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://eesast.com");
+        }
+            private void DISP(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -577,11 +586,14 @@ namespace MatrixCal
                         CalculateAndPush(arr[i]);
                     }
                 }
+                if (stack.Count > 1)
+                    throw new Exception("表达式语法有误");
                 if (IsValidMatrixName(stack.Peek()))
                 {
                     App.matpool["1"] = App.temppool[stack.Pop()];//结果存在temp1中
                     Output output = new("1");
                     output.Show();
+                    log.Content = "计算完成";
                 }
                 else log.Content = Convert.ToDouble(stack.Pop()); 
                 App.temppool.Clear();
