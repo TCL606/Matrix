@@ -3,13 +3,10 @@
 ## Brief Introduction
 
 - this is a matrix processing library for C++ or C#, which can be convenient for matrix operations.
-
   - C++ version is at Matrix/TCL_Matrix.h on master branch
   - C# version is at CSharp_Matrix on master branch
 
-- GUI program for matrix calculation has been released. You are welcome to download and use the latest version. Please see detailed instructions at 
-
-  [MatrixCal/README.md]: ./MatrixCal/README.md
+- GUI program for matrix calculation has been released. You are welcome to download and use the latest version. Please see detailed instructions at [MatrixCal/README.md](https://github.com/TCL606/Matrix/blob/main/MatrixCal/README.md)
 
 - C++ and C# libraries implement almost the same algorithms, including
 
@@ -72,10 +69,7 @@
 
   - C++处理库为master分支下的Matrix/TCL_Matrix.h
   - C#处理库位于master分支下的CSharp_Matrix
-
-- 矩阵计算的GUI程序已发布，欢迎大家下载使用最新Release版本进行使用。详细说明请见
-
-  [MatrixCal/README.md]: ./MatrixCal/README.md
+- 矩阵计算的GUI程序已发布，欢迎大家下载使用最新Release版本进行使用。详细说明请见[MatrixCal/README.md](https://github.com/TCL606/Matrix/blob/main/MatrixCal/README.md)
 
 - C++ 与 C# 库实现的算法基本相同，包括
 
