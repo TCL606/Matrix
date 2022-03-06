@@ -1,8 +1,9 @@
-#  A Matrix Processing Library
+# C++ / C# Matrix Processing Library
 
 ## Brief Introduction
 
 - this is a matrix processing library for C++ or C#, which can be convenient for matrix operations.
+
   - C++ version is at Matrix/TCL_Matrix.h on master branch
   - C# version is at CSharp_Matrix on master branch
 
@@ -63,7 +64,7 @@
 - [Power iteration - Wikipedia](https://en.wikipedia.org/wiki/Power_iteration)
 - [Aberth method - Wikipedia](https://en.wikipedia.org/wiki/Aberth_method)
 
-# 矩阵处理库
+# C++ / C# 矩阵处理库
 
 ## 简介
 
