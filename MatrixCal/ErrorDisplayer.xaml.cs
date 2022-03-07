@@ -12,7 +12,7 @@ namespace MatrixCal
         public ErrorDisplayer(string s)
         {
             InitializeComponent();
-            errorDisplayer.Text = s + " Time:" + DateTime.Now.ToString();
+            errorDisplayer.Text = s + "！\nTime:" + DateTime.Now.ToString();
         }
         private void ErrorClose(object sender,RoutedEventArgs e)
         {

@@ -28,6 +28,13 @@ namespace MatrixCal
             InitializeComponent();
         }
 
+        public void ErrorHandle(Exception ex)
+        {
+            if (errflag) err.Close();
+            err = new(ex.Message);
+            err.Show();
+            errflag = true;
+        }
         private void DragWindow(object sender, MouseButtonEventArgs e)
         {
             DragMove();
@@ -35,7 +42,7 @@ namespace MatrixCal
 
         private void Close(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown(); 
+            Application.Current.Shutdown();
         }
         private void Envalue1(object sender, RoutedEventArgs e)
         {
@@ -45,10 +52,10 @@ namespace MatrixCal
                 {
                     if (!EnvalueFlag)
                     {
-                        EnvalueFlag = true;
                         tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("1");
                         input.Show();
+                        EnvalueFlag = true;
                     }
                 }
                 else
@@ -57,28 +64,23 @@ namespace MatrixCal
                     {
                         throw new Exception("请输入矩阵符号");
                     }
-                    else if (Interface.Text.Length >= 2)
+                    else if (!IsValidMatrixName(Interface.Text))
                     {
-                        throw new Exception("本功能只支持对单个矩阵操作");
+                        throw new Exception("输入的式子并非矩阵符号，请检查");
                     }
                     else
-                    {          
-                            STOflag = false;
-                            sto.Background = new System.Windows.Media.SolidColorBrush(
-                                (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
-                            App.matpool[Interface.Text] = App.matpool["1"];
-                            log.Content = "已对矩阵" + Interface.Text + "赋值";
+                    {
+                        STOflag = false;
+                        sto.Background = new System.Windows.Media.SolidColorBrush(
+                            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+                        App.matpool[Interface.Text] = App.matpool["1"];
+                        log.Content = "已对矩阵" + Interface.Text + "赋值";
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void Envalue2(object sender, RoutedEventArgs e)
@@ -89,10 +91,10 @@ namespace MatrixCal
                 {
                     if (!EnvalueFlag)
                     {
-                        EnvalueFlag = true;
                         tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("2");
                         input.Show();
+                        EnvalueFlag = true;
                     }
                 }
                 else
@@ -101,9 +103,9 @@ namespace MatrixCal
                     {
                         throw new Exception("请输入矩阵符号");
                     }
-                    else if (Interface.Text.Length >= 2)
+                    else if (!IsValidMatrixName(Interface.Text))
                     {
-                        throw new Exception("本功能只支持对单个矩阵操作");
+                        throw new Exception("输入的式子并非矩阵符号，请检查");
                     }
                     else
                     {
@@ -117,12 +119,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void Envalue3(object sender, RoutedEventArgs e)
@@ -133,10 +130,10 @@ namespace MatrixCal
                 {
                     if (!EnvalueFlag)
                     {
-                        EnvalueFlag = true;
                         tmp1.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("3");
                         input.Show();
+                        EnvalueFlag = true;
                     }
                 }
                 else
@@ -145,9 +142,9 @@ namespace MatrixCal
                     {
                         throw new Exception("请输入矩阵符号");
                     }
-                    else if (Interface.Text.Length >= 2)
+                    else if (!IsValidMatrixName(Interface.Text))
                     {
-                        throw new Exception("本功能只支持对单个矩阵操作");
+                        throw new Exception("输入的式子并非矩阵符号，请检查");
                     }
                     else
                     {
@@ -161,21 +158,16 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void Minimize(object sender, RoutedEventArgs e)
         {
-            WindowState=WindowState.Minimized;  
+            WindowState = WindowState.Minimized;
         }
         private void Display1(object sender, MouseButtonEventArgs e)
         {
-            Output output=new("1");
+            Output output = new("1");
             output.Show();
         }
         private void Display2(object sender, MouseButtonEventArgs e)
@@ -203,11 +195,11 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if(Interface.Text.Length >=2)
+                else if (Interface.Text.Length >= 2)
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
-                else if(App.matpool.ContainsKey(Interface.Text))
+                else if (App.matpool.ContainsKey(Interface.Text))
                 {
                     Matrix matrix = App.matpool[Interface.Text];
                     matrix.QR(out Matrix temp1, out Matrix temp2);
@@ -224,10 +216,9 @@ namespace MatrixCal
             {
                 if (!errflag)
                 {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
+                    ErrorHandle(ex);
                 }
+                else err.Content = ex.Message;
             }
         }
         private void ELM(object sender, RoutedEventArgs e)
@@ -238,7 +229,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -254,12 +245,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void SVD(object sender, RoutedEventArgs e)
@@ -270,7 +256,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -291,12 +277,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void STO(object sender, RoutedEventArgs e)
@@ -321,7 +302,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -341,12 +322,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void INV(object sender, RoutedEventArgs e)
@@ -357,7 +333,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -376,12 +352,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void RANK(object sender, RoutedEventArgs e)
@@ -392,7 +363,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -401,7 +372,7 @@ namespace MatrixCal
                     string key = Interface.Text;
                     Matrix matrix = App.matpool[key];
                     int rank = matrix.GetRank();
-                    log.Content = Interface.Text+"的秩是"+Convert.ToString(rank);
+                    log.Content = Interface.Text + "的秩是" + Convert.ToString(rank);
                 }
                 else
                 {
@@ -410,12 +381,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void DET(object sender, RoutedEventArgs e)
@@ -426,7 +392,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -434,7 +400,7 @@ namespace MatrixCal
                 {
                     string key = Interface.Text;
                     Matrix matrix = App.matpool[key];
-                    double det=matrix.Determinant();
+                    double det = matrix.Determinant();
                     log.Content = Interface.Text + "的行列式是" + Convert.ToString(det);
                 }
                 else
@@ -444,12 +410,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void LU(object sender, RoutedEventArgs e)
@@ -460,7 +421,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -480,12 +441,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void GJ(object sender, RoutedEventArgs e)
@@ -496,7 +452,7 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
                     throw new Exception("输入的式子并非矩阵符号，请检查。");
                 }
@@ -512,12 +468,7 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
+                ErrorHandle(ex);
             }
         }
         private void RAD(object sender, RoutedEventArgs e)
@@ -528,9 +479,9 @@ namespace MatrixCal
                 {
                     throw new Exception("请输入矩阵符号");
                 }
-                else if (Interface.Text.Length >= 2)
+                else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("本功能只支持对单个矩阵操作");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -546,40 +497,26 @@ namespace MatrixCal
             }
             catch (Exception ex)
             {
-                if (!errflag)
-                {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
-                }
-            }
-        }
-        private void Others(object sender, RoutedEventArgs e)
-        {
-            if (!errflag)
-            {
-                err = new("更多算法请等待更新！");
-                err.Show();
-                errflag = true;
+                ErrorHandle(ex);
             }
         }
         private void Guide(object sender, RoutedEventArgs e)
         {
             _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://github.com/TCL606/Matrix/tree/dev/MatrixCal");
         }
-            private void DISP(object sender, RoutedEventArgs e)
+        private void DISP(object sender, RoutedEventArgs e)
         {
             try
             {
                 formula = InputProcessing.Infix2Suffix(Interface.Text);
                 var arr = formula.Split(' ');
-                for (int i = 0; i < arr.Length-1; i++)
+                for (int i = 0; i < arr.Length - 1; i++)
                 {
                     if (arr[i] != "+" && arr[i] != "-" && arr[i] != "*" && arr[i] != "^")//不是运算符
                     {
                         stack.Push(arr[i]);
-                        if(IsValidMatrixName(arr[i]))
-                        App.temppool[arr[i]]=App.matpool[arr[i]];
+                        if (IsValidMatrixName(arr[i]))
+                            App.temppool[arr[i]] = App.matpool[arr[i]];
                     }
                     else//是运算符
                     {
@@ -595,29 +532,195 @@ namespace MatrixCal
                     output.Show();
                     log.Content = "计算完成";
                 }
-                else log.Content = Convert.ToDouble(stack.Pop()); 
+                else log.Content = Convert.ToDouble(stack.Pop());
                 App.temppool.Clear();
             }
             catch (Exception ex)
             {
-                if (!errflag)
+                ErrorHandle(ex);
+            }
+        }
+        private void EGV(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Interface.Text.Length == 0)
                 {
-                    err = new(ex.Message);
-                    err.Show();
-                    errflag = true;
+                    throw new Exception("请输入矩阵符号");
                 }
+                else if (!IsValidMatrixName(Interface.Text))
+                {
+                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                }
+                else if (App.matpool.ContainsKey(Interface.Text))
+                {
+                    string key = Interface.Text;
+                    Matrix matrix = App.matpool[key];
+                    var EigenValues= matrix.GetAllEigenValues();
+                    double[,] ReEigenValues = new double[1,EigenValues.Count];
+                    double[,] ImEigenValues = new double[1, EigenValues.Count];
+                    for(int i=0;i<EigenValues.Count;i++)
+                    {
+                        ReEigenValues[0, i] = EigenValues[i].real;
+                        ImEigenValues[0, i] = EigenValues[i].imag;
+                    }
+                    Matrix Remat = new(ReEigenValues);
+                    Matrix Immat = new(ImEigenValues);
+                    App.matpool["1"] = Remat;
+                    App.matpool["2"] = Immat;
+                    log.Content = "已对" + Interface.Text + "求特征值";
+                }
+                else
+                {
+                    throw new Exception("输入的式子含有未被赋值的矩阵");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
+        }
+        private void RSV(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Interface.Text.Length == 0)
+                {
+                    throw new Exception("请输入矩阵符号");
+                }
+                else if (!IsValidMatrixName(Interface.Text))
+                {
+                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                }
+                else if (App.matpool.ContainsKey(Interface.Text))
+                {
+                    string key = Interface.Text;
+                    Matrix matrix = App.matpool[key];
+                    matrix.GetAllSolutionsForAugmentedMatrix(out Matrix temp1);
+                    App.matpool["1"] = temp1;
+                    log.Content = "已对增广矩阵" + Interface.Text + "求解";
+                }
+                else
+                {
+                    throw new Exception("输入的式子含有未被赋值的矩阵");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
+        }
+        private void EGC(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Interface.Text.Length == 0)
+                {
+                    throw new Exception("请输入矩阵符号");
+                }
+                else if (!IsValidMatrixName(Interface.Text))
+                {
+                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                }
+                else if (App.matpool.ContainsKey(Interface.Text))
+                {
+                    string key = Interface.Text;
+                    Matrix matrix = App.matpool[key];
+                    var Coefficients = matrix.GetCoefficientsOfCharacteristicPolynomial();
+                    double[,] coefficients = new double[1, Coefficients.Count];
+                    for (int i = 0; i < Coefficients.Count; i++)
+                    {
+                        coefficients[0,i]=Coefficients[i];
+                    }
+                    Matrix comat = new(coefficients);
+                    App.matpool["1"] = comat;
+                    log.Content = "已对" + Interface.Text + "求特征多项式系数";
+                }
+                else
+                {
+                    throw new Exception("输入的式子含有未被赋值的矩阵");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
+        }
+        private void GINV(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Interface.Text.Length == 0)
+                {
+                    throw new Exception("请输入矩阵符号");
+                }
+                else if (!IsValidMatrixName(Interface.Text))
+                {
+                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                }
+                else if (App.matpool.ContainsKey(Interface.Text))
+                {
+                    string key = Interface.Text;
+                    Matrix matrix = App.matpool[key];
+                    Matrix temp1;
+                    throw new Exception("广义逆正在开发");
+                    App.matpool["1"] = temp1;
+                    log.Content = "已对" + Interface.Text + "求广义逆";
+                }
+                else
+                {
+                    throw new Exception("输入的式子含有未被赋值的矩阵");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
+        }
+        private void ZSP(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (Interface.Text.Length == 0)
+                {
+                    throw new Exception("请输入矩阵符号");
+                }
+                else if (!IsValidMatrixName(Interface.Text))
+                {
+                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                }
+                else if (App.matpool.ContainsKey(Interface.Text))
+                {
+                    string key = Interface.Text;
+                    Matrix matrix = App.matpool[key];
+                    matrix.GetBasesOfNullSpace(out Matrix temp1);
+                    App.matpool["1"] = temp1;
+                    log.Content = "已对" + Interface.Text + "求零空间";
+                }
+                else
+                {
+                    throw new Exception("输入的式子含有未被赋值的矩阵");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
             }
         }
         private bool IsValidMatrixName(string str)
         {
-            if (str[0] >= 'A' && str[0] <= 'Z')
-                return true;
-            return false;
+            if (str.Length > 1) return false;
+            else
+            {
+                if (str[0] >= 'A' && str[0] <= 'Z')
+                    return true;
+                return false;
+            }
         }
         private void CalculateAndPush(string s3)
         {
             string s1, s2;
-            if (stack.Count >= 2)
+            if (stack.Count >=2)
             {
                 s2 = stack.Pop();
                 s1 = stack.Pop();
