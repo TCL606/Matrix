@@ -1,14 +1,77 @@
-# Matrix
+# C++ / C# Matrix Processing Library
+
+## Brief Introduction
+
+- this is a matrix processing library for C++ or C#, which can be convenient for matrix operations.
+  - C++ version is at Matrix/TCL_Matrix.h on master branch
+  - C# version is at CSharp_Matrix on master branch
+
+- GUI program for matrix calculation has been released. You are welcome to download and use the latest version. Please see detailed instructions at [MatrixCal/README.md](https://github.com/TCL606/Matrix/blob/main/MatrixCal/README.md)
+
+- C++ and C# libraries implement almost the same algorithms, including
+
+  - Basic Calculation
+
+    - Addtion
+
+    - Multiplication
+    - Transpose
+
+  - Matrix common operations:
+
+    - Get the inverse of a matrix
+
+    - Matrix Gauss-Jordan elimination
+
+    - Matrix LU decomposition
+
+    - Find the rank of the matrix
+
+    - Get determinant
+
+    - Matrix fast power
+    - Solve linear equations
+    - Find the null space of the matrix
+    - Get trace of a matrix
+    - Matrix QR decomposition
+
+  - Common numerical calculation
+
+    - Calculate the matrix norm
+    - Calculate the spectral radius of the matrix
+    - Find all singular values of any matrix (excluding multiple roots)
+    - Find all (complex) eigenvalues of any matrix (including multiple roots)
+
+  - Matrix advanced operations
+
+    - Obtain the coefficients of the square matrix characteristic polynomial
+    - Matrix SVD decomposition
+    - Get the Moore-Penrose generalized inverse of any matrix
+
+
+## Related instructions
+
+- As for solving the eigenvalue and singular values of the matrix, if the problem is highly sensitive, the calculated eigenvalue/singular values may be biased
+- Any question, bug report or improvement suggestion is welcome through [opening up a new issue](https://github.com/TCL606/Matrix/issues)
+
+## References
+
+- 《线性代数入门》 梁鑫，田垠，杨一龙 编著。（清华大学内部讲义 2020年秋）
+- [Faddeev–LeVerrier algorithm - Wikipedia](https://en.wikipedia.org/wiki/Faddeev–LeVerrier_algorithm)
+- [Power iteration - Wikipedia](https://en.wikipedia.org/wiki/Power_iteration)
+- [Aberth method - Wikipedia](https://en.wikipedia.org/wiki/Aberth_method)
+
+# C++ / C# 矩阵处理库
 
 ## 简介
 
-- 使用TCL_Matrix.h，可以方便地对矩阵进行运算。
+- 这是一个 C++ 和 C# 的矩阵处理库，可以方便的对矩阵进行运算
 
-- 本程序更强调算法的准确性，可用于小规模问题的测试。
+  - C++处理库为master分支下的Matrix/TCL_Matrix.h
+  - C#处理库位于master分支下的CSharp_Matrix
+- 矩阵计算的GUI程序已发布，欢迎大家下载使用最新Release版本进行使用。详细说明请见[MatrixCal/README.md](https://github.com/TCL606/Matrix/blob/main/MatrixCal/README.md)
 
-  对于大规模问题，程序中可能有大量对动态内存的申请、释放等操作，因此不保证程序有最高的效率。
-
-- 目前，TCL_Matrix.h中实现了矩阵的操作包括：
+- C++ 与 C# 库实现的算法基本相同，包括
 
   - 基本运算：
     - 矩阵加法
@@ -28,24 +91,20 @@
   - 常用数值计算
     - 求矩阵范数
     - 求矩阵谱半径
-    - 求对称非不定矩阵的所有特征值（不含重根）
     - 求任意矩阵的所有奇异值（不含重根）
     - 求任意矩阵的（复）特征值（含重根）
   - 矩阵高级操作
     - 获得方阵特征多项式的系数
-    - 求任意矩阵的SVD分解或简化SVD分解
-    - 求行/列满秩矩阵的Moore-Penrose广义逆
+    - 矩阵SVD分解
     - 求任意矩阵的Moore-Penrose广义逆
   - 其他操作
     - 从文件中读入矩阵
     - 向文件中写入矩阵
 
-## 可能的BUG
+## 相关说明
 
-- 用程序对矩阵处理，往往要考虑诸多情况，难以保证绝对正确。目前已上传的代码，在大部分样例上是通过的。
-  - 关于求解矩阵特征值、奇异值的部分，如果问题高度敏感，则计算出的特征值/奇异值可能有偏差。
-- 鉴于本人能力有限，程序中仍然可能存在其他bug。在使用过程中如果发现bug，欢迎联系我。
-- 欢迎各位向该矩阵类添加更多功能。
+- 关于求解矩阵特征值、奇异值的部分，如果问题高度敏感，则计算出的特征值/奇异值可能有偏差
+- 我们欢迎大家通过[issue](https://github.com/TCL606/Matrix/issues).，向我们询问任何问题，提出bug报告、或给予改进建议
 
 ## 参考资料
 
@@ -53,4 +112,3 @@
 - [Faddeev–LeVerrier algorithm - Wikipedia](https://en.wikipedia.org/wiki/Faddeev–LeVerrier_algorithm)
 - [Power iteration - Wikipedia](https://en.wikipedia.org/wiki/Power_iteration)
 - [Aberth method - Wikipedia](https://en.wikipedia.org/wiki/Aberth_method)
-
