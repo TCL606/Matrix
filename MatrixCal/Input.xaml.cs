@@ -11,10 +11,13 @@ namespace MatrixCal
     /// </summary>
     public partial class Input : Window
     {  
-        const int TextBoxHeight = 15;
+        const int TextBoxHeight = 17;
         const int TextBoxWidth = 48;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;
+        MatrixCal.MainWindow _mainWindow = Application.Current.Windows
+             .Cast<Window>()
+             .FirstOrDefault(window => window is MainWindow) as MainWindow;
         public Input(string s)
         {
             flag = false;
@@ -28,12 +31,9 @@ namespace MatrixCal
         }
         private void InputClose(object sender,RoutedEventArgs e)
         {
-            var _mainWindow = Application.Current.Windows
-            .Cast<Window>()
-            .FirstOrDefault(window => window is MainWindow) as MainWindow;
-            _mainWindow.tmp1.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
-            _mainWindow.tmp2.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
-            _mainWindow.tmp3.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
+            _mainWindow.tmp1.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
+            _mainWindow.tmp2.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
+            _mainWindow.tmp3.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
             _mainWindow.EnvalueFlag = false;
             Close();
         }
@@ -47,9 +47,9 @@ namespace MatrixCal
                     {
                         throw new Exception("请填写完整的信息");
                     }
-                    else if(Convert.ToInt32(Col.Text) > 35 || Convert.ToInt32(Row.Text) > 35)
+                    else if(Convert.ToInt32(Col.Text) > 27 || Convert.ToInt32(Row.Text) > 27)
                     {
-                        throw new Exception("受屏幕尺寸限制，不支持35行/列以上的输入");
+                        throw new Exception("受屏幕尺寸限制，不支持27行/列以上的输入");
                     }
                     else
                     {
@@ -84,16 +84,7 @@ namespace MatrixCal
                 }
                 catch (Exception ex)
                 {
-                    var _mainWindow = Application.Current.Windows
-             .Cast<Window>()
-             .FirstOrDefault(window => window is MainWindow) as MainWindow;
-                    _mainWindow.err.errorDisplayer.Text = ex.Message;
-                    if (!_mainWindow.errflag)
-                    {
-                        _mainWindow.err = new(ex.Message);
-                        _mainWindow.err.Show();
-                        _mainWindow.errflag = true;
-                    }
+                    _mainWindow.ErrorHandle(ex);
                 }
             }
             else
@@ -120,27 +111,15 @@ namespace MatrixCal
                         App.matpool.Add(key, temp);
                     else
                         App.matpool[key] = temp;
-                    var _mainWindow = Application.Current.Windows
-                   .Cast<Window>()
-                   .FirstOrDefault(window => window is MainWindow) as MainWindow;
-                    _mainWindow.tmp1.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
-                    _mainWindow.tmp2.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
-                    _mainWindow.tmp3.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF545858"));
+                    _mainWindow.tmp1.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
+                    _mainWindow.tmp2.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
+                    _mainWindow.tmp3.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
                     _mainWindow.EnvalueFlag = false;
                     Close();
                 }
                 catch (Exception ex)
                 {
-                    var _mainWindow = Application.Current.Windows
-            .Cast<Window>()
-            .FirstOrDefault(window => window is MainWindow) as MainWindow;
-                    _mainWindow.err.errorDisplayer.Text = ex.Message;
-                    if (!_mainWindow.errflag)
-                    {
-                        _mainWindow.err = new(ex.Message);
-                         _mainWindow.err.Show();
-                        _mainWindow.errflag = true;
-                    }
+                    _mainWindow.ErrorHandle(ex);
                 }
             }
         }
