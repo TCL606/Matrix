@@ -484,7 +484,7 @@ namespace TCL_Matrix
         }
 
         /// <summary>
-        /// 计算逆矩阵，矩阵不可逆时，inverse为零矩阵
+        /// 计算逆矩阵，矩阵不可逆时报错
         /// </summary>
         /// <param name="inverse"></param>
         /// <returns></returns>
