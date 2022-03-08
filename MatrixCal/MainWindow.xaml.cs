@@ -25,6 +25,7 @@ namespace MatrixCal
             App.matpool.Add("1", new Matrix(1, 1));
             App.matpool.Add("2", new Matrix(1, 1));
             App.matpool.Add("3", new Matrix(1, 1));
+            Matrix.ExceptionHandling = ErrorHandle;
             InitializeComponent();
         }
 

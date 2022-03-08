@@ -4,10 +4,10 @@ namespace TCL_Matrix
 {
     public class Matrix : ICloneable, IEnumerable
     {
-        private static void ExceptionHandling(Exception e)
+        public static Action<Exception> ExceptionHandling = (Exception e) =>
         {
             Console.WriteLine(e.Message);
-        }
+        };
         public const double PRECISION_OF_DIFFERENCE = 1e-3;
         public const double PRECISION_WHEN_CALCULATING = 1e-5;
 
