@@ -42,7 +42,7 @@ namespace MatrixCal
 
         private void Close(object sender, RoutedEventArgs e)
         {
-            Application.Current.Shutdown();
+            Environment.Exit(0);
         }
         private void Envalue1(object sender, RoutedEventArgs e)
         {
@@ -225,7 +225,7 @@ namespace MatrixCal
                 }
                 else if (Interface.Text.Length >= 2)
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -259,7 +259,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -286,7 +286,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -339,7 +339,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -370,7 +370,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -400,7 +400,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -429,7 +429,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -458,7 +458,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -489,7 +489,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -550,6 +550,10 @@ namespace MatrixCal
         {
             try
             {
+                if (Interface.Text.Length == 0)
+                {
+                    throw new Exception("请输入矩阵符号");
+                }
                 formula = InputProcessing.Infix2Suffix(Interface.Text);
                 var arr = formula.Split(' ');
                 for (int i = 0; i < arr.Length - 1; i++)
@@ -592,7 +596,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -632,7 +636,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -662,7 +666,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -698,7 +702,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {
@@ -729,7 +733,7 @@ namespace MatrixCal
                 }
                 else if (!IsValidMatrixName(Interface.Text))
                 {
-                    throw new Exception("输入的式子并非矩阵符号，请检查。");
+                    throw new Exception("输入的式子并非矩阵符号，请检查");
                 }
                 else if (App.matpool.ContainsKey(Interface.Text))
                 {

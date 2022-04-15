@@ -43,13 +43,13 @@
             <Button Grid.Column="1" Grid.Row="2" Content="ELM" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="ELM"/>
             <Button Grid.Column="2" Grid.Row="2" Content="SVD" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="SVD"/>
             <Button Name="tmp1" Grid.Column="4" Grid.Row="2" Content="tmp1" FontSize="22" Opacity="0.8" Foreground="White" Click="Envalue1" MouseRightButtonDown="Display1" Background="#FF0078D7"/>
-            <Button Grid.Row="3" Content="TRAN" FontSize="21.5" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="TRAN"/>
+            <Button Grid.Row="3" Content="TRAN" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="TRAN"/>
             <Button Grid.Column="2" Grid.Row="3" Content="INV" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="INV"/>
             <Button Name="sto" Grid.Column="0" Grid.Row="2" Content="STO" FontSize="22" Background="#FFF6DF07" Opacity="0.8" Foreground="White" Click="STO"/>
             <Button Name="tmp2" Grid.Column="4" Grid.Row="3" Content="tmp2" FontSize="22" Background="#FF0078D7" Opacity="0.8" Foreground="White" Click="Envalue2" MouseRightButtonDown="Display2"/>
             <Button Grid.Row="4" Content="DET" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="DET"/>
             <Button Grid.Column="2" Grid.Row="4" Content="LU" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="LU"/>
-            <Button Grid.Column="0" Grid.Row="4" Content="RANK" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="RANK"/>
+            <Button Grid.Column="0" Grid.Row="4" Content="RANK" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Click="RANK"/>
             <Button Name="tmp3" Grid.Column="4" Grid.Row="4" Content="tmp3" FontSize="22" Background="#FF0078D7" Opacity="0.8" Foreground="White" Click="Envalue3" MouseRightButtonDown="Display3" Margin="0,0,0,0"/>
             <Button Grid.Column="0" Grid.Row="5" Content="GJ" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="GJ"/>
             <Button Grid.Row="5" Content="RAD" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="RAD"/>
@@ -57,7 +57,7 @@
             <Button Grid.Row="3" Content="RSV" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="RSV"/>
             <Button Grid.Row="4" Content="EGC" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="EGC"/>
             <Button Grid.Row="5" Content="ZSP" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="2" Click="ZSP"/>
-            <Button Grid.Row="5" Content="GINV" FontSize="21.5" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="GINV"/>
+            <Button Grid.Row="5" Content="GINV" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="GINV"/>
             <Button Grid.Column="4" Grid.Row="5" Content="=" FontSize="22" Background="#FF019820" Opacity="0.8" Foreground="White" Margin="0,0,0,0" Click="DISP"/>
             <TextBox Name="Interface" FontSize="28" Grid.Row="0" Background="LightBlue" Margin="30,50,30,15" TextWrapping="Wrap" Text="" Grid.ColumnSpan="5" IsReadOnly="False" />
             <Button Content="Store" FontSize="21.5" Background="Blue" Opacity="0.8" Foreground="White" Grid.Row="1" Grid.Column="0" Click="OpenStore"/>
