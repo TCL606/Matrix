@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MatrixTest", "MatrixTest\Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Csharp_Matrix", "..\Csharp_Matrix\Csharp_Matrix\Csharp_Matrix.csproj", "{BED589D6-5EB3-4A76-816D-F6C8E8215D60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckAcc", "SeeTestResult\CheckAcc.csproj", "{2BE849D7-001D-4E5E-A9BD-6D34DA08EB18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckAcc", "CheckAcc\CheckAcc.csproj", "{0DD23F60-BBEE-4D94-851E-66BBC18A1567}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{BED589D6-5EB3-4A76-816D-F6C8E8215D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BED589D6-5EB3-4A76-816D-F6C8E8215D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BED589D6-5EB3-4A76-816D-F6C8E8215D60}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BE849D7-001D-4E5E-A9BD-6D34DA08EB18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BE849D7-001D-4E5E-A9BD-6D34DA08EB18}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BE849D7-001D-4E5E-A9BD-6D34DA08EB18}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BE849D7-001D-4E5E-A9BD-6D34DA08EB18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DD23F60-BBEE-4D94-851E-66BBC18A1567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DD23F60-BBEE-4D94-851E-66BBC18A1567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DD23F60-BBEE-4D94-851E-66BBC18A1567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DD23F60-BBEE-4D94-851E-66BBC18A1567}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
