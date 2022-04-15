@@ -71,7 +71,7 @@ namespace MatrixCal
             App.matpool.Remove(Convert.ToString(button.Content));
             Construct();
         }
-            private void StoreClose(object sender,RoutedEventArgs e)
+        private void StoreClose(object sender, RoutedEventArgs e)
         {
             App.storeFlag = false;
             Close();

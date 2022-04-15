@@ -26,7 +26,7 @@ namespace StringProcessing
             for (int i = 1; i < str.Length; i++)
             {
                 if ((!(str[i] < 'A' || str[i] > 'Z') || str[i] == '(')
-                    && str[i - 1] != '+' && str[i - 1] != '-' && str[i - 1] != '*' 
+                    && str[i - 1] != '+' && str[i - 1] != '-' && str[i - 1] != '*'
                     && str[i - 1] != '^' && str[i - 1] != '(' && str[i - 1] != '.')
                     str = str.Insert(i, "*");
                 i++;

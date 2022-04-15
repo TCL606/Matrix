@@ -1,9 +1,9 @@
-﻿using System;
-using TCL_Matrix;
+﻿using StringProcessing;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
-using StringProcessing;
-using System.Collections.Generic;
+using TCL_Matrix;
 
 namespace MatrixCal
 {
@@ -78,7 +78,7 @@ namespace MatrixCal
                     }
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 ErrorHandle(ex);
             }
@@ -167,24 +167,52 @@ namespace MatrixCal
         }
         private void Display1(object sender, MouseButtonEventArgs e)
         {
-            Output output = new("1");
-            output.Show();
+            try
+            {
+                Output output = new("1");
+                output.Show();
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
         }
         private void Display2(object sender, MouseButtonEventArgs e)
         {
-            Output output = new("2");
-            output.Show();
+            try
+            {
+                Output output = new("2");
+                output.Show();
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
         }
         private void Display3(object sender, MouseButtonEventArgs e)
         {
-            Output output = new("3");
-            output.Show();
+            try
+            {
+                Output output = new("3");
+                output.Show();
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
         }
 
         private void OpenStore(object sender, RoutedEventArgs e)
         {
-            Store store = new();
-            store.Show();
+            try
+            {
+                Store store = new();
+                store.Show();
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
         }
 
         private void QR(object sender, RoutedEventArgs e)
@@ -282,16 +310,23 @@ namespace MatrixCal
         }
         private void STO(object sender, RoutedEventArgs e)
         {
-            if (!STOflag)
+            try
             {
-                STOflag = true;
-                sto.Background = System.Windows.Media.Brushes.Crimson;
+                if (!STOflag)
+                {
+                    STOflag = true;
+                    sto.Background = System.Windows.Media.Brushes.Crimson;
+                }
+                else
+                {
+                    STOflag = false;
+                    sto.Background = new System.Windows.Media.SolidColorBrush(
+                        (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                STOflag = false;
-                sto.Background = new System.Windows.Media.SolidColorBrush(
-                    (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString("#FFF6DF07"));
+                ErrorHandle(ex);
             }
         }
         private void TRAN(object sender, RoutedEventArgs e)
@@ -502,7 +537,14 @@ namespace MatrixCal
         }
         private void Guide(object sender, RoutedEventArgs e)
         {
-            _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://github.com/TCL606/Matrix/tree/dev/MatrixCal");
+            try
+            {
+                _ = System.Diagnostics.Process.Start("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe", "https://github.com/TCL606/Matrix/tree/dev/MatrixCal");
+            }
+            catch (Exception ex)
+            {
+                ErrorHandle(ex);
+            }
         }
         private void DISP(object sender, RoutedEventArgs e)
         {
@@ -556,10 +598,10 @@ namespace MatrixCal
                 {
                     string key = Interface.Text;
                     Matrix matrix = App.matpool[key];
-                    var EigenValues= matrix.GetAllEigenValues();
-                    double[,] ReEigenValues = new double[1,EigenValues.Count];
+                    var EigenValues = matrix.GetAllEigenValues();
+                    double[,] ReEigenValues = new double[1, EigenValues.Count];
                     double[,] ImEigenValues = new double[1, EigenValues.Count];
-                    for(int i=0;i<EigenValues.Count;i++)
+                    for (int i = 0; i < EigenValues.Count; i++)
                     {
                         ReEigenValues[0, i] = EigenValues[i].real;
                         ImEigenValues[0, i] = EigenValues[i].imag;
@@ -630,7 +672,7 @@ namespace MatrixCal
                     double[,] coefficients = new double[1, Coefficients.Count];
                     for (int i = 0; i < Coefficients.Count; i++)
                     {
-                        coefficients[0,i]=Coefficients[i];
+                        coefficients[0, i] = Coefficients[i];
                     }
                     Matrix comat = new(coefficients);
                     App.matpool["1"] = comat;
@@ -720,13 +762,13 @@ namespace MatrixCal
         private void CalculateAndPush(string s3)
         {
             string s1, s2;
-            if (stack.Count >=2)
+            if (stack.Count >= 2)
             {
                 s2 = stack.Pop();
                 s1 = stack.Pop();
             }
             else throw new Exception("表达式操作数个数有误");
-            if(IsValidMatrixName(s1)&&IsValidMatrixName(s2))//s1，s2表示矩阵
+            if (IsValidMatrixName(s1) && IsValidMatrixName(s2))//s1，s2表示矩阵
             {
                 if (!(App.matpool.ContainsKey(s1) && App.matpool.ContainsKey(s2)))
                 {
@@ -737,7 +779,7 @@ namespace MatrixCal
                     switch (s3)
                     {
                         case "+":
-                            App.temppool[s1]+=App.temppool[s2];
+                            App.temppool[s1] += App.temppool[s2];
                             stack.Push(s1);
                             break;
                         case "-":
@@ -763,17 +805,17 @@ namespace MatrixCal
                 {
                     switch (s3)
                     {
-                        case "+":     
+                        case "+":
                         case "-":
                             throw new Exception("矩阵不能和数相加减");
                         case "*":
-                            App.temppool[s1] = Convert.ToDouble(s2)* App.temppool[s1];
+                            App.temppool[s1] = Convert.ToDouble(s2) * App.temppool[s1];
                             stack.Push(s1);
                             break;
                         case "^":
-                                App.temppool[s1] = App.temppool[s1].Power(Convert.ToInt32(s2));
-                                stack.Push(s1);
-                                break;
+                            App.temppool[s1] = App.temppool[s1].Power(Convert.ToInt32(s2));
+                            stack.Push(s1);
+                            break;
                     }
                 }
             }
@@ -789,19 +831,19 @@ namespace MatrixCal
                     {
                         case "+":
                         case "-":
-                            throw new Exception("矩阵不能和数相加减");        
+                            throw new Exception("矩阵不能和数相加减");
                         case "*":
                             App.temppool[s2] = Convert.ToDouble(s1) * App.temppool[s2];
                             stack.Push(s2);
                             break;
                         case "^":
-                                throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
+                            throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
                     }
                 }
             }
             else//全是数
             {
-                switch(s3)
+                switch (s3)
                 {
                     case "+":
                         stack.Push(Convert.ToString(Convert.ToDouble(s1) + Convert.ToDouble(s2)));
@@ -813,7 +855,7 @@ namespace MatrixCal
                         stack.Push(Convert.ToString(Convert.ToDouble(s1) * Convert.ToDouble(s2)));
                         break;
                     case "^":
-                        stack.Push(Convert.ToString(Math.Pow(Convert.ToDouble(s1),Convert.ToDouble(s2))));
+                        stack.Push(Convert.ToString(Math.Pow(Convert.ToDouble(s1), Convert.ToDouble(s2))));
                         break;
                 }
             }

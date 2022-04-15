@@ -132,7 +132,7 @@ namespace TCL_Matrix
             Random r = new Random(Environment.TickCount);
             for (int i = 0; i < row; i++)
             {
-                for(int j = 0; j < col; j++)
+                for (int j = 0; j < col; j++)
                 {
                     ret.matrix[i, j] = r.NextDouble() * MaxPossibleValue * (r.Next() % 2 == 1 ? 1 : -1);
                 }
@@ -144,14 +144,14 @@ namespace TCL_Matrix
         #region 文件读写
         public static bool WriteToFile(Matrix m, String path)
         {
-            try 
-            {   
-                using(StreamWriter sw = new StreamWriter(path))
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(path))
                 {
                     sw.WriteLine($"{m.row}  {m.col}");
-                    for(int i = 0; i < m.row; i++)
+                    for (int i = 0; i < m.row; i++)
                     {
-                        for(int j = 0; j < m.col; j++)
+                        for (int j = 0; j < m.col; j++)
                         {
                             sw.Write($"{m.matrix[i, j]} ");
                         }
@@ -160,7 +160,7 @@ namespace TCL_Matrix
                 }
                 return true;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 return false;
@@ -199,7 +199,7 @@ namespace TCL_Matrix
                     return m;
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 return null;
@@ -810,7 +810,7 @@ namespace TCL_Matrix
                 Matrix V = new Matrix(this.col, this.col);
                 U = new Matrix(this.row, this.row);
 
-                if (this.col< this.row)
+                if (this.col < this.row)
                 {
                     Matrix ATA = A * this;
                     values = ATA.GetEigenValuesOfDefiniteMatrix(false);
@@ -830,7 +830,7 @@ namespace TCL_Matrix
                             {
                                 for (int j = 0; j < eigenSubSpace.col; j++)
                                 {
-                                    V.matrix[i , j + nowDim] = eigenSubSpace.matrix[i , j];
+                                    V.matrix[i, j + nowDim] = eigenSubSpace.matrix[i, j];
                                 }
                             }
                             multiplicity.Add(eigenSubSpace.col);
@@ -851,7 +851,7 @@ namespace TCL_Matrix
                     {
                         for (int j = 0; j < V1.col; j++)
                         {
-                            V1.matrix[i , j] = V.matrix[i , j];
+                            V1.matrix[i, j] = V.matrix[i, j];
                         }
                     }
                     //V1作正交化
@@ -861,12 +861,12 @@ namespace TCL_Matrix
                         mod = 0;
                         for (int i = 0; i < V1.row; i++)
                         {
-                            mod += V1.matrix[i , j] * V1.matrix[i , j];
+                            mod += V1.matrix[i, j] * V1.matrix[i, j];
                         }
                         mod = Math.Sqrt(mod);
                         for (int i = 0; i < V1.row; i++)
                         {
-                            V1.matrix[i , j] /= mod; //归一化
+                            V1.matrix[i, j] /= mod; //归一化
                         }
                         mod = 0;
                         for (int k = 0; k < nowCol; k++)
@@ -874,17 +874,17 @@ namespace TCL_Matrix
                             double innerProduct = 0;
                             for (int p = 0; p < V1.row; p++)
                             {
-                                innerProduct += V1.matrix[p , k] * V1.matrix[p , nowCol];
+                                innerProduct += V1.matrix[p, k] * V1.matrix[p, nowCol];
                             }
                             for (int p = 0; p < V1.row; p++)
                             {
-                                V1.matrix[p , nowCol] -= innerProduct * V1.matrix[p , k];
-                                mod += V1.matrix[p , nowCol] * V1.matrix[p , nowCol];
+                                V1.matrix[p, nowCol] -= innerProduct * V1.matrix[p, k];
+                                mod += V1.matrix[p, nowCol] * V1.matrix[p, nowCol];
                             }
                             mod = Math.Sqrt(mod);
                             for (int p = 0; p < V1.row; p++)
                             {
-                                V1.matrix[p , nowCol] /= mod; //归一化
+                                V1.matrix[p, nowCol] /= mod; //归一化
                             }
                             nowCol++;
                         }
@@ -898,7 +898,7 @@ namespace TCL_Matrix
                         {
                             if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
                             {
-                                Sigmar.matrix[now , now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
+                                Sigmar.matrix[now, now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
                                 now++;
                             }
                         }
@@ -911,7 +911,7 @@ namespace TCL_Matrix
                         {
                             if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
                             {
-                                Sigma.matrix[now , now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
+                                Sigma.matrix[now, now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
                                 now++;
                             }
                         }
@@ -924,7 +924,7 @@ namespace TCL_Matrix
                     {
                         Matrix I = IdentityMatrix(V.row);
                         Matrix zero = new Matrix(V.row, 1);
-                        Matrix V2 = new Matrix(V.row, V.col -V1.col);
+                        Matrix V2 = new Matrix(V.row, V.col - V1.col);
                         Matrix V1T = V1.Transpose();
 
                         int nowExpandDim = 0;
@@ -936,18 +936,18 @@ namespace TCL_Matrix
                             {
                                 _mod = 0;
                                 Matrix vector = new Matrix(V.row, 1);
-                                vector.matrix[i , 0] = 1;
+                                vector.matrix[i, 0] = 1;
                                 vector = (I - V1 * V1T) * vector;
                                 for (int j = 0; j < nowExpandDim; j++)
                                 {
                                     double innerProduct = 0;
                                     for (int p = 0; p < V2.row; p++)
                                     {
-                                        innerProduct += V2.matrix[p , j] * vector.matrix[p , 0];
+                                        innerProduct += V2.matrix[p, j] * vector.matrix[p, 0];
                                     }
                                     for (int p = 0; p < V1.row; p++)
                                     {
-                                        vector.matrix[p , 0] -= innerProduct * V2.matrix[p , j];
+                                        vector.matrix[p, 0] -= innerProduct * V2.matrix[p, j];
                                     }
                                 }
 
@@ -955,12 +955,12 @@ namespace TCL_Matrix
                                 {
                                     for (int p = 0; p < vector.row; p++)
                                     {
-                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                        _mod += vector.matrix[p, 0] * vector.matrix[p, 0];
                                     }
                                     _mod = Math.Sqrt(_mod);
                                     for (int p = 0; p < V2.row; p++)
                                     {
-                                        V2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                        V2.matrix[p, nowExpandDim] = vector.matrix[p, 0] / _mod;
                                     }
                                     nowExpandDim++;
                                     break;
@@ -970,7 +970,7 @@ namespace TCL_Matrix
                         }
                         if (nowExpandDim != V.col - V1.col)
                         {
-                                throw new Exception("Something went wrong that the program can't find all V's orthogonal bases!");
+                            throw new Exception("Something went wrong that the program can't find all V's orthogonal bases!");
                         }
                         V = V1 & V2;
                     }
@@ -987,24 +987,24 @@ namespace TCL_Matrix
                         int nowExpandDim = 0;
                         int iterateTimes = 0;
                         double _mod;
-                        while (iterateTimes<U.col - U1.col)
+                        while (iterateTimes < U.col - U1.col)
                         {
-                            for (int i = 0; i<U.row; i++)
+                            for (int i = 0; i < U.row; i++)
                             {
                                 _mod = 0;
                                 Matrix vector = new Matrix(U.row, 1);
-                                vector.matrix[i , 0] = 1;
-                                vector = (I - U1* U1T) * vector;
-                                for (int j = 0; j<nowExpandDim; j++)
+                                vector.matrix[i, 0] = 1;
+                                vector = (I - U1 * U1T) * vector;
+                                for (int j = 0; j < nowExpandDim; j++)
                                 {
                                     double innerProduct = 0;
-                                    for (int p = 0; p<U2.row; p++)
+                                    for (int p = 0; p < U2.row; p++)
                                     {
-                                        innerProduct += U2.matrix[p , j] * vector.matrix[p , 0];
+                                        innerProduct += U2.matrix[p, j] * vector.matrix[p, 0];
                                     }
-                                    for (int p = 0; p<U1.row; p++)
+                                    for (int p = 0; p < U1.row; p++)
                                     {
-                                        vector.matrix[p , 0] -= innerProduct* U2.matrix[p , j];
+                                        vector.matrix[p, 0] -= innerProduct * U2.matrix[p, j];
                                     }
                                 }
 
@@ -1012,12 +1012,12 @@ namespace TCL_Matrix
                                 {
                                     for (int p = 0; p < vector.row; p++)
                                     {
-                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                        _mod += vector.matrix[p, 0] * vector.matrix[p, 0];
                                     }
                                     _mod = Math.Sqrt(_mod);
                                     for (int p = 0; p < U2.row; p++)
                                     {
-                                        U2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                        U2.matrix[p, nowExpandDim] = vector.matrix[p, 0] / _mod;
                                     }
                                     nowExpandDim++;
                                     break;
@@ -1053,7 +1053,7 @@ namespace TCL_Matrix
                             {
                                 for (int j = 0; j < eigenSubSpace.col; j++)
                                 {
-                                    U.matrix[i , j + nowDim] = eigenSubSpace.matrix[i , j];
+                                    U.matrix[i, j + nowDim] = eigenSubSpace.matrix[i, j];
                                 }
                             }
                             multiplicity.Add(eigenSubSpace.col);
@@ -1074,7 +1074,7 @@ namespace TCL_Matrix
                     {
                         for (int j = 0; j < U1.col; j++)
                         {
-                            U1.matrix[i , j] = U.matrix[i , j];
+                            U1.matrix[i, j] = U.matrix[i, j];
                         }
                     }
                     //U1作正交化
@@ -1084,12 +1084,12 @@ namespace TCL_Matrix
                         mod = 0;
                         for (int i = 0; i < U1.row; i++)
                         {
-                            mod += U1.matrix[i , j] * U1.matrix[i , j];
+                            mod += U1.matrix[i, j] * U1.matrix[i, j];
                         }
                         mod = Math.Sqrt(mod);
                         for (int i = 0; i < U1.row; i++)
                         {
-                            U1.matrix[i , j] /= mod; //归一化
+                            U1.matrix[i, j] /= mod; //归一化
                         }
                         mod = 0;
                         for (int k = 0; k < nowCol; k++)
@@ -1097,17 +1097,17 @@ namespace TCL_Matrix
                             double innerProduct = 0;
                             for (int p = 0; p < U1.row; p++)
                             {
-                                innerProduct += U1.matrix[p , k] * U1.matrix[p , nowCol];
+                                innerProduct += U1.matrix[p, k] * U1.matrix[p, nowCol];
                             }
                             for (int p = 0; p < U1.row; p++)
                             {
-                                U1.matrix[p , nowCol] -= innerProduct * U1.matrix[p , k];
-                                mod += U1.matrix[p , nowCol] * U1.matrix[p , nowCol];
+                                U1.matrix[p, nowCol] -= innerProduct * U1.matrix[p, k];
+                                mod += U1.matrix[p, nowCol] * U1.matrix[p, nowCol];
                             }
                             mod = Math.Sqrt(mod);
                             for (int p = 0; p < U1.row; p++)
                             {
-                                U1.matrix[p , nowCol] /= mod; //归一化
+                                U1.matrix[p, nowCol] /= mod; //归一化
                             }
                             nowCol++;
                         }
@@ -1121,7 +1121,7 @@ namespace TCL_Matrix
                         {
                             if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
                             {
-                                Sigmar.matrix[now , now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
+                                Sigmar.matrix[now, now] = 1 / Math.Sqrt(values[i]); //Sigmar的逆矩阵
                                 now++;
                             }
                         }
@@ -1134,20 +1134,20 @@ namespace TCL_Matrix
                         {
                             if (Math.Abs(values[i]) > PRECISION_OF_DIFFERENCE)
                             {
-                                Sigma.matrix[now , now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
+                                Sigma.matrix[now, now] = Math.Sqrt(values[i]); //Sigma矩阵赋值
                                 now++;
                             }
                         }
                     }
 
-                    Matrix V1 = A* U1 *Sigmar;
+                    Matrix V1 = A * U1 * Sigmar;
 
                     //还要生成U的正交基
                     if (U1.col < U.col)
                     {
                         Matrix I = IdentityMatrix(U.row);
                         Matrix zero = new Matrix(U.row, 1);
-                        Matrix U2 = new Matrix(U.row, U.col -U1.col);
+                        Matrix U2 = new Matrix(U.row, U.col - U1.col);
                         Matrix U1T = U1.Transpose();
 
                         int nowExpandDim = 0;
@@ -1159,18 +1159,18 @@ namespace TCL_Matrix
                             {
                                 _mod = 0;
                                 Matrix vector = new Matrix(U.row, 1);
-                                vector.matrix[i , 0] = 1;
+                                vector.matrix[i, 0] = 1;
                                 vector = (I - U1 * U1T) * vector;
                                 for (int j = 0; j < nowExpandDim; j++)
                                 {
                                     double innerProduct = 0;
                                     for (int p = 0; p < U2.row; p++)
                                     {
-                                        innerProduct += U2.matrix[p , j] * vector.matrix[p , 0];
+                                        innerProduct += U2.matrix[p, j] * vector.matrix[p, 0];
                                     }
                                     for (int p = 0; p < U1.row; p++)
                                     {
-                                        vector.matrix[p , 0] -= innerProduct * U2.matrix[p , j];
+                                        vector.matrix[p, 0] -= innerProduct * U2.matrix[p, j];
                                     }
                                 }
 
@@ -1178,12 +1178,12 @@ namespace TCL_Matrix
                                 {
                                     for (int p = 0; p < vector.row; p++)
                                     {
-                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                        _mod += vector.matrix[p, 0] * vector.matrix[p, 0];
                                     }
                                     _mod = Math.Sqrt(_mod);
                                     for (int p = 0; p < U2.row; p++)
                                     {
-                                        U2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                        U2.matrix[p, nowExpandDim] = vector.matrix[p, 0] / _mod;
                                     }
                                     nowExpandDim++;
                                     break;
@@ -1204,7 +1204,7 @@ namespace TCL_Matrix
                     {
                         Matrix I = IdentityMatrix(V.row);
                         Matrix zero = new Matrix(V.row, 1);
-                        Matrix V2 = new Matrix(V.row, V.col -V1.col);
+                        Matrix V2 = new Matrix(V.row, V.col - V1.col);
                         Matrix V1T = V1.Transpose();
 
                         int nowExpandDim = 0;
@@ -1216,18 +1216,18 @@ namespace TCL_Matrix
                             {
                                 _mod = 0;
                                 Matrix vector = new Matrix(V.row, 1);
-                                vector.matrix[i , 0] = 1;
+                                vector.matrix[i, 0] = 1;
                                 vector = (I - V1 * V1T) * vector;
                                 for (int j = 0; j < nowExpandDim; j++)
                                 {
                                     double innerProduct = 0;
                                     for (int p = 0; p < V2.row; p++)
                                     {
-                                        innerProduct += V2.matrix[p , j] * vector.matrix[p , 0];
+                                        innerProduct += V2.matrix[p, j] * vector.matrix[p, 0];
                                     }
                                     for (int p = 0; p < V1.row; p++)
                                     {
-                                        vector.matrix[p , 0] -= innerProduct * V2.matrix[p , j];
+                                        vector.matrix[p, 0] -= innerProduct * V2.matrix[p, j];
                                     }
                                 }
 
@@ -1235,12 +1235,12 @@ namespace TCL_Matrix
                                 {
                                     for (int p = 0; p < vector.row; p++)
                                     {
-                                        _mod += vector.matrix[p , 0] * vector.matrix[p , 0];
+                                        _mod += vector.matrix[p, 0] * vector.matrix[p, 0];
                                     }
                                     _mod = Math.Sqrt(_mod);
                                     for (int p = 0; p < V2.row; p++)
                                     {
-                                        V2.matrix[p , nowExpandDim] = vector.matrix[p , 0] / _mod;
+                                        V2.matrix[p, nowExpandDim] = vector.matrix[p, 0] / _mod;
                                     }
                                     nowExpandDim++;
                                     break;
@@ -1275,7 +1275,7 @@ namespace TCL_Matrix
         /// <returns></returns>
         public bool QR(out Matrix? Q, out Matrix? R)
         {
-            try 
+            try
             {
                 if (this.matrix == null)
                     throw new Exception("Try to do QR factorization on a null matrix!");
@@ -1333,7 +1333,7 @@ namespace TCL_Matrix
                 }
                 return tr;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 return Double.MaxValue;
@@ -1548,7 +1548,7 @@ namespace TCL_Matrix
                         roots[i] -= w[i];
                     }
                 }
-                
+
                 //懒得定义新变量了，直接开辟一块区域算了
                 {
                     int i, j, max = 0;
@@ -1642,7 +1642,7 @@ namespace TCL_Matrix
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 v.Clear();
@@ -1664,13 +1664,13 @@ namespace TCL_Matrix
                 {
                     throw new Exception("The matrix is not a square so it doesn't have eigenvalues.");
                 }
-                if(judgeSymmetry)
+                if (judgeSymmetry)
                 {
                     for (int i = 0; i < row; i++)
                     {
                         for (int j = i + 1; j < col; j++)
                         {
-                            if (Math.Abs(matrix[i , j] - matrix[j , i]) > PRECISION_OF_DIFFERENCE)
+                            if (Math.Abs(matrix[i, j] - matrix[j, i]) > PRECISION_OF_DIFFERENCE)
                             {
                                 throw new Exception("The matrix is not symmetric!");
                             }
@@ -1678,13 +1678,13 @@ namespace TCL_Matrix
                     }
                 }
                 var complexEigen = GetAllEigenValues();
-                foreach(Complex i in complexEigen)
+                foreach (Complex i in complexEigen)
                 {
-                    if(!v.Contains(i.real))
+                    if (!v.Contains(i.real))
                         v.Add(i.real);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 v.Clear();
                 ExceptionHandling(e);
@@ -1710,17 +1710,17 @@ namespace TCL_Matrix
                 Matrix vector = new Matrix(T.col, 1);
                 for (int i = 0; i < T.col; i++)
                 {
-                    vector.matrix[i , 0] = 1;
+                    vector.matrix[i, 0] = 1;
                 }
 
                 vector = T * vector;
                 int maxpos = 0; //最大位置
                 for (int i = 0; i < T.col; i++)
                 {
-                    if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                    if (Math.Abs(vector.matrix[i, 0]) > Math.Abs(vector.matrix[maxpos, 0]))
                         maxpos = i;
                 }
-                double last = vector.matrix[maxpos , 0];
+                double last = vector.matrix[maxpos, 0];
                 double now = last;
                 int iteration = 0; //归0迭代次数
                 do
@@ -1728,15 +1728,15 @@ namespace TCL_Matrix
                     last = now;
                     for (int i = 0; i < T.col; i++)
                     {
-                        vector.matrix[i , 0] /= last;
+                        vector.matrix[i, 0] /= last;
                     }
                     vector = T * vector;
                     for (int i = 0; i < T.col; i++)
                     {
-                        if (Math.Abs(vector.matrix[i , 0]) > Math.Abs(vector.matrix[maxpos , 0]))
+                        if (Math.Abs(vector.matrix[i, 0]) > Math.Abs(vector.matrix[maxpos, 0]))
                             maxpos = i;
                     }
-                    now = vector.matrix[maxpos , 0];
+                    now = vector.matrix[maxpos, 0];
                     iteration++;
                 } while (iteration < minIteration || Math.Abs(now - last) > precision);
                 return now;
@@ -1825,7 +1825,7 @@ namespace TCL_Matrix
                 }
                 return ret;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
             }
@@ -1844,7 +1844,7 @@ namespace TCL_Matrix
                 {
                     for (int j = 0; j < ret.col; j++)
                     {
-                        ret.matrix[i , j] += A.matrix[i , j] - B.matrix[i , j];
+                        ret.matrix[i, j] += A.matrix[i, j] - B.matrix[i, j];
                     }
                 }
                 return ret;
@@ -1869,7 +1869,7 @@ namespace TCL_Matrix
                 }
                 return ret;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 ExceptionHandling(e);
                 return A;
@@ -1890,14 +1890,14 @@ namespace TCL_Matrix
                     {
                         for (int j = 0; j < A.col; j++)
                         {
-                            ret.matrix[i , j] = A.matrix[i , j];
+                            ret.matrix[i, j] = A.matrix[i, j];
                         }
                     }
                     for (int i = 0; i < B.row; i++)
                     {
                         for (int j = 0; j < B.col; j++)
                         {
-                            ret.matrix[i , j + A.col] = B.matrix[i , j];
+                            ret.matrix[i, j + A.col] = B.matrix[i, j];
                         }
                     }
                     return ret;
@@ -1920,7 +1920,7 @@ namespace TCL_Matrix
                     else if (i < 0 || j < 0 || i >= row || j >= col)
                         throw new Exception("Index out of range! Return NAN");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ExceptionHandling(e);
                     return double.NaN;
@@ -1936,7 +1936,7 @@ namespace TCL_Matrix
                     else if (i < 0 || j < 0 || i >= row || j >= col)
                         throw new Exception("Index out of range!");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     ExceptionHandling(e);
                     return;
@@ -1961,7 +1961,7 @@ namespace TCL_Matrix
                     return null;
                 }
                 Matrix ret = new Matrix(row, 1);
-                for(int i = 0; i < row; i++)
+                for (int i = 0; i < row; i++)
                 {
                     ret.matrix[i, 0] = matrix[i, j];
                 }
