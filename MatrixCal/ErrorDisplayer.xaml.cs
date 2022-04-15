@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using System.Linq;
 namespace MatrixCal
 {
     /// <summary>
@@ -14,7 +14,7 @@ namespace MatrixCal
             InitializeComponent();
             errorDisplayer.Text = s + "！\nTime:" + DateTime.Now.ToString();
         }
-        private void ErrorClose(object sender,RoutedEventArgs e)
+        private void ErrorClose(object sender, RoutedEventArgs e)
         {
             var _mainWindow = Application.Current.Windows
             .Cast<Window>()

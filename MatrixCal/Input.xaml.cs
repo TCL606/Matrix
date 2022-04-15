@@ -10,7 +10,7 @@ namespace MatrixCal
     /// Input.xaml 的交互逻辑
     /// </summary>
     public partial class Input : Window
-    {  
+    {
         const int TextBoxHeight = 17;
         const int TextBoxWidth = 48;
         const int VerticalInterval = 3;
@@ -21,7 +21,7 @@ namespace MatrixCal
         public Input(string s)
         {
             flag = false;
-            key=s;    
+            key = s;
             InitializeComponent();
             Key.Text = key;
         }
@@ -29,7 +29,7 @@ namespace MatrixCal
         {
             DragMove();
         }
-        private void InputClose(object sender,RoutedEventArgs e)
+        private void InputClose(object sender, RoutedEventArgs e)
         {
             _mainWindow.tmp1.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
             _mainWindow.tmp2.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF0078D7"));
@@ -37,28 +37,28 @@ namespace MatrixCal
             _mainWindow.EnvalueFlag = false;
             Close();
         }
-        private void InputConfirm(object sender,RoutedEventArgs e)
+        private void InputConfirm(object sender, RoutedEventArgs e)
         {
             if (!flag)
-            {  
+            {
                 try
-                {  
+                {
                     if (Row.Text.Length == 0 || Col.Text.Length == 0)
                     {
                         throw new Exception("请填写完整的信息");
                     }
-                    else if(Convert.ToInt32(Col.Text) > 27 || Convert.ToInt32(Row.Text) > 27)
+                    else if (Convert.ToInt32(Col.Text) > 27 || Convert.ToInt32(Row.Text) > 27)
                     {
                         throw new Exception("受屏幕尺寸限制，不支持27行/列以上的输入");
                     }
                     else
                     {
-                        Key.IsReadOnly=true;
+                        Key.IsReadOnly = true;
                         Col.IsReadOnly = Row.IsReadOnly = true;
                         flag = true;
                         int col = Convert.ToInt32(Col.Text);
                         int row = Convert.ToInt32(Row.Text);
-                        Height += (TextBoxHeight+VerticalInterval) * row ;
+                        Height += (TextBoxHeight + VerticalInterval) * row;
                         Width = (TextBoxWidth + HorizontalInterval) * col + 54 > Width ?
                                 (TextBoxWidth + HorizontalInterval) * col + 54 : Width;
                         textBoxes = new TextBox[row, col];
@@ -72,7 +72,7 @@ namespace MatrixCal
                                 textBoxes[i, j].Height = TextBoxHeight;
                                 textBoxes[i, j].Width = TextBoxWidth;
                                 textBoxes[i, j].Opacity = 0.8;
-                                textBoxes[i, j].BorderBrush= new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFABABAB"));
+                                textBoxes[i, j].BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFABABAB"));
                                 textBoxes[i, j].Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFABABAB"));
                                 textBoxes[i, j].Foreground = Brushes.White;
                                 textBoxes[i, j].Margin = new Thickness(27 + (TextBoxWidth + HorizontalInterval) * j,
@@ -94,7 +94,7 @@ namespace MatrixCal
                     int col = Convert.ToInt32(Col.Text);
                     int row = Convert.ToInt32(Row.Text);
                     App.matpool.Remove(key);
-                    TCL_Matrix.Matrix temp=new(row, col);
+                    TCL_Matrix.Matrix temp = new(row, col);
                     for (int i = 0; i < row; i++)
                         for (int j = 0; j < col; j++)
                         {
@@ -104,7 +104,7 @@ namespace MatrixCal
                             }
                             else
                             {
-                                temp[i,j]=Convert.ToDouble(textBoxes[i, j].Text);
+                                temp[i, j] = Convert.ToDouble(textBoxes[i, j].Text);
                             }
                         }
                     if (!App.matpool.ContainsKey(key))
