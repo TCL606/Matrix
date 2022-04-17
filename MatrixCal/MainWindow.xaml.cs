@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 using TCL_Matrix;
+using System.Windows.Threading;
 
 namespace MatrixCal
 {
@@ -28,7 +29,6 @@ namespace MatrixCal
             Matrix.ExceptionHandling = ErrorHandle;
             InitializeComponent();
         }
-
         public void ErrorHandle(Exception ex)
         {
             if (errflag) err.Close();
@@ -92,7 +92,7 @@ namespace MatrixCal
                 {
                     if (!EnvalueFlag)
                     {
-                        tmp1.Background = System.Windows.Media.Brushes.Crimson;
+                        tmp2.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("2");
                         input.Show();
                         EnvalueFlag = true;
@@ -131,7 +131,7 @@ namespace MatrixCal
                 {
                     if (!EnvalueFlag)
                     {
-                        tmp1.Background = System.Windows.Media.Brushes.Crimson;
+                        tmp3.Background = System.Windows.Media.Brushes.Crimson;
                         Input input = new("3");
                         input.Show();
                         EnvalueFlag = true;
@@ -549,6 +549,7 @@ namespace MatrixCal
         }
         private void DISP(object sender, RoutedEventArgs e)
         {
+            int number = 0;
             try
             {
                 if (Interface.Text.Length == 0)
@@ -562,29 +563,34 @@ namespace MatrixCal
                     if (arr[i] != "+" && arr[i] != "-" && arr[i] != "*" && arr[i] != "^")//不是运算符
                     {
                         stack.Push(arr[i]);
-                        if (IsValidMatrixName(arr[i]))
+                        if (IsValidMatrixName(arr[i])&& !App.temppool.ContainsKey(arr[i]))
                             App.temppool[arr[i]] = App.matpool[arr[i]];
                     }
                     else//是运算符
                     {
-                        CalculateAndPush(arr[i]);
+                        CalculateAndPush(arr[i],number);
+                        number++;
                     }
                 }
                 if (stack.Count > 1)
                     throw new Exception("表达式语法有误");
-                if (IsValidMatrixName(stack.Peek()))
+                if (IsValidMatrixName(stack.Peek())||IsValidInsideName(stack.Peek()))
                 {
                     App.matpool["1"] = App.temppool[stack.Pop()];//结果存在temp1中
                     Output output = new("1");
                     output.Show();
                     log.Content = "计算完成";
+                    number = 0;
                 }
                 else log.Content = Convert.ToDouble(stack.Pop());
                 App.temppool.Clear();
+                stack.Clear();
             }
             catch (Exception ex)
             {
                 ErrorHandle(ex);
+                App.temppool.Clear();
+                stack.Clear();
             }
         }
         private void EGV(object sender, RoutedEventArgs e)
@@ -764,18 +770,33 @@ namespace MatrixCal
                 return false;
             }
         }
-        private void CalculateAndPush(string s3)
+        private bool IsValidInsideName(string str)
+        {
+            if (str[0] == '#')
+                try
+                {
+                    if (Convert.ToInt32(str.Remove(0,1)) >= 0) return true;
+                    else return false;
+                }
+                catch { return false; }
+            else return false;
+        }
+        private void CalculateAndPush(string s3,int number)
         {
             string s1, s2;
+            string label = "#" + Convert.ToString(number);
             if (stack.Count >= 2)
             {
                 s2 = stack.Pop();
                 s1 = stack.Pop();
             }
             else throw new Exception("表达式操作数个数有误");
-            if (IsValidMatrixName(s1) && IsValidMatrixName(s2))//s1，s2表示矩阵
+            if ((IsValidMatrixName(s1) ||
+                 IsValidInsideName(s1))&&
+                (IsValidMatrixName(s2) ||
+                IsValidInsideName(s2))  )  //s1，s2表示矩阵
             {
-                if (!(App.matpool.ContainsKey(s1) && App.matpool.ContainsKey(s2)))
+                if (!(App.temppool.ContainsKey(s1) && App.temppool.ContainsKey(s2)))
                 {
                     throw new Exception("输入的式子含有未被赋值的矩阵");
                 }
@@ -784,25 +805,24 @@ namespace MatrixCal
                     switch (s3)
                     {
                         case "+":
-                            App.temppool[s1] += App.temppool[s2];
-                            stack.Push(s1);
+                            App.temppool[label]=App.temppool[s1] + App.temppool[s2];
                             break;
                         case "-":
-                            App.temppool[s1] -= App.temppool[s2];
-                            stack.Push(s1);
+                            App.temppool[label] = App.temppool[s1] - App.temppool[s2];
                             break;
                         case "*":
-                            App.temppool[s1] *= App.temppool[s2];
-                            stack.Push(s1);
+                            App.temppool[label] = App.temppool[s1] * App.temppool[s2];
                             break;
                         case "^":
-                            throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
+                            throw new Exception("矩阵指数幂运算尚未实现，敬请期待");
                     }
+                    stack.Push(label);
                 }
             }
-            else if (IsValidMatrixName(s1))//s1为矩阵，s2为数
+            else if (IsValidMatrixName(s1) ||
+                IsValidInsideName(s1))//s1为矩阵，s2为数
             {
-                if (!App.matpool.ContainsKey(s1))
+                if (!App.temppool.ContainsKey(s1))
                 {
                     throw new Exception("输入的式子含有未被赋值的矩阵");
                 }
@@ -814,19 +834,18 @@ namespace MatrixCal
                         case "-":
                             throw new Exception("矩阵不能和数相加减");
                         case "*":
-                            App.temppool[s1] = Convert.ToDouble(s2) * App.temppool[s1];
-                            stack.Push(s1);
+                            App.temppool[label] = Convert.ToDouble(s2) * App.temppool[s1];
                             break;
                         case "^":
-                            App.temppool[s1] = App.temppool[s1].Power(Convert.ToInt32(s2));
-                            stack.Push(s1);
+                            App.temppool[label] = App.temppool[s1].Power(Convert.ToInt32(s2));
                             break;
                     }
+                    stack.Push(label);
                 }
             }
-            else if (IsValidMatrixName(s2))//s2为矩阵，s1为数
+            else if (IsValidMatrixName(s2) || IsValidInsideName(s2))//s2为矩阵，s1为数
             {
-                if (!App.matpool.ContainsKey(s2))
+                if (!App.temppool.ContainsKey(s2))
                 {
                     throw new Exception("输入的式子含有未被赋值的矩阵");
                 }
@@ -838,12 +857,12 @@ namespace MatrixCal
                         case "-":
                             throw new Exception("矩阵不能和数相加减");
                         case "*":
-                            App.temppool[s2] = Convert.ToDouble(s1) * App.temppool[s2];
-                            stack.Push(s2);
+                            App.temppool[label] = Convert.ToDouble(s1) * App.temppool[s2];
                             break;
                         case "^":
                             throw new Exception("矩阵指数幂运算尚未定义，敬请期待");
                     }
+                    stack.Push(s2);
                 }
             }
             else//全是数
@@ -878,6 +897,7 @@ namespace MatrixCal
         private string? formula;
         private bool STOflag;
         public bool EnvalueFlag;
+        private DispatcherTimer timer;
     }
 }
 //更新：现在同一时间只有一个错误栏；增加输出日志；增加一些错误处理；

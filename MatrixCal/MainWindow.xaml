@@ -1,7 +1,7 @@
 ﻿<Window x:Class="MatrixCal.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MatCal" Height="500" Width="320" MinHeight="500" MinWidth="300" WindowStyle="None" AllowsTransparency="True" Background="Transparent" OpacityMask="White" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="DragWindow">
+        Title="MatCal" Height="530" Width="320" MinHeight="530" MinWidth="320" WindowStyle="None" AllowsTransparency="True" Background="Transparent" OpacityMask="White" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="DragWindow">
     <Window.Resources>
         <ControlTemplate x:Key="roundbutton" TargetType="Button">
             <Grid>
@@ -58,7 +58,7 @@
             <Button Grid.Row="4" Content="EGC" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="EGC"/>
             <Button Grid.Row="5" Content="ZSP" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="2" Click="ZSP"/>
             <Button Grid.Row="5" Content="GINV" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="GINV"/>
-            <Button Grid.Column="4" Grid.Row="5" Content="=" FontSize="22" Background="#FF019820" Opacity="0.8" Foreground="White" Margin="0,0,0,0" Click="DISP"/>
+            <Button Name="Disp" IsDefault="True" Grid.Column="4" Grid.Row="5" Content="=" FontSize="22" Background="#FF019820" Opacity="0.8" Foreground="White" Margin="0,0,0,0" Click="DISP"/>
             <TextBox Name="Interface" FontSize="28" Grid.Row="0" Background="LightBlue" Margin="30,50,30,15" TextWrapping="Wrap" Text="" Grid.ColumnSpan="5" IsReadOnly="False" />
             <Button Content="Store" FontSize="21.5" Background="Blue" Opacity="0.8" Foreground="White" Grid.Row="1" Grid.Column="0" Click="OpenStore"/>
         </Grid>
