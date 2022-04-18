@@ -1,5 +1,5 @@
-﻿using System.Windows;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Windows;
 
 namespace MatrixCal
 {
@@ -8,7 +8,7 @@ namespace MatrixCal
     /// </summary>
     public partial class App : Application
     {
-        public static Dictionary<string, TCL_Matrix.Matrix>? matpool,temppool;
+        public static Dictionary<string, TCL_Matrix.Matrix>? matpool, temppool;
         public static bool storeFlag;
     }
 }

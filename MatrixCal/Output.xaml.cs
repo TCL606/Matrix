@@ -11,7 +11,7 @@ namespace MatrixCal
     /// </summary>
     public partial class Output : Window
     {
-        const int TextBoxHeight = 15;
+        const int TextBoxHeight = 17;
         const int TextBoxWidth = 48;
         const int VerticalInterval = 3;
         const int HorizontalInterval = 5;

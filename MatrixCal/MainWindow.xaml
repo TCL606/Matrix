@@ -1,10 +1,7 @@
 ﻿<Window x:Class="MatrixCal.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MatrixCal"
-        Title="MatCal" Height="500" Width="300" MinHeight="500" MinWidth="300" WindowStyle="None" AllowsTransparency="True" Background="Transparent" OpacityMask="White" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="DragWindow">
+        Title="MatCal" Height="530" Width="320" MinHeight="530" MinWidth="320" WindowStyle="None" AllowsTransparency="True" Background="Transparent" OpacityMask="White" ResizeMode="CanResizeWithGrip" MouseLeftButtonDown="DragWindow">
     <Window.Resources>
         <ControlTemplate x:Key="roundbutton" TargetType="Button">
             <Grid>
@@ -30,6 +27,7 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="187*"/>
@@ -39,26 +37,30 @@
                 <RowDefinition Height="57*"/>
                 <RowDefinition Height="57*"/>
             </Grid.RowDefinitions>
-            <Button Content="📃" Template="{StaticResource roundbutton}" Background="Gray" Grid.Column="3" Grid.Row="0" Margin="46,0,0,0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20" Click="Guide"/>
-            <Label Name="log" Content="Welcome!" Margin="10,6,10,12" Foreground="White" FontSize="18" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="3"/>
+            <Button Content="📃" Template="{StaticResource roundbutton}" Grid.Column="4" Grid.Row="0" Height="20" VerticalAlignment="Top" HorizontalAlignment="Right" Width="20" Click="Guide" Background="#FFC92C92"/>
+            <Label Name="log" Content="  Welcome!" Margin="0" Foreground="White" FontSize="18" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="4"/>
             <Button Grid.Column="0" Grid.Row="3" Content="QR" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="QR"/>
             <Button Grid.Column="1" Grid.Row="2" Content="ELM" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="ELM"/>
             <Button Grid.Column="2" Grid.Row="2" Content="SVD" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="SVD"/>
-            <Button Name="tmp1" Grid.Column="3" Grid.Row="2" Content="tmp1" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="Envalue1" MouseRightButtonDown="Display1"/>
-            <Button Grid.Row="3" Content="TRAN" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="TRAN"/>
+            <Button Name="tmp1" Grid.Column="4" Grid.Row="2" Content="tmp1" FontSize="22" Opacity="0.8" Foreground="White" Click="Envalue1" MouseRightButtonDown="Display1" Background="#FF0078D7"/>
+            <Button Grid.Row="3" Content="TRAN" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="TRAN"/>
             <Button Grid.Column="2" Grid.Row="3" Content="INV" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="INV"/>
             <Button Name="sto" Grid.Column="0" Grid.Row="2" Content="STO" FontSize="22" Background="#FFF6DF07" Opacity="0.8" Foreground="White" Click="STO"/>
-            <Button Name="tmp2" Grid.Column="3" Grid.Row="3" Content="tmp2" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="Envalue2" MouseRightButtonDown="Display2"/>
+            <Button Name="tmp2" Grid.Column="4" Grid.Row="3" Content="tmp2" FontSize="22" Background="#FF0078D7" Opacity="0.8" Foreground="White" Click="Envalue2" MouseRightButtonDown="Display2"/>
             <Button Grid.Row="4" Content="DET" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="DET"/>
             <Button Grid.Column="2" Grid.Row="4" Content="LU" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="LU"/>
-            <Button Grid.Column="0" Grid.Row="4" Content="RANK" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="RANK"/>
-            <Button Name="tmp3" Grid.Column="3" Grid.Row="4" Content="tmp3" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="Envalue3" MouseRightButtonDown="Display3" Margin="1,0,0,0"/>
+            <Button Grid.Column="0" Grid.Row="4" Content="RANK" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Click="RANK"/>
+            <Button Name="tmp3" Grid.Column="4" Grid.Row="4" Content="tmp3" FontSize="22" Background="#FF0078D7" Opacity="0.8" Foreground="White" Click="Envalue3" MouseRightButtonDown="Display3" Margin="0,0,0,0"/>
             <Button Grid.Column="0" Grid.Row="5" Content="GJ" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Click="GJ"/>
             <Button Grid.Row="5" Content="RAD" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="1" Click="RAD"/>
-            <Button Grid.Column="2" Grid.Row="5" Content="Others" FontSize="18" Background="#FF830D80" Opacity="0.8" Foreground="White" Click="Others"/>
-            <Button Grid.Column="3" Grid.Row="5" Content="=" FontSize="22" Background="#FF019820" Opacity="0.8" Foreground="White" Margin="1,0,0,0" Click="DISP"/>
-            <TextBox Name="Interface" FontSize="28" Grid.Row="0" Background="LightBlue" Margin="30,50,30,15" TextWrapping="Wrap" Text="" Grid.ColumnSpan="4" IsReadOnly="False" />
-            <Button Content="Store" FontSize="22" Background="Blue" Opacity="0.8" Foreground="White" Grid.Row="1" Grid.Column="0" Click="OpenStore"/>
+            <Button Grid.Row="2" Content="EGV" FontSize="21.5" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="EGV"/>
+            <Button Grid.Row="3" Content="RSV" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="RSV"/>
+            <Button Grid.Row="4" Content="EGC" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="EGC"/>
+            <Button Grid.Row="5" Content="ZSP" FontSize="22" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="2" Click="ZSP"/>
+            <Button Grid.Row="5" Content="GINV" FontSize="20" Background="#FF545858" Opacity="0.8" Foreground="White" Grid.Column="3" Click="GINV"/>
+            <Button Name="Disp" IsDefault="True" Grid.Column="4" Grid.Row="5" Content="=" FontSize="22" Background="#FF019820" Opacity="0.8" Foreground="White" Margin="0,0,0,0" Click="DISP"/>
+            <TextBox Name="Interface" FontSize="28" Grid.Row="0" Background="LightBlue" Margin="30,50,30,15" TextWrapping="Wrap" Text="" Grid.ColumnSpan="5" IsReadOnly="False" />
+            <Button Content="Store" FontSize="21.5" Background="Blue" Opacity="0.8" Foreground="White" Grid.Row="1" Grid.Column="0" Click="OpenStore"/>
         </Grid>
     </Grid>
 </Window>
